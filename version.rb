@@ -41,7 +41,7 @@ class Version
   end
 
   def local_filename
-    Version.local_filename @uid, @versionId
+    Version.local_filename @uid, (@versionName ? @versionName : @versionId)
   end
   def self.local_filename(uid, versionId)
     'files/' + uid + '/' + versionId + '.json'

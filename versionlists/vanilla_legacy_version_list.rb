@@ -62,6 +62,7 @@ class VanillaLegacyVersionList < BaseVersionList
       'a1.0.11' => '0.2.3',
       'a1.0.5_01' => '0.2.2',
       'a1.0.4' => '0.2.1',
+      'inf-20100618' => '0.1.5',
       'c0.30_01c' => '0.1.4',
       'c0.0.13a_03' => '0.1.3',
       'c0.0.13a' => '0.1.2',
@@ -84,7 +85,7 @@ class VanillaLegacyVersionList < BaseVersionList
     end
     file.time = data[:releaseTime]
     file.type = data[:type]
-    file.traits = data[:traits]
+    file.traits = data[:'+traits']
     file.extra[:processArguments] = data[:processArguments]
     file.mainClass = data[:mainClass] if data.has_key? :mainClass
     file.appletClass = data[:appletClass] if data.has_key? :appletClass

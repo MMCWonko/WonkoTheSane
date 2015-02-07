@@ -10,8 +10,10 @@ module Reader
       v = Version.new
       v.is_complete = false
       v.uid = json.uid
-      v.versionId = ver[:id] ? ver.id : ver.version
-      v.versionName = ver[:id] ? ver.version : nil
+      v.versionName = ver[:id] ? ver.id : ver.version
+      v.versionId = ver[:id] ? ver.version : nil
+      v.type = ver[:type]
+      v.time = ver[:time]
       index.versions << v
     end
 
@@ -70,14 +72,19 @@ module Writer
         versions: []
     }
     index.versions.each do |ver|
+      obj = nil
       if ver.versionName
-        json[:versions] << {
-            id: ver.versionId,
-            version: ver.versionName
+        obj = {
+            id: ver.versionName,
+            version: ver.versionId
         }
       else
-        json[:versions] << { id: ver.versionId }
+        obj = { id: ver.versionId }
       end
+      obj[:type] = ver.type
+      obj[:time] = ver.time
+      obj[:releaseTime] = ver.time
+      json[:versions] << obj
     end
 
     return JSON.pretty_generate json
@@ -102,9 +109,13 @@ module Writer
     json[:time] = version.time                             if version.time and version.time != ''
     json[:type] = version.type                             if version.type and version.type != ''
 
-    json[:tweakers] = version.tweakers                     if version.tweakers and not version.tweakers.empty?
+    json[:'+tweakers'] = version.tweakers                  if version.tweakers and not version.tweakers.empty?
     json[:requires] = version.requires                     if version.requires and not version.requires.empty?
-    json[:libraries] = version.libraries.map do |lib| write_library lib end if version.libraries
+    json[:'+libraries'] = version.libraries.reverse.map do |lib|
+      js = write_library lib
+      js['insert'] = 'prepend'
+      js
+    end if version.libraries
     # TODO versionName and versionId
     if version.versionName
       json[:version] = version.versionName
@@ -117,7 +128,7 @@ module Writer
     json[:appletClass] = version.appletClass               if version.appletClass and version.appletClass != ''
     json[:assets] = version.assets                         if version.assets and version.assets != ''
     json[:minecraftArguments] = version.minecraftArguments if version.minecraftArguments and version.minecraftArguments != ''
-    json[:traits] = version.traits                         if version.traits and not version.traits.empty?
+    json[:'+traits'] = version.traits                      if version.traits and not version.traits.empty?
 
     return JSON.pretty_generate json
   end
