@@ -23,9 +23,12 @@ class BaseVersionList
       unless @processed.include? id
         files = get_version version
         next if files.nil? or (files.is_a? Array and files.empty?)
+
         files.each do |file|
           $registry.store file
-        end if files
+        end if files and files.is_a? Array
+        $registry.store files if files and files.is_a? Version
+
         @processed << id
         File.write 'cache/' + @artifact + '.json', JSON.generate(@processed)
       end

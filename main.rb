@@ -15,5 +15,8 @@ $vanilla.refresh
 $vanillaLegacy = VanillaLegacyVersionList.new
 $vanillaLegacy.refresh
 
+$liteloader = LiteLoaderVersionList.new
+$liteloader.refresh
+
 $forge = ForgeVersionList.new
 $forge.refresh

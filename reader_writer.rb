@@ -87,13 +87,14 @@ module Writer
   def write_version(version)
     json = {
         uid: version.uid,
-        versionId: version.versionId,
-        time: version.time,
-        type: version.type,
-        tweakers: version.tweakers,
-        requires: version.requires
+        versionId: version.versionId
     }
 
+    json[:time] = version.time                             if version.time and version.time != ''
+    json[:type] = version.type                             if version.type and version.type != ''
+
+    json[:tweakers] = version.tweakers                     if version.tweakers and not version.tweakers.empty?
+    json[:requires] = version.requires                     if version.requires and not version.requires.empty?
     json[:libraries] = version.libraries.map do |lib| write_library lib end if version.libraries
     json[:versionName] = version.versionName               if version.versionName and version.versionName != ''
     json[:mainClass] = version.mainClass                   if version.mainClass and version.mainClass != ''

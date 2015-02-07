@@ -37,6 +37,7 @@ class Version
 
   def initialize
     @extra = {}
+    @requires = []
   end
 
   def local_filename
