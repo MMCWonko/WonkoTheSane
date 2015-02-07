@@ -1,4 +1,4 @@
-require_relative 'util/cache'
+require_relative '../util/cache'
 
 class BaseVersionList
   attr_accessor :artifact
@@ -22,6 +22,7 @@ class BaseVersionList
       id = version.is_a?(Array) ? version.first : version
       unless @processed.include? id
         files = get_version version
+        next if files.nil? or (files.is_a? Array and files.empty?)
         files.each do |file|
           $registry.store file
         end if files

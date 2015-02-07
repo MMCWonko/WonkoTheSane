@@ -12,5 +12,8 @@ Bundler.require(:default, :development)
 $vanilla = VanillaVersionList.new
 $vanilla.refresh
 
+$vanillaLegacy = VanillaLegacyVersionList.new
+$vanillaLegacy.refresh
+
 $forge = ForgeVersionList.new
 $forge.refresh

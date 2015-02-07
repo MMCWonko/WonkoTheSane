@@ -73,7 +73,7 @@ class MojangInput
 
     file.uid = @artifact
     file.versionId = object[:id]
-    file.time = object[:time]
+    file.time = object[:releaseTime]
     file.type = object[:type]
     file.mainClass = object[:mainClass]
     file.assets = object[:assets]
@@ -119,5 +119,30 @@ class MojangSplitLWJGLSanitizer < BaseSanitizer
     file.requires = [] if file.requires.nil?
     file.requires << 'org.lwjgl'
     return [file, lwjgl]
+  end
+end
+
+class MojangTraitsSanitizer < BaseSanitizer
+  def self.sanitize(file)
+    if file.uid == 'net.minecraft'
+    end
+    file
+  end
+end
+
+class MojangProcessArgumentsSanitizer < BaseSanitizer
+  def self.sanitize(file)
+    if file.extra[:processArguments]
+      case file.extra[:processArguments]
+        when 'legacy'
+          file.minecraftArguments = ' ${auth_player_name} ${auth_session}'
+        when 'username_session'
+          file.minecraftArguments = '--username ${auth_player_name} --session ${auth_session}'
+        when 'username_session_version'
+          file.minecraftArguments = '--username ${auth_player_name} --session ${auth_session} --version ${profile_name}'
+      end
+      file.extra.delete :processArguments
+    end
+    file
   end
 end

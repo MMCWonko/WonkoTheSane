@@ -42,10 +42,12 @@ module Reader
     file.type = json.type
 
     file.mainClass = json.mainClass
+    file.appletClass = json.appletClass
     file.assets = json.assets
     file.minecraftArguments = json.minecraftArguments
     file.tweakers = json.tweakers
     file.requires = json.requires
+    file.traits = json.traits ? json.traits : []
 
     file.libraries = []
     json.libraries.each do |lib|
@@ -89,14 +91,16 @@ module Writer
         time: version.time,
         type: version.type,
         tweakers: version.tweakers,
-        requires: version.requires,
-        libraries: version.libraries.map { |lib| write_library lib }
+        requires: version.requires
     }
 
+    json[:libraries] = version.libraries.map do |lib| write_library lib end if version.libraries
     json[:versionName] = version.versionName               if version.versionName and version.versionName != ''
     json[:mainClass] = version.mainClass                   if version.mainClass and version.mainClass != ''
+    json[:appletClass] = version.appletClass               if version.appletClass and version.appletClass != ''
     json[:assets] = version.assets                         if version.assets and version.assets != ''
     json[:minecraftArguments] = version.minecraftArguments if version.minecraftArguments and version.minecraftArguments != ''
+    json[:traits] = version.traits                         if version.traits and not version.traits.empty?
 
     return JSON.pretty_generate json
   end

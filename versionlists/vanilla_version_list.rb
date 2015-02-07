@@ -1,4 +1,5 @@
 require_relative 'base_version_list'
+require 'date'
 
 class VanillaVersionList < BaseVersionList
   def initialize
@@ -13,6 +14,14 @@ class VanillaVersionList < BaseVersionList
   end
 
   def get_version(id)
-    @input.parse BaseVersionList.get_json('http://s3.amazonaws.com/Minecraft.Download/versions/' + id + '/' + id + '.json')
+    files = @input.parse BaseVersionList.get_json('http://s3.amazonaws.com/Minecraft.Download/versions/' + id + '/' + id + '.json')
+    mcfile = files.find do |file|
+      file.uid == 'net.minecraft'
+    end
+    if mcfile and Date.iso8601(mcfile.time) > Date.iso8601('2013-06-25T15:08:56+02:00')
+      files
+    else
+      []
+    end
   end
 end

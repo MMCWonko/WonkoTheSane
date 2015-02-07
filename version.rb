@@ -25,11 +25,19 @@ class Version
 
   # TODO these are resources, and should be moved elsewhere
   attr_accessor :mainClass
+  attr_accessor :appletClass
   attr_accessor :assets
   attr_accessor :minecraftArguments
   attr_accessor :tweakers
   attr_accessor :requires
   attr_accessor :libraries # list of VersionLibrary
+  attr_accessor :traits
+
+  attr_accessor :extra
+
+  def initialize
+    @extra = {}
+  end
 
   def local_filename
     Version.local_filename @uid, @versionId

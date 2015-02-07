@@ -21,20 +21,23 @@ class ForgeVersionList < BaseVersionList
   end
 
   def get_version(id)
-    files = id[1][:files]
-    file = files.find do |file| file[1] == 'installer' end
     version = id[1][:mcversion] + '-' + id[1][:version]
     version += '-' + id[1][:branch] unless id[1][:branch].nil?
 
     result = []
 
-    unless file.nil?
-      path = version + '/' + id[1][:artifact] + '-' + version + '-' + file[1] + '.' + file[0]
+    files = id[1][:files]
+    installerFile = files.find do |file| file[1] == 'installer' end
+    # installer versions of forge
+    unless installerFile.nil? and id[1][:mcversion] != '1.5.2'
+      path = version + '/' + id[1][:artifact] + '-' + version + '-' + installerFile[1] + '.' + installerFile[0]
       url = id[1][:baseurl] + '/' + path
       HTTPCatcher.get url, 'forgeinstallers/' + path
       arch = Zip::File.open 'cache/network/forgeinstallers/' + path do |jarfile|
         result << @input.parse(jarfile.glob('install_profile.json').first.get_input_stream.read, version)
       end
+    else
+      # non-installer versions of forge
     end
     return result
   end
