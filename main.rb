@@ -20,3 +20,6 @@ $liteloader.refresh
 
 $forge = ForgeVersionList.new
 $forge.refresh
+
+$fml = FMLVersionList.new
+$fml.refresh

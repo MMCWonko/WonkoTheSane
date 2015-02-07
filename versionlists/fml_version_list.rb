@@ -1,21 +1,21 @@
 require_relative 'base_version_list'
 require 'zip'
 
-class ForgeVersionList < BaseVersionList
+class FMLVersionList < BaseVersionList
   def initialize
-    super('net.minecraftforge')
-    @input = ForgeInstallerProfileInput.new('net.minecraftforge')
+    super('net.minecraftforge.fml')
+    @input = ForgeInstallerProfileInput.new('net.minecraftforge.fml')
   end
 
   def get_versions
-    result = BaseVersionList.get_json 'http://files.minecraftforge.net/maven/net/minecraftforge/forge/json'
+    result = BaseVersionList.get_json 'http://files.minecraftforge.net/maven/net/minecraftforge/fml/json'
 
     out = {}
     result[:number].values.each do |obj|
       out[obj[:build]] = obj.merge({
-        artifact: result[:artifact],
-        baseurl: result[:webpath]
-      })
+                                       artifact: result[:artifact],
+                                       baseurl: result[:webpath]
+                                   })
     end
     return out
   end

@@ -55,8 +55,12 @@ class ForgeRemoveMinecraftSanitizer < BaseSanitizer
         end
       end
       file.requires.select! do |req|
-        nil == minecraft.requires.find do |mcReq|
-          req == mcReq
+        if minecraft.requires
+          nil == minecraft.requires.find do |mcReq|
+            req == mcReq
+          end
+        else
+          true
         end
       end
     else

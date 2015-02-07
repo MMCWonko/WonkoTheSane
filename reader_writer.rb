@@ -1,8 +1,8 @@
 require 'hashie'
 
 module Reader
-  def read_index(data)
-    json = Hashie::Mash.new JSON.parse(data)
+  def read_version_index(data)
+    json = Hashie::Mash.new JSON.parse(data, symbolize_names: true)
 
     index = VersionIndex.new json.uid
     index.name = json.name
@@ -10,8 +10,8 @@ module Reader
       v = Version.new
       v.is_complete = false
       v.uid = json.uid
-      v.versionId = ver.versionId
-      v.versionName = ver.versionName
+      v.versionId = ver[:id] ? ver.id : ver.version
+      v.versionName = ver[:id] ? ver.version : nil
       index.versions << v
     end
 
@@ -36,8 +36,8 @@ module Reader
     file.is_complete = true
 
     file.uid = json.uid
-    file.versionId = json.versionId
-    file.versionName = json[:versionName] ? json.versionName : nil
+    file.versionId = json[:versionId] ? json.versionId : json.version
+    file.versionName = json[:versionId] ? json.version : nil
     file.time = json.time
     file.type = json.type
 
@@ -56,19 +56,28 @@ module Reader
 
     return file
   end
+
+  def read_index(data)
+    JSON.parse data, symbolize_names: true
+  end
 end
 
 module Writer
-  def write_index(index)
+  def write_version_index(index)
     json = {
         uid: index.uid,
         name: index.name,
         versions: []
     }
     index.versions.each do |ver|
-      obj = { versionId: ver.versionId }
-      obj[:versionName] = ver.versionName if ver.versionName
-      json[:versions] << obj
+      if ver.versionName
+        json[:versions] << {
+            id: ver.versionId,
+            version: ver.versionName
+        }
+      else
+        json[:versions] << { id: ver.versionId }
+      end
     end
 
     return JSON.pretty_generate json
@@ -96,7 +105,14 @@ module Writer
     json[:tweakers] = version.tweakers                     if version.tweakers and not version.tweakers.empty?
     json[:requires] = version.requires                     if version.requires and not version.requires.empty?
     json[:libraries] = version.libraries.map do |lib| write_library lib end if version.libraries
-    json[:versionName] = version.versionName               if version.versionName and version.versionName != ''
+    # TODO versionName and versionId
+    if version.versionName
+      json[:version] = version.versionName
+      json[:versionId] = version.versionId
+    else
+      json[:version] = version.versionId
+      json[:versionId] = version.versionId
+    end
     json[:mainClass] = version.mainClass                   if version.mainClass and version.mainClass != ''
     json[:appletClass] = version.appletClass               if version.appletClass and version.appletClass != ''
     json[:assets] = version.assets                         if version.assets and version.assets != ''
@@ -104,6 +120,10 @@ module Writer
     json[:traits] = version.traits                         if version.traits and not version.traits.empty?
 
     return JSON.pretty_generate json
+  end
+
+  def write_index(index)
+    return JSON.pretty_generate index
   end
 end
 
