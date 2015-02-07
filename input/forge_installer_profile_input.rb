@@ -10,10 +10,10 @@ class ForgeInstallerProfileInput < BaseInput
   def parse(data, version)
     object = JSON.parse data, symbolize_names: true
     info = object[:versionInfo]
-    file = VersionFile.new
+    file = Version.new
 
-    file.id = @artifact
-    file.version = version
+    file.uid = @artifact
+    file.versionId = version
     file.time = info[:time]
     file.type = info[:type]
     file.mainClass = info[:mainClass]
@@ -24,14 +24,15 @@ class ForgeInstallerProfileInput < BaseInput
       MojangInput.sanetize_mojang_library obj
     end
 
-    return BaseSanitizer.sanitize file, MojangSplitNativesSanitizer, MojangExtractTweakersSanitizer, MojangSplitLWJGLSanitizer, ForgeRemoveMinecraftSanitizer
+    return BaseSanitizer.sanitize file, MojangExtractTweakersSanitizer, MojangSplitLWJGLSanitizer, ForgeRemoveMinecraftSanitizer, ForgePackXZUrlsSanitizer
   end
 end
 
 # Removes minecraft stuff (libraries, arguments etc.)
 class ForgeRemoveMinecraftSanitizer < BaseSanitizer
   def self.sanitize(file)
-    return file if file.id != 'net.minecraftforge'
+    return nil if file.uid == 'org.lwjgl' # remove lwjgl, it's managed by minecraft
+    return file if file.uid != 'net.minecraftforge'
     mcversion = nil
     file.requires.each do |req|
       if req.include? 'net.minecraft:'
@@ -53,11 +54,6 @@ class ForgeRemoveMinecraftSanitizer < BaseSanitizer
           lib.name == mcLib.name
         end
       end
-      file.natives.select! do |nat|
-        nil == minecraft.natives.find do |mcNat|
-          nat.name == mcNat.name
-        end
-      end
       file.requires.select! do |req|
         nil == minecraft.requires.find do |mcReq|
           req == mcReq
@@ -65,6 +61,20 @@ class ForgeRemoveMinecraftSanitizer < BaseSanitizer
       end
     else
       # don't know which version of minecraft this is, so we can't know which parts to eliminate
+    end
+    file
+  end
+end
+
+class ForgePackXZUrlsSanitizer < BaseSanitizer
+  @@packXZLibs = [ 'org.scala-lang', 'com.typesafe', 'com.typesafe.akka' ]
+  def self.sanitize(file)
+    file.libraries.map! do |lib|
+      if @@packXZLibs.include? MavenIdentifier.new(lib.name).group
+        lib = lib.clone
+        lib.url = 'https://repo1.maven.org/maven2/'
+      end
+      lib
     end
     file
   end

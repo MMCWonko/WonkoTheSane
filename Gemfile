@@ -7,3 +7,4 @@ group :development do
 end
 
 gem 'rubyzip'
+gem 'hashie'

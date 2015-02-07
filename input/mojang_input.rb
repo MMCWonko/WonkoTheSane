@@ -4,11 +4,7 @@ class MojangInput
   # reads a general mojang-style library
   # TODO os versions
   def self.sanetize_mojang_library(object)
-    if object.key? :natives
-      lib = VersionNative.new
-    else
-      lib = VersionLibrary.new
-    end
+    lib = VersionLibrary.new
     lib.name = object[:name]
     lib.url = object.key?(:url) ? object[:url] : 'https://libraries.minecraft.net/'
 
@@ -73,10 +69,10 @@ class MojangInput
 
   def parse(data)
     object = data.class == Hash ? data : JSON.parse(data, symbolize_names: true)
-    file = VersionFile.new
+    file = Version.new
 
-    file.id = @artifact
-    file.version = object[:id]
+    file.uid = @artifact
+    file.versionId = object[:id]
     file.time = object[:time]
     file.type = object[:type]
     file.mainClass = object[:mainClass]
@@ -86,24 +82,7 @@ class MojangInput
       MojangInput.sanetize_mojang_library obj
     end
 
-    return BaseSanitizer.sanitize file, MojangSplitNativesSanitizer, MojangSplitLWJGLSanitizer
-  end
-end
-
-class MojangSplitNativesSanitizer < BaseSanitizer
-  def self.sanitize(file)
-    libs = []
-    natives = []
-    file.libraries.each do |lib|
-      if lib.is_a? VersionNative
-        natives << lib
-      else
-        libs << lib
-      end
-    end
-    file.libraries = libs
-    file.natives = natives
-    return file
+    return BaseSanitizer.sanitize file, MojangSplitLWJGLSanitizer
   end
 end
 
@@ -121,27 +100,16 @@ class MojangSplitLWJGLSanitizer < BaseSanitizer
   @@lwjglMaster = 'org.lwjgl.lwjgl:lwjgl:'
 
   def self.sanitize(file)
-    lwjgl = VersionFile.new
-    lwjgl.id = 'org.lwjgl'
+    lwjgl = Version.new
+    lwjgl.uid = 'org.lwjgl'
     lwjgl.libraries = []
-    lwjgl.natives = []
     file.libraries.select! do |lib|
       if lib.name.include? @@lwjglMaster
-        lwjgl.version = MavenIdentifier.new(lib.name).version
+        lwjgl.versionId = MavenIdentifier.new(lib.name).version
       end
       nil == @@lwjglList.find do |lwjglCandidate|
         if lib.name.include? lwjglCandidate
           lwjgl.libraries << lib
-          true
-        else
-          false
-        end
-      end
-    end
-    file.natives.select! do |nat|
-      nil == @@lwjglList.find do |lwjglCandidate|
-        if nat.name.include? lwjglCandidate
-          lwjgl.natives << nat
           true
         else
           false

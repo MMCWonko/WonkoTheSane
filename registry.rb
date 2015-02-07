@@ -1,39 +1,30 @@
 class Registry
-  def versions(id)
-    if File.exist? 'files/' + id + '.versions.json'
-      JSON.parse File.read('files/' + id + '.versions.json')
+  def index(uid)
+    if File.exist? VersionIndex.local_filename(uid)
+      $rw.read_index File.read(VersionIndex.local_filename uid)
     else
-      []
+      VersionIndex.new uid
     end
   end
 
-  def store(file)
-    if file.is_a? Array
-      file.each do |f| store(f) end
+  def store(version)
+    if version.is_a? Array
+      version.each do |f| store(f) end
     else
-      Dir.mkdir 'files/' + file.id unless Dir.exist? 'files/' + file.id
-      File.write filename(file.id, file.version), file.to_json
+      Dir.mkdir 'files/' + version.uid unless Dir.exist? 'files/' + version.uid
+      File.write version.local_filename, $rw.write_version(version)
 
-      vers = versions file.id
-      ver = {
-          id: file.version,
-          type: file.type
-      }
-      ver[:name] = file.versionName if file.versionName and file.versionName != ''
-      vers << ver
-      File.write 'files/' + file.id + '.versions.json', JSON.generate(vers.uniq)
+      index = index version.uid
+      index.add_version version
+      File.write VersionIndex.local_filename(index.uid), $rw.write_index(index)
     end
   end
   def retrieve(id, version)
-    if File.exist? filename(id, version)
-      return VersionFile.from_json File.read(filename id, version)
+    if File.exist? Version.local_filename(id, version)
+      return $rw.read_version File.read(Version.local_filename id, version)
     else
       return nil
     end
-  end
-
-  def filename(id, version)
-    return 'files/' + id + '/' + version + '.json'
   end
 end
 Dir.mkdir 'files' unless Dir.exist? 'files'
