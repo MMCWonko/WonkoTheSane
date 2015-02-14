@@ -13,7 +13,7 @@ class ForgeInstallerProfileInput < BaseInput
     file = Version.new
 
     file.uid = @artifact
-    file.versionId = version
+    file.version = version
     file.time = info[:time]
     file.type = info[:type]
     file.mainClass = info[:mainClass]

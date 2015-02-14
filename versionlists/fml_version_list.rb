@@ -33,9 +33,7 @@ class FMLVersionList < BaseVersionList
       path = version + '/' + id[1][:artifact] + '-' + version + '-' + installerFile[1] + '.' + installerFile[0]
       url = id[1][:baseurl] + '/' + path
       HTTPCatcher.get url, 'forgeinstallers/' + path
-      arch = Zip::File.open 'cache/network/forgeinstallers/' + path do |jarfile|
-        result << @input.parse(jarfile.glob('install_profile.json').first.get_input_stream.read, id[1][:version])
-      end
+      result << @input.parse(ExtractionCache.get('cache/network/forgeinstallers/' + path, :zip, 'install_profile.json'), id[1][:version])
     else
       # non-installer versions of forge
     end

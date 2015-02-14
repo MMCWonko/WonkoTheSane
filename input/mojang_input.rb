@@ -72,7 +72,7 @@ class MojangInput
     file = Version.new
 
     file.uid = @artifact
-    file.versionId = object[:id]
+    file.version = object[:id]
     file.time = object[:releaseTime]
     file.type = object[:type]
     file.mainClass = object[:mainClass]
@@ -82,7 +82,7 @@ class MojangInput
       MojangInput.sanetize_mojang_library obj
     end
 
-    return BaseSanitizer.sanitize file, MojangSnapshotVersionSanitizer, MojangSplitLWJGLSanitizer
+    return BaseSanitizer.sanitize file, MojangSplitLWJGLSanitizer
   end
 end
 
@@ -105,7 +105,8 @@ class MojangSplitLWJGLSanitizer < BaseSanitizer
     lwjgl.libraries = []
     file.libraries.select! do |lib|
       if lib.name.include? @@lwjglMaster
-        lwjgl.versionId = MavenIdentifier.new(lib.name).version
+        lwjgl.version = MavenIdentifier.new(lib.name).version
+        lwjgl.time = nil
       end
       nil == @@lwjglList.find do |lwjglCandidate|
         if lib.name.include? lwjglCandidate
@@ -144,70 +145,5 @@ class MojangProcessArgumentsSanitizer < BaseSanitizer
       file.extra.delete :processArguments
     end
     file
-  end
-end
-
-class MojangSnapshotVersionSanitizer < BaseSanitizer
-  @@mapping = {
-      '14w02a' => '1.8-alpha1',
-      '14w02b' => '1.8-alpha2',
-      '14w02c' => '1.8-alpha3',
-      '14w03a' => '1.8-alpha4',
-      '14w03b' => '1.8-alpha5',
-      '14w04a' => '1.8-alpha6',
-      '14w04b' => '1.8-alpha7',
-      '14w05a' => '1.8-alpha8',
-      '14w05b' => '1.8-alpha9',
-      '14w06a' => '1.8-alpha10',
-      '14w06b' => '1.8-alpha11',
-      '14w07a' => '1.8-alpha12',
-      '14w08a' => '1.8-alpha13',
-      '14w10a' => '1.8-alpha14',
-      '14w10b' => '1.8-alpha15',
-      '14w10c' => '1.8-alpha16',
-      '14w11a' => '1.8-alpha17',
-      '14w11b' => '1.8-alpha18',
-      '14w17a' => '1.8-alpha19',
-      '14w18a' => '1.8-alpha20',
-      '14w18b' => '1.8-alpha21',
-      '14w19a' => '1.8-alpha22',
-      '14w20a' => '1.8-alpha23',
-      '14w20b' => '1.8-alpha24',
-      '14w21a' => '1.8-alpha25',
-      '14w21b' => '1.8-alpha26',
-      '14w25a' => '1.8-alpha27',
-      '14w25b' => '1.8-alpha28',
-      '14w26a' => '1.8-alpha29',
-      '14w26b' => '1.8-alpha30',
-      '14w26c' => '1.8-alpha31',
-      '14w27a' => '1.8-alpha32',
-      '14w27b' => '1.8-alpha33',
-      '14w28a' => '1.8-alpha34',
-      '14w28b' => '1.8-alpha35',
-      '14w29a' => '1.8-alpha36',
-      '14w29b' => '1.8-alpha37',
-      '14w30a' => '1.8-alpha38',
-      '14w30b' => '1.8-alpha39',
-      '14w30c' => '1.8-alpha40',
-      '14w31a' => '1.8-alpha41',
-      '14w32a' => '1.8-alpha42',
-      '14w32b' => '1.8-alpha43',
-      '14w32c' => '1.8-alpha44',
-      '14w32d' => '1.8-alpha45',
-      '14w33a' => '1.8-alpha46',
-      '14w33b' => '1.8-alpha47',
-      '14w33c' => '1.8-alpha48',
-      '14w34a' => '1.8-alpha49',
-      '14w34b' => '1.8-alpha50',
-      '14w34c' => '1.8-alpha51',
-      '14w34d' => '1.8-alpha52'
-  }
-
-  def self.sanitize(file)
-    if @@mapping.has_key? file.versionId
-      file.versionName = file.versionId
-      file.versionId = @@mapping[file.versionId]
-    end
-    return file
   end
 end

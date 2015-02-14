@@ -10,8 +10,7 @@ module Reader
       v = Version.new
       v.is_complete = false
       v.uid = json.uid
-      v.versionName = ver[:id] ? ver.id : ver.version
-      v.versionId = ver[:id] ? ver.version : nil
+      v.version = ver[:id]
       v.type = ver[:type]
       v.time = ver[:time]
       index.versions << v
@@ -38,8 +37,7 @@ module Reader
     file.is_complete = true
 
     file.uid = json.uid
-    file.versionId = json[:versionId] ? json.versionId : json.version
-    file.versionName = json[:versionId] ? json.version : nil
+    file.version = json.version
     file.time = json.time
     file.type = json.type
 
@@ -72,18 +70,10 @@ module Writer
         versions: []
     }
     index.versions.each do |ver|
-      obj = nil
-      if ver.versionName
-        obj = {
-            id: ver.versionName,
-            version: ver.versionId
-        }
-      else
-        obj = { id: ver.versionId }
-      end
+      obj = { id: ver.version }
       obj[:type] = ver.type
       obj[:time] = ver.time
-      obj[:releaseTime] = ver.time
+      obj[:releaseTime] = Time.at(ver.time).to_datetime.iso8601 # TODO: Remove
       json[:versions] << obj
     end
 
@@ -103,10 +93,10 @@ module Writer
   def write_version(version)
     json = {
         uid: version.uid,
-        versionId: version.versionId
+        version: version.version,
+        time: version.time
     }
 
-    json[:time] = version.time                             if version.time and version.time != ''
     json[:type] = version.type                             if version.type and version.type != ''
 
     json[:'+tweakers'] = version.tweakers                  if version.tweakers and not version.tweakers.empty?
@@ -116,14 +106,6 @@ module Writer
       js['insert'] = 'prepend'
       js
     end if version.libraries
-    # TODO versionName and versionId
-    if version.versionName
-      json[:version] = version.versionName
-      json[:versionId] = version.versionId
-    else
-      json[:version] = version.versionId
-      json[:versionId] = version.versionId
-    end
     json[:mainClass] = version.mainClass                   if version.mainClass and version.mainClass != ''
     json[:appletClass] = version.appletClass               if version.appletClass and version.appletClass != ''
     json[:assets] = version.assets                         if version.assets and version.assets != ''

@@ -17,9 +17,8 @@ end
 
 class Version
   attr_accessor :uid
-  attr_accessor :versionId
-  attr_accessor :versionName
-  attr_accessor :time # ISO formatted date of release
+  attr_accessor :version
+  attr_reader :time # unix timestamp
   attr_accessor :type
   attr_accessor :is_complete
 
@@ -40,10 +39,14 @@ class Version
     @requires = []
   end
 
-  def local_filename
-    Version.local_filename @uid, (@versionName ? @versionName : @versionId)
+  def time=(time)
+    @time = Timestamps.get @uid, @version, time
   end
-  def self.local_filename(uid, versionId)
-    'files/' + uid + '/' + versionId + '.json'
+
+  def local_filename
+    Version.local_filename @uid, @version
+  end
+  def self.local_filename(uid, version)
+    'files/' + uid + '/' + version + '.json'
   end
 end
