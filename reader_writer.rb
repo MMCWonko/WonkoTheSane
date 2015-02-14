@@ -45,20 +45,18 @@ module Reader
     end if json.requires
 
     json.data do |data|
-      file.traits = data.traits if data.traits
+      file.traits = data[:'general.traits'] if data[:'general.traits']
       file.libraries = []
-      data.libraries.each do |lib|
+      data[:'java.libraries'].each do |lib|
         file.libraries << read_library(lib)
-      end if data.libraries
+      end if data[:'java.libraries']
 
-      data.launch do |launch|
-        file.mainClass = launch.mainClass
-        file.appletClass = launch.appletClass
-        file.assets = launch.assets
-        file.minecraftArguments = launch.minecraftArguments
-        file.tweakers = launch.tweakers
-        file.mainLib = read_library launch.mainLib if launch.mainLib
-      end if data.launch
+      file.mainClass = data[:'java.mainClass']
+      file.appletClass = data[:'mc.appletClass']
+      file.assets = data[:'mc.assets']
+      file.minecraftArguments = data[:'mc.arguments']
+      file.tweakers = data[:'mc.tweakers']
+      file.mainLib = read_library data[:'java.mainLib'] if data[:'java.mainLib']
     end if json.data
 
     return file
@@ -111,20 +109,19 @@ module Writer
     end if version.requires and not version.requires.empty?
 
     data = {}
-    data[:'+libraries'] = version.libraries.reverse.map do |lib|
+    data[:'general.traits'] = version.traits                      if version.traits and not version.traits.empty?
+    data[:'general.launcher'] = :minecraft
+
+    data[:'java.mainClass'] = version.mainClass                   if version.mainClass and version.mainClass != ''
+    data[:'java.mainLib'] = write_library version.mainLib         if version.mainLib
+    data[:'java.libraries'] = version.libraries.reverse.map do |lib|
       write_library lib
     end if version.libraries
-    data[:'+traits'] = version.traits                      if version.traits and not version.traits.empty?
 
-    launch = { type: :minecraft }
-    launch[:'+tweakers'] = version.tweakers                  if version.tweakers and not version.tweakers.empty?
-    launch[:mainClass] = version.mainClass                   if version.mainClass and version.mainClass != ''
-    launch[:appletClass] = version.appletClass               if version.appletClass and version.appletClass != ''
-    launch[:assets] = version.assets                         if version.assets and version.assets != ''
-    launch[:minecraftArguments] = version.minecraftArguments if version.minecraftArguments and version.minecraftArguments != ''
-    launch[:mainLib] = write_library version.mainLib         if version.mainLib
-    data[:launch] = launch
-
+    data[:'mc.tweakers'] = version.tweakers                  if version.tweakers and not version.tweakers.empty?
+    data[:'mc.appletClass'] = version.appletClass               if version.appletClass and version.appletClass != ''
+    data[:'mc.assets'] = version.assets                         if version.assets and version.assets != ''
+    data[:'mc.arguments'] = version.minecraftArguments if version.minecraftArguments and version.minecraftArguments != ''
     json[:data] = data
 
     return JSON.pretty_generate json
