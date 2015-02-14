@@ -40,7 +40,7 @@ class Registry
       File.write 'files/index.json', $rw.write_index(ind)
     end
   rescue Exception => e
-    puts 'Inable to store ' + version.uid + ':' + version.version
+    puts 'Unable to store ' + version.uid + ':' + version.version
     raise e
   end
   def retrieve(id, version)

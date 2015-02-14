@@ -49,7 +49,7 @@ class LiteLoaderVersionList < BaseVersionList
     file.version = id.first
     file.type = id[1][:type]
     file.time = id[1][:timestamp]
-    file.requires << ('net.minecraft:' + id[1][:minecraft])
+    file.requires << Referenced.new('net.minecraft', id[1][:minecraft])
     file.tweakers = [ id[1][:tweakClass] ]
     file.mainClass = 'net.minecraft.launchwrapper.Launch'
     file.libraries = id[1][:libraries].map do |lib|

@@ -1,5 +1,3 @@
-require 'json'
-
 # TODO this is a resource, and should be moved elsewhere
 class VersionLibrary
   attr_accessor :name
@@ -15,6 +13,20 @@ class VersionLibrary
   end
 end
 
+class Referenced
+  attr_accessor :uid
+  attr_accessor :version
+
+  def initialize(uid, version = nil)
+    @uid = uid
+    @version = version
+  end
+
+  def ==(other)
+    @uid == other.uid and @version == other.version
+  end
+end
+
 class Version
   attr_accessor :uid
   attr_accessor :version
@@ -22,15 +34,16 @@ class Version
   attr_accessor :type
   attr_accessor :is_complete
 
-  # TODO these are resources, and should be moved elsewhere
+  attr_accessor :traits
+  attr_accessor :requires # list of Referenced
+
   attr_accessor :mainClass
   attr_accessor :appletClass
   attr_accessor :assets
   attr_accessor :minecraftArguments
   attr_accessor :tweakers
-  attr_accessor :requires
   attr_accessor :libraries # list of VersionLibrary
-  attr_accessor :traits
+  attr_accessor :mainLib # VersionLibrary
 
   attr_accessor :extra
 

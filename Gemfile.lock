@@ -18,6 +18,7 @@ GEM
       pry (>= 0.9.11)
     rubyzip (1.1.7)
     slop (3.6.0)
+    yajl-ruby (1.2.1)
 
 PLATFORMS
   ruby
@@ -28,3 +29,4 @@ DEPENDENCIES
   pry-nav
   pry-stack_explorer
   rubyzip
+  yajl-ruby

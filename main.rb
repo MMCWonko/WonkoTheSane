@@ -1,7 +1,7 @@
 #!/usr/bin/ruby
 
 require 'rubygems'
-require "bundler/setup"
+require 'bundler/setup'
 
 Dir.chdir(File.dirname(__FILE__))
 

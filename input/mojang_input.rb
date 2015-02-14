@@ -81,6 +81,9 @@ class MojangInput
     file.libraries = object[:libraries].map do |obj|
       MojangInput.sanetize_mojang_library obj
     end
+    file.mainLib = VersionLibrary.new
+    file.mainLib.name = 'net.minecraft:minecraft:' + file.version
+    file.mainLib.absoluteUrl = 'http://s3.amazonaws.com/Minecraft.Download/versions/' + file.version + '/' + file.version + '.jar'
 
     return BaseSanitizer.sanitize file, MojangSplitLWJGLSanitizer
   end
@@ -118,7 +121,7 @@ class MojangSplitLWJGLSanitizer < BaseSanitizer
       end
     end
     file.requires = [] if file.requires.nil?
-    file.requires << 'org.lwjgl'
+    file.requires << Referenced.new('org.lwjgl')
     return [file, lwjgl]
   end
 end

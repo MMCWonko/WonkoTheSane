@@ -1,4 +1,4 @@
-require 'json'
+require 'yajl/json_gem'
 
 class Timestamps
   def initialize
