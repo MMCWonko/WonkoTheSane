@@ -1,5 +1,4 @@
 require_relative 'base_version_list'
-require 'zip'
 
 class FMLVersionList < BaseVersionList
   def initialize

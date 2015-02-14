@@ -15,7 +15,7 @@ class Timestamps
       if int.to_s == default
         return int
       else
-        return DateTime.iso8601(default).to_time.to_i
+        return DateTime.parse(default).to_time.to_i
       end
     elsif default.is_a? Fixnum
       return default

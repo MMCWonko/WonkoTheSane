@@ -37,6 +37,7 @@ class Version
   attr_accessor :traits
   attr_accessor :requires # list of Referenced
 
+  # resources
   attr_accessor :mainClass
   attr_accessor :appletClass
   attr_accessor :assets
@@ -45,6 +46,7 @@ class Version
   attr_accessor :libraries # list of VersionLibrary
   attr_accessor :mainLib # VersionLibrary
 
+  # for communication between sanitizers, parsers etc.
   attr_accessor :extra
 
   def initialize
