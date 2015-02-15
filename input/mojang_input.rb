@@ -113,6 +113,7 @@ class MojangSplitLWJGLSanitizer < BaseSanitizer
   def self.sanitize(file)
     lwjgl = Version.new
     lwjgl.uid = 'org.lwjgl'
+    lwjgl.type = 'release'
     lwjgl.libraries = []
     file.libraries.select! do |lib|
       if lib.name.include? @@lwjglMaster
