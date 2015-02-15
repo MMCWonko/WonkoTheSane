@@ -7,6 +7,8 @@ class MojangInput
     lib = VersionLibrary.new
     lib.name = object[:name]
     lib.url = object.key?(:url) ? object[:url] : 'https://libraries.minecraft.net/'
+    lib.oldRules = object[:rules] if object.key? :rules
+    lib.oldNatives = object[:natives] if object.key? :natives
 
     allowed = VersionLibrary.possiblePlatforms
     if object.key? :rules
@@ -69,6 +71,12 @@ class MojangInput
 
   def parse(data)
     object = data.class == Hash ? data : JSON.parse(data, symbolize_names: true)
+
+    if object[:minimumLauncherVersion] and object[:minimumLauncherVersion] > 14
+      # TODO log error
+      return []
+    end
+
     file = Version.new
 
     file.uid = @artifact

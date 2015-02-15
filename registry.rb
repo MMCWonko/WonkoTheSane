@@ -29,6 +29,7 @@ class Registry
       File.write VersionIndex.local_filename(vindex.uid), $rw.write_version_index(vindex)
 
       ind = index
+      ind[:formatVersion] = 0
       ind[:index].each do |i|
         if version.uid == i[:uid]
           return

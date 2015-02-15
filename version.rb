@@ -7,6 +7,9 @@ class VersionLibrary
   attr_accessor :platforms # list of platforms ({lin,win,osx}{32,64}), or empty for all
   attr_accessor :natives # map of platform => id
 
+  attr_accessor :oldRules
+  attr_accessor :oldNatives
+
   @@possiblePlatforms = [ 'win32', 'win64', 'lin32', 'lin64', 'osx64' ]
   def self.possiblePlatforms
     @@possiblePlatforms

@@ -70,6 +70,7 @@ end
 module Writer
   def write_version_index(index)
     json = {
+        formatVersion: 0,
         uid: index.uid,
         name: index.name,
         versions: []
@@ -90,13 +91,15 @@ module Writer
     json[:absoluteUrl] = library.absoluteUrl if library.absoluteUrl and library.absoluteUrl != ''
     json[:checksums] = library.checksums     if library.checksums and library.checksums != ''
     json[:platforms] = library.platforms     if library.platforms and library.platforms != VersionLibrary.possiblePlatforms
-    json[:natives] = library.natives         if library.natives
+    json[:natives] = library.oldNatives      if library.oldNatives
+    json[:rules] = library.oldRules          if library.oldRules
     return json
   end
 
   def write_version(version)
     # metadata
     json = {
+        formatVersion: 0,
         uid: version.uid,
         version: version.version,
         time: version.time

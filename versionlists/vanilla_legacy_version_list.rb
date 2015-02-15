@@ -6,7 +6,7 @@ class VanillaLegacyVersionList < BaseVersionList
   end
 
   def get_versions
-    result = BaseVersionList.get_json 'https://cdn.rawgit.com/MultiMC/MultiMC5/develop/resources/versions/minecraft.json'
+    result = Yajl::Parser.parse File.open('minecraft.json', 'r'), symbolize_names: true
     return result[:versions].map do |obj| [obj[:id], obj] end
   end
 
