@@ -4,35 +4,77 @@ class BaseVersionList
   attr_accessor :artifact
   # @processed contains a list of version ids for all versions that have been processed. simply clear it to invalidate caches
   attr_accessor :processed
+  attr_accessor :lastError
+  attr_accessor :running
 
   def initialize(artifact)
     @artifact = artifact
-    if File.exist? 'cache/' + @artifact + '.json'
-      @processed = JSON.parse File.read('cache/' + @artifact + '.json')
+    @running = false
+    if File.exist? cache_file
+      data = JSON.parse File.read(cache_file), symbolize_names: true
+      @processed = data[:versions] ? data[:versions] : []
+      @lastError = data[:lastError]
     else
       @processed = []
+      @lastError = nil
     end
   end
 
   def refresh
-    versions = get_versions
+    @lastError = nil
+    begin
+      versions = get_versions
 
-    # check if some versions aren't in @processed (likely new ones) and fetch and process them
-    versions.each do |version|
-      id = version.is_a?(Array) ? version.first : version
-      unless @processed.include? id
-        files = get_version version
-        next if files.nil? or (files.is_a? Array and files.empty?)
+      # check if some versions aren't in @processed (likely new ones) and fetch and process them
+      versions.each do |version|
+        id = version.is_a?(Array) ? version.first : version
+        unless @processed.include? id
+          files = get_version version
+          next if files.nil? or (files.is_a? Array and files.empty?)
 
-        files.each do |file|
-          $registry.store file
-        end if files and files.is_a? Array
-        $registry.store files if files and files.is_a? Version
+          files.each do |file|
+            $registry.store file
+          end if files and files.is_a? Array
+          $registry.store files if files and files.is_a? Version
 
-        @processed << id
-        File.write 'cache/' + @artifact + '.json', JSON.generate(@processed)
+          @processed << id
+          write_cache_file
+        end
       end
+
+      FileUtils.touch cache_file
+    rescue Exception => e
+      @lastError = e.message
     end
+    @running = false
+  end
+
+  def invalidate(version = nil)
+    if version
+      @processed.remove version
+    else
+      @processed = []
+    end
+    write_cache_file
+  end
+
+  def last_modified
+    if File.exist? cache_file
+      File.mtime cache_file
+    else
+      nil
+    end
+  end
+
+  def write_cache_file
+    File.write cache_file, JSON.generate({
+                                             versions: @processed,
+                                             lastError: @lastError
+                                         })
+  end
+
+  def cache_file
+    'cache/' + @artifact + '.json'
   end
 
   def get_versions

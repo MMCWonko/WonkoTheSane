@@ -174,21 +174,154 @@ end
   $modLists << JenkinsVersionList.new(obj[:uid], obj[:url], obj[:artifact])
 end
 
+users = {
+    'jan' => 'test'
+}
+
+$lists = {
+    thisErrors: BaseVersionList.new('thisErrors'),
+    vanilla: VanillaVersionList.new,
+    vanillaLegacy: VanillaLegacyVersionList.new,
+    liteloader: LiteLoaderVersionList.new,
+    forge: ForgeVersionList.new,
+    fml: FMLVersionList.new
+}
 $modLists.each do |list|
-  #list.refresh
+  $lists[list.artifact.to_sym] = list
 end
 
-$vanilla = VanillaVersionList.new
-$vanilla.refresh
+$broadcastChannel = EM::Channel.new
+class WonkoHttpServer < EM::Connection
+  include EM::HttpServer
+  def post_init
+    super
+    no_environment_strings
+  end
+  def process_http_request
+    response = EM::DelegatedHttpResponse.new(self)
+    puts 'Received request for ' + @http_path_info
+    if @http_path_info == '/'
+      response.status = 200
+      response.content_type 'text/html'
+      response.content = File.read 'web.html'
+    elsif @http_path_info == '/favicon.png'
+      response.status = 200
+      response.content_type 'image/png'
+      response.content = File.read 'favicon.png'
+    elsif @http_path_info.start_with? '/api/'
+      response.status = 200
+      response.content_type 'text/json'
+      case @http_path_info.match(/(?<=\/api\/).*/)[0]
+        when /^lists$/
+          response.content = JSON.generate($lists.map do |artifact, list| {
+                                               uid: artifact,
+                                               lastModified: list.last_modified,
+                                               versions: list.processed.length,
+                                               lastError: list.lastError,
+                                               running: list.running
+                                           } end)
+        when /^list\/([^\/]*)$/
+          list = $1.to_sym
+          obj = if File.exist? VersionIndex.local_filename(list.to_s)
+                  JSON.parse File.read(VersionIndex.local_filename(list.to_s))
+                else
+                  {
+                      versions: [],
+                      uid: list.to_s
+                  }
+                end
+          obj[:lastModified] = $lists[list].last_modified
+          obj[:lastError] = $lists[list].lastError
+          obj[:running] = $lists[list].running
+          response.content = JSON.generate obj
+        when /^list\/([^\/]*)\/refresh$/
+          puts 'Will refresh ' + $1
+          listId = $1.to_sym
+          list = $lists[listId]
+          if list
+            if not list.running
+              $broadcastChannel.push({command: :refreshEnqueued, list: listId})
+              list.running = true
+              $broadcastChannel.push({command: :listUpdated, list: listId})
+              EventMachine.defer do
+                list.refresh
+                if list.lastError
+                  $broadcastChannel.push({command: :refreshError, list: listId, error: list.lastError})
+                else
+                  $broadcastChannel.push({command: :refreshFinished, list: listId})
+                end
+                $broadcastChannel.push({command: :listUpdated, list: listId})
+              end
+            end
+            response.content = '{}'
+          else
+            response.status = 404
+            response.content = '{"error": "Unknown list ID"}'
+          end
+        when /^list\/([^\/]*)\/invalidate/
+          listId = $1.to_sym
+          $lists[listId].invalidate
+          $broadcastChannel.push({command: :listUpdated, list: listId})
+        when /^list\/([^\/]*)\/([^\/]*)\/invalidate/
+          listId = $1.to_sym
+          $lists[listId].invalidate $2
+          $broadcastChannel.push({command: :listUpdated, list: listId})
+        when /^shutdown$/
+          $broadcastChannel.push({command: :shuttingDown})
+          EventMachine::WebSocket.stop
+          EventMachine.stop
+      end
+    end
+    response.send_response
+  end
+end
 
-$vanillaLegacy = VanillaLegacyVersionList.new
-$vanillaLegacy.refresh
+require 'digest/sha2'
 
-$liteloader = LiteLoaderVersionList.new
-$liteloader.refresh
+EventMachine.run do
+  EventMachine.start_server '0.0.0.0', 8080, WonkoHttpServer
 
-$forge = ForgeVersionList.new
-$forge.refresh
+  @wsServer = EventMachine::WebSocket.run(host: '0.0.0.0', port: 10081, debug: true) do |ws|
+    ws.onopen do
+      bcId = nil
+      hasAuthed = false
 
-$fml = FMLVersionList.new
-$fml.refresh
+      ws.onmessage do |msg|
+        begin
+          resp = JSON.parse(msg, symbolize_names: true)
+          cmd = resp[:command].to_sym
+          if not cmd
+            raise 'No command specified'
+          end
+          if not hasAuthed
+            if cmd != :auth
+              raise 'You have not authorized yourself yet!'
+            elsif users.key? resp[:username] and Digest::SHA512.hexdigest(users[resp[:username]]) == resp[:password]
+              hasAuthed = true
+              ws.send JSON.generate({command: :authSuccess})
+              bcId = $broadcastChannel.subscribe do |msg| ws.send JSON.generate(msg) end
+            else
+              ws.send JSON.generate({command: :authError, error: 'Invalid username or password'})
+              ws.close
+            end
+          else
+            case cmd
+              when :ping
+                ws.send JSON.generate({command: :pong, timestamp: resp[:timestamp]})
+            end
+          end
+        rescue JSON::ParserError => e
+          ws.send JSON.generate({command: :error, error: 'Invalid JSON'})
+        rescue Exception => e
+          ws.send JSON.generate({command: :error, error: e.message})
+          puts e.backtrace
+        end
+      end
+      ws.onclose do
+        $broadcastChannel.unsubscribe bcId if bcId
+      end
+    end
+  end
+end
+
+exit 0

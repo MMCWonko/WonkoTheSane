@@ -5,7 +5,13 @@ GEM
       debug_inspector (>= 0.0.1)
     coderay (1.1.0)
     debug_inspector (0.0.2)
+    em-websocket (0.5.1)
+      eventmachine (>= 0.12.9)
+      http_parser.rb (~> 0.6.0)
+    eventmachine (1.0.7)
+    eventmachine_httpserver (0.2.1)
     hashie (3.4.0)
+    http_parser.rb (0.6.0)
     method_source (0.8.2)
     pry (0.10.1)
       coderay (~> 1.1.0)
@@ -24,6 +30,8 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  em-websocket
+  eventmachine_httpserver
   hashie
   pry
   pry-nav

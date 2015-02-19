@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Wonko The Sane</title>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.2/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.5/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/plug-ins/f2c75b7247b/integration/bootstrap/3/dataTables.bootstrap.js"></script>
+    <script type="text/javascript" src="https://cdn.rawgit.com/julien-maurel/jQuery-Storage-API/master/jquery.storageapi.min.js"></script>
+    <script type="text/javascript" src="https://cdn.rawgit.com/emn178/js-sha512/master/build/sha512.min.js"></script>
+    <script type="text/javascript" src="https://cdn.rawgit.com/nakupanda/bootstrap3-dialog/master/dist/js/bootstrap-dialog.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.7.0/underscore-min.js"></script>
+    <script type="text/javascript" src="https://rawgit.com/flatiron/director/master/build/director.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.2/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://cdn.datatables.net/plug-ins/f2c75b7247b/integration/bootstrap/3/dataTables.bootstrap.css"/>
+    <link rel="stylesheet" href="https://cdn.rawgit.com/nakupanda/bootstrap3-dialog/master/dist/css/bootstrap-dialog.min.css"/>
+    <link rel="shortcut icon" type="image/png" href="/favicon.png"/>
+    <script type="text/javascript">
+        // TODO actually authorize HTTP requests
+        $(function() {
+            window.websocket = null;
+            window.loggedIn = false;
+            window.moreTemplate = _.template($('#moreTemplate').html());
+
+            window.updateBreadcrumbs = function(crumbs) {
+                $('#bread').empty();
+                crumbs.forEach(function(crumb, index) {
+                    var isLast = index == (crumbs.length - 1);
+                    if (isLast)
+                    {
+                        $('#bread').append('<li class="active">' + crumb.text + '</li>')
+                    }
+                    else
+                    {
+                        $('#bread').append('<li><a href="' + (crumb.url ? crumb.url : 'javascript:;') + '" id="crumb-' + index + '">' + crumb.text + '</a></li>')
+                    }
+                    if (crumb.callback)
+                    {
+                        $('#crumb-' + index).on('click', crumb.callback);
+                    }
+                });
+            };
+            window.updateLoggedIn = function() {
+                if (loggedIn)
+                {
+                    $('.visible-logged-in').show();
+                }
+                else
+                {
+                    $('.visible-logged-in').hide();
+                }
+            };
+
+            window.router = new Router({
+                '/': function() {
+                    $('#listsContainer').show();
+                    $('#more').hide();
+                    updateBreadcrumbs([{text: 'Home'}]);
+                },
+                '/list/:uid': function(uid) {
+                    $('#listsContainer').hide();
+                    $('#more').empty().html('<div class="progress"><div class="progress-bar progress-bar-stripped active" role="progressbar" style="width:100%"></div></div>').show();
+                    updateBreadcrumbs([{text: 'Home', url: '#/'}, {text: uid}]);
+                    $.ajax({url: '/api/list/' + uid}).done(function(data, status, jqXHR) {
+                        $('#more').empty().html(moreTemplate(data));
+                        $('#more').find('div.alert').hide();
+                        $('#more > table').DataTable({
+                            "data": data.versions,
+                            "columns": [
+                                {
+                                    "title": "Version",
+                                    "data": "id"
+                                },
+                                {
+                                    "title": "Release",
+                                    "data": "time",
+                                    "render": function(timestamp) {
+                                        var date = new Date(timestamp);
+                                        return date.getHours() + ':' + (date.getMinutes() < 10 ? '0' : '') + date.getMinutes() + ' ' + date.getDay() + '/' + date.getMonth() + '/' + date.getFullYear();
+                                    }
+                                }
+                            ]
+                        });
+                        updateLoggedIn();
+                    });
+                }
+            }).configure({});
+            window.router.init('/');
+            window.shutdown = function() {
+                $.ajax({url: '/api/shutdown'})
+            };
+            window.updateList = function(list) {
+                $.ajax({url: '/api/list/' + list + '/refresh'})
+            };
+            window.invalidateList = function(list) {
+                $.ajax({url: '/api/list/' + list + '/invalidate'})
+            };
+            window.refetchList = function(list) {
+                $.ajax({
+                    url: '/api/list/' + list
+                }).done(function(result) {
+                    result.versions = result.versions.length;
+                    $("#lists").DataTable().row(function(idx, tableData, node) {
+                        return list == tableData.uid
+                    }).data(result);
+                });
+            };
+
+            window.tryConnect = function() {
+                if (websocket)
+                {
+                    $.localStorage.set('username', '');
+                    $.localStorage.set('password', '');
+                    websocket.close();
+                    return;
+                }
+
+                $.localStorage.set('username', $('#usernameEdit').val());
+                $.localStorage.set('password', sha512($('#passwordEdit').val()));
+                connect();
+            };
+
+            window.connect = function() {
+                if (websocket)
+                {
+                    websocket.close();
+                    return;
+                }
+
+                if (!$.localStorage.isSet('username') || !$.localStorage.isSet('password') || $.localStorage.get('username') === "" || $.localStorage.get('password') === "")
+                {
+                    return;
+                }
+
+                $('#login input, #login button').prop('disabled', true);
+                window.websocket = new WebSocket("ws://localhost:10081");
+                window.websocket.onopen = function (evt) {
+                    websocket.send('{"command": "auth", "username": "' + $.localStorage.get('username') + '", "password": "' + $.localStorage.get('password') + '"}')
+                };
+                window.websocket.onclose = function (evt) {
+                    websocket = null;
+                    $('#login input, #login button').prop('disabled', false);
+                    $('#login button').html('Connect');
+                    loggedIn = false;
+                    updateLoggedIn();
+                };
+                window.websocket.onmessage = function (evt) {
+                    var data = $.parseJSON(evt.data);
+                    switch (data.command) {
+                        case 'error':
+                        case 'authError':
+                            BootstrapDialog.show({
+                                title: 'Error',
+                                message: data.error
+                            });
+                            break;
+                        case 'authSuccess':
+                            $('#login button').prop('disabled', false).html('Disconnect');
+                            loggedIn = true;
+                            updateLoggedIn();
+                            break;
+                        case 'refreshEnqueued':
+                        case 'refreshFinished':
+                        case 'refreshError':
+                        case 'listUpdated':
+                            refetchList(data.list);
+                            $('#updateAlert-' + data.list.replace('.', '_')).show();
+                            break
+                    }
+                };
+                window.websocket.onerror = function (evt) {
+                    console.debug(evt)
+                }
+            };
+
+            $(document).on('ready', function () {
+                updateLoggedIn();
+                $("#lists").DataTable({
+                    "ajax": {
+                        "url": "/api/lists",
+                        "dataSrc": ""
+                    },
+                    "columns": [
+                        {
+                            "title": "UID",
+                            "data": "uid"
+                        },
+                        {
+                            "title": "Last Modified",
+                            "data": "lastModified"
+                        },
+                        {
+                            "title": "Version count",
+                            "data": "versions"
+                        },
+                        {
+                            "title": "Actions",
+                            "data": "uid",
+                            "render": function(data, type, row, meta) {
+                                if (type !== 'display')
+                                {
+                                    return '';
+                                }
+                                var runningDisabled = row.running ? 'disabled="disabled"' : '';
+                                return '<div class="btn-group btn-group-xs" role="group"><button type="button" class="btn btn-default" onclick="router.setRoute(\'/list/' + data + '\')">More</button><button ' + runningDisabled + ' type="button" class="btn btn-default visible-logged-in" onclick="updateList(\'' + data + '\')">Update</button></div>'
+                            }
+                        }
+                    ],
+                    "drawCallback": window.updateLoggedIn
+                });
+                connect();
+            });
+        });
+    </script>
+    <script type="text/template" id="moreTemplate">
+        <div class="alert alert-warning alert-dismissable" role="alert" id="updateAlert-<%- uid.replace('.', '_') %>">
+            <button type="button" class="close" aria-label="Close" onclick="$('#updateAlert-<%- uid.replace('.', '_') %>').hide();"><span aria-hidden="true">&times;</span></button>
+            There has been an update to this version list. You should probably <a href="javascript:location.reload();" class="alert-link">reload</a> this page.
+        </div>
+        <div class="page-header">
+            <h1>
+                <%- uid %>
+                <div class="btn-group pull-right visible-logged-in" role="group">
+                    <button onclick="updateList('<%- uid %>')" type="button" class="btn btn-success">Update</button>
+                    <button onclick="invalidateList('<%- uid %>')" type="button" class="btn btn-danger">Invalidate all versions</button>
+                </div>
+                <small><%- lastModified %></small>
+            </h1>
+        </div>
+        <table class="table"></table>
+    </script>
+</head>
+<body>
+    <nav class="navbar navbar-default">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="#/">
+                    WonkoTheSane
+                </a>
+            </div>
+            <div id="navbar-collapse" class="collapse navbar-collapse">
+                <form class="navbar-form navbar-left" onsubmit="tryConnect();return false;" id="login">
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Username" id="usernameEdit"/>
+                    </div>
+                    <div class="form-group">
+                        <input type="password" class="form-control" placeholder="Password" id="passwordEdit"/>
+                    </div>
+                    <button type="submit" class="btn btn-submit">Connect</button>
+                </form>
+                <ul class="nav navbar-nav navbar-right">
+                    <li><button type="button" id="shutdownBtn" onclick="shutdown()" class="btn btn-danger visible-logged-in">Shutdown</button></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <main class="container">
+        <ol id="bread" class="breadcrumb">
+        </ol>
+        <div id="listsContainer">
+            <table id="lists" class="table"></table>
+        </div>
+        <div id="more">
+        </div>
+    </main>
+    <hr/>
+    <footer class="container" style="color: rgb(119, 119, 119); text-align: center; padding-bottom:20px;">
+        &copy; 2015 Jan Dalheimer
+    </footer>
+</body>
+</html>
