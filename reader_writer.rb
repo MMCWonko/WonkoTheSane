@@ -57,6 +57,7 @@ module Reader
       file.minecraftArguments = data[:'mc.arguments']
       file.tweakers = data[:'mc.tweakers']
       file.mainLib = read_library data[:'java.mainLib'] if data[:'java.mainLib']
+      file.serverLib = read_library data[:'java.serverLib'] if data[:'java.serverLib']
     end if json.data
 
     return file
@@ -117,6 +118,7 @@ module Writer
 
     data[:'java.mainClass'] = version.mainClass                   if version.mainClass and version.mainClass != ''
     data[:'java.mainLib'] = write_library version.mainLib         if version.mainLib
+    data[:'java.serverLib'] = write_library version.serverLib     if version.serverLib
     data[:'java.libraries'] = version.libraries.reverse.map do |lib|
       write_library lib
     end if version.libraries

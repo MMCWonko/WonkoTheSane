@@ -92,7 +92,9 @@ class MojangInput
     file.mainLib = VersionLibrary.new
     file.mainLib.name = 'net.minecraft:minecraft:' + file.version
     file.mainLib.absoluteUrl = 'http://s3.amazonaws.com/Minecraft.Download/versions/' + file.version + '/' + file.version + '.jar'
-
+    file.serverLib = VersionLibrary.new
+    file.serverLib.name = 'net.minecraft:minecraft_server:' + file.version
+    file.serverLib.absoluteUrl = 'http://s3.amazonaws.com/Minecraft.Download/versions/' + file.version + '/minecraft_server.' + file.version + '.jar'
     return BaseSanitizer.sanitize file, MojangSplitLWJGLSanitizer
   end
 end
