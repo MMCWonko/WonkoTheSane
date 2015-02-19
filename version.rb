@@ -48,6 +48,7 @@ class Version
   attr_accessor :tweakers
   attr_accessor :libraries # list of VersionLibrary
   attr_accessor :mainLib # VersionLibrary
+  attr_accessor :serverLib # VersionLibrary
 
   # for communication between sanitizers, parsers etc.
   attr_accessor :extra
