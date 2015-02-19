@@ -25,7 +25,7 @@ class LiteLoaderVersionList < BaseVersionList
           artefact[1].each do |item|
             if item.first != 'latest'
               out << [
-                  item[1][:version].sub('_', '.'),
+                  item[1][:version],
                   item[1].merge({
                     minecraft: minecraft.to_s,
                     type: latest == item[1][:version] ? 'latest' : nil
@@ -46,11 +46,10 @@ class LiteLoaderVersionList < BaseVersionList
 
     file = Version.new
     file.uid = 'com.mumfrey.liteloader'
-    file.versionId = id.first
-    file.versionName = id[1][:version]
+    file.version = id.first
     file.type = id[1][:type]
-    file.time = Time.at(id[1][:timestamp].to_i).iso8601
-    file.requires << ('net.minecraft:' + id[1][:minecraft])
+    file.time = id[1][:timestamp]
+    file.requires << Referenced.new('net.minecraft', id[1][:minecraft])
     file.tweakers = [ id[1][:tweakClass] ]
     file.mainClass = 'net.minecraft.launchwrapper.Launch'
     file.libraries = id[1][:libraries].map do |lib|

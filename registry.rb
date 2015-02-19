@@ -29,6 +29,7 @@ class Registry
       File.write VersionIndex.local_filename(vindex.uid), $rw.write_version_index(vindex)
 
       ind = index
+      ind[:formatVersion] = 0
       ind[:index].each do |i|
         if version.uid == i[:uid]
           return
@@ -39,6 +40,9 @@ class Registry
       }
       File.write 'files/index.json', $rw.write_index(ind)
     end
+  rescue Exception => e
+    puts 'Unable to store ' + version.uid + ':' + version.version
+    raise e
   end
   def retrieve(id, version)
     if File.exist? Version.local_filename(id, version)

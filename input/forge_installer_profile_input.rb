@@ -1,6 +1,4 @@
-require 'json'
 require_relative '../base_input'
-require 'pry'
 
 class ForgeInstallerProfileInput < BaseInput
   def initialize(artifact)
@@ -13,13 +11,13 @@ class ForgeInstallerProfileInput < BaseInput
     file = Version.new
 
     file.uid = @artifact
-    file.versionId = version
+    file.version = version
     file.time = info[:time]
     file.type = info[:type]
     file.mainClass = info[:mainClass]
     file.minecraftArguments = info[:minecraftArguments]
     file.assets = info[:assets]
-    file.requires = ['net.minecraft:' + object[:install][:minecraft]]
+    file.requires << Referenced.new('net.minecraft', object[:install][:minecraft])
     file.libraries = info[:libraries].map do |obj|
       MojangInput.sanetize_mojang_library obj
     end
@@ -35,8 +33,8 @@ class ForgeRemoveMinecraftSanitizer < BaseSanitizer
     return file if file.uid != 'net.minecraftforge'
     mcversion = nil
     file.requires.each do |req|
-      if req.include? 'net.minecraft:'
-        mcversion = req.sub 'net.minecraft:', ''
+      if req.uid == 'net.minecraft'
+        mcversion = req.version
       end
     end
     minecraft = $registry.retrieve 'net.minecraft', mcversion

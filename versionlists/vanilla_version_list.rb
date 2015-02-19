@@ -18,7 +18,7 @@ class VanillaVersionList < BaseVersionList
     mcfile = files.find do |file|
       file.uid == 'net.minecraft'
     end
-    if mcfile and Date.iso8601(mcfile.time) > Date.iso8601('2013-06-25T15:08:56+02:00')
+    if mcfile and mcfile.time > DateTime.iso8601('2013-06-25T15:08:56+02:00').to_time.to_i
       files
     else
       []

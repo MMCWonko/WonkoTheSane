@@ -10,8 +10,9 @@ module Reader
       v = Version.new
       v.is_complete = false
       v.uid = json.uid
-      v.versionId = ver[:id] ? ver.id : ver.version
-      v.versionName = ver[:id] ? ver.version : nil
+      v.version = ver[:id]
+      v.type = ver[:type]
+      v.time = ver[:time]
       index.versions << v
     end
 
@@ -36,23 +37,27 @@ module Reader
     file.is_complete = true
 
     file.uid = json.uid
-    file.versionId = json[:versionId] ? json.versionId : json.version
-    file.versionName = json[:versionId] ? json.version : nil
+    file.version = json.version
     file.time = json.time
     file.type = json.type
+    file.requires = json.requires.map do |req|
+      Referenced.new(req[:uid], req[:version])
+    end if json.requires
 
-    file.mainClass = json.mainClass
-    file.appletClass = json.appletClass
-    file.assets = json.assets
-    file.minecraftArguments = json.minecraftArguments
-    file.tweakers = json.tweakers
-    file.requires = json.requires
-    file.traits = json.traits ? json.traits : []
+    json.data do |data|
+      file.traits = data[:'general.traits'] if data[:'general.traits']
+      file.libraries = []
+      data[:'java.libraries'].each do |lib|
+        file.libraries << read_library(lib)
+      end if data[:'java.libraries']
 
-    file.libraries = []
-    json.libraries.each do |lib|
-      file.libraries << read_library(lib)
-    end if json.libraries
+      file.mainClass = data[:'java.mainClass']
+      file.appletClass = data[:'mc.appletClass']
+      file.assets = data[:'mc.assets']
+      file.minecraftArguments = data[:'mc.arguments']
+      file.tweakers = data[:'mc.tweakers']
+      file.mainLib = read_library data[:'java.mainLib'] if data[:'java.mainLib']
+    end if json.data
 
     return file
   end
@@ -65,19 +70,16 @@ end
 module Writer
   def write_version_index(index)
     json = {
+        formatVersion: 0,
         uid: index.uid,
         name: index.name,
         versions: []
     }
     index.versions.each do |ver|
-      if ver.versionName
-        json[:versions] << {
-            id: ver.versionId,
-            version: ver.versionName
-        }
-      else
-        json[:versions] << { id: ver.versionId }
-      end
+      obj = { id: ver.version }
+      obj[:type] = ver.type
+      obj[:time] = ver.time
+      json[:versions] << obj
     end
 
     return JSON.pretty_generate json
@@ -89,35 +91,41 @@ module Writer
     json[:absoluteUrl] = library.absoluteUrl if library.absoluteUrl and library.absoluteUrl != ''
     json[:checksums] = library.checksums     if library.checksums and library.checksums != ''
     json[:platforms] = library.platforms     if library.platforms and library.platforms != VersionLibrary.possiblePlatforms
-    json[:natives] = library.natives         if library.natives
+    json[:natives] = library.oldNatives      if library.oldNatives
+    json[:rules] = library.oldRules          if library.oldRules
     return json
   end
 
   def write_version(version)
+    # metadata
     json = {
+        formatVersion: 0,
         uid: version.uid,
-        versionId: version.versionId
+        version: version.version,
+        time: version.time
     }
-
-    json[:time] = version.time                             if version.time and version.time != ''
     json[:type] = version.type                             if version.type and version.type != ''
+    json[:requires] = version.requires.map do |req|
+      obj = { uid: req.uid }
+      obj[:version] = req.version if req.version
+      obj
+    end if version.requires and not version.requires.empty?
 
-    json[:tweakers] = version.tweakers                     if version.tweakers and not version.tweakers.empty?
-    json[:requires] = version.requires                     if version.requires and not version.requires.empty?
-    json[:libraries] = version.libraries.map do |lib| write_library lib end if version.libraries
-    # TODO versionName and versionId
-    if version.versionName
-      json[:version] = version.versionName
-      json[:versionId] = version.versionId
-    else
-      json[:version] = version.versionId
-      json[:versionId] = version.versionId
-    end
-    json[:mainClass] = version.mainClass                   if version.mainClass and version.mainClass != ''
-    json[:appletClass] = version.appletClass               if version.appletClass and version.appletClass != ''
-    json[:assets] = version.assets                         if version.assets and version.assets != ''
-    json[:minecraftArguments] = version.minecraftArguments if version.minecraftArguments and version.minecraftArguments != ''
-    json[:traits] = version.traits                         if version.traits and not version.traits.empty?
+    data = {}
+    data[:'general.traits'] = version.traits                      if version.traits and not version.traits.empty?
+    data[:'general.launcher'] = :minecraft
+
+    data[:'java.mainClass'] = version.mainClass                   if version.mainClass and version.mainClass != ''
+    data[:'java.mainLib'] = write_library version.mainLib         if version.mainLib
+    data[:'java.libraries'] = version.libraries.reverse.map do |lib|
+      write_library lib
+    end if version.libraries
+
+    data[:'mc.tweakers'] = version.tweakers                  if version.tweakers and not version.tweakers.empty?
+    data[:'mc.appletClass'] = version.appletClass               if version.appletClass and version.appletClass != ''
+    data[:'mc.assets'] = version.assets                         if version.assets and version.assets != ''
+    data[:'mc.arguments'] = version.minecraftArguments if version.minecraftArguments and version.minecraftArguments != ''
+    json[:data] = data
 
     return JSON.pretty_generate json
   end

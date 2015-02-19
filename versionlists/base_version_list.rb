@@ -44,7 +44,7 @@ class BaseVersionList
   end
 
   def self.get_json(url)
-    JSON.parse HTTPCatcher.get(url, url), symbolize_names: true
+    Yajl::Parser.parse HTTPCatcher.file(url, url), symbolize_names: true
   end
 end
 Dir.mkdir 'cache' unless Dir.exist? 'cache'

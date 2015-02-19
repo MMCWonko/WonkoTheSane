@@ -7,6 +7,8 @@ class MojangInput
     lib = VersionLibrary.new
     lib.name = object[:name]
     lib.url = object.key?(:url) ? object[:url] : 'https://libraries.minecraft.net/'
+    lib.oldRules = object[:rules] if object.key? :rules
+    lib.oldNatives = object[:natives] if object.key? :natives
 
     allowed = VersionLibrary.possiblePlatforms
     if object.key? :rules
@@ -69,10 +71,16 @@ class MojangInput
 
   def parse(data)
     object = data.class == Hash ? data : JSON.parse(data, symbolize_names: true)
+
+    if object[:minimumLauncherVersion] and object[:minimumLauncherVersion] > 14
+      # TODO log error
+      return []
+    end
+
     file = Version.new
 
     file.uid = @artifact
-    file.versionId = object[:id]
+    file.version = object[:id]
     file.time = object[:releaseTime]
     file.type = object[:type]
     file.mainClass = object[:mainClass]
@@ -81,7 +89,12 @@ class MojangInput
     file.libraries = object[:libraries].map do |obj|
       MojangInput.sanetize_mojang_library obj
     end
-
+    file.mainLib = VersionLibrary.new
+    file.mainLib.name = 'net.minecraft:minecraft:' + file.version
+    file.mainLib.absoluteUrl = 'http://s3.amazonaws.com/Minecraft.Download/versions/' + file.version + '/' + file.version + '.jar'
+    file.serverLib = VersionLibrary.new
+    file.serverLib.name = 'net.minecraft:minecraft_server:' + file.version
+    file.serverLib.absoluteUrl = 'http://s3.amazonaws.com/Minecraft.Download/versions/' + file.version + '/minecraft_server.' + file.version + '.jar'
     return BaseSanitizer.sanitize file, MojangSplitLWJGLSanitizer
   end
 end
@@ -102,10 +115,12 @@ class MojangSplitLWJGLSanitizer < BaseSanitizer
   def self.sanitize(file)
     lwjgl = Version.new
     lwjgl.uid = 'org.lwjgl'
+    lwjgl.type = 'release'
     lwjgl.libraries = []
     file.libraries.select! do |lib|
       if lib.name.include? @@lwjglMaster
-        lwjgl.versionId = MavenIdentifier.new(lib.name).version
+        lwjgl.version = MavenIdentifier.new(lib.name).version
+        lwjgl.time = nil
       end
       nil == @@lwjglList.find do |lwjglCandidate|
         if lib.name.include? lwjglCandidate
@@ -117,7 +132,7 @@ class MojangSplitLWJGLSanitizer < BaseSanitizer
       end
     end
     file.requires = [] if file.requires.nil?
-    file.requires << 'org.lwjgl'
+    file.requires << Referenced.new('org.lwjgl')
     return [file, lwjgl]
   end
 end

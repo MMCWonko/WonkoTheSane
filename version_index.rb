@@ -16,7 +16,7 @@ class VersionIndex
   end
   def remove_version(version)
     @versions.select! do |ver|
-      version.versionId != ver.versionId
+      version.version != ver.version
     end
   end
   def self.get_full_version(version)
