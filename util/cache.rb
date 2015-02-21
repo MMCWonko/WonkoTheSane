@@ -1,4 +1,6 @@
 require 'fileutils'
+require 'rubygems'
+require 'zip'
 
 # http://www.ericson.net/content/2011/04/caching-http-requests-with-ruby/
 # TODO etags and other caching stuff
