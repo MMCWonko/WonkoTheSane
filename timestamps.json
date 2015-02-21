@@ -1,6 +1,7 @@
 {
   "__comment": "Put timestamp corrections in here",
   "org.lwjgl": {
+    "2.9.4-nightly-20150209" : 1424440809,
     "2.9.3": 1421539200,
     "2.9.2-nightly-20140822": 1408665600,
     "2.9.1": 1385942400,
