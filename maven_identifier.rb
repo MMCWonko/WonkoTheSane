@@ -21,4 +21,15 @@ class MavenIdentifier
     end
     return path + '.' + @extension
   end
+
+  def to_name
+    name = @group + ':' + @artifact + ':' + @version
+    if @classifier
+      name = name + ':' + @classifier
+    end
+    if @extension != 'jar'
+      name = name + '@' + @extension
+    end
+    return name
+  end
 end

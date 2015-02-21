@@ -22,7 +22,22 @@ class ForgeInstallerProfileInput < BaseInput
       MojangInput.sanetize_mojang_library obj
     end
 
-    return BaseSanitizer.sanitize file, MojangExtractTweakersSanitizer, MojangSplitLWJGLSanitizer, ForgeRemoveMinecraftSanitizer, ForgePackXZUrlsSanitizer
+    return BaseSanitizer.sanitize file, MojangExtractTweakersSanitizer, MojangSplitLWJGLSanitizer, ForgeRemoveMinecraftSanitizer, ForgeFixJarSanitizer, ForgePackXZUrlsSanitizer
+  end
+end
+
+class ForgeFixJarSanitizer < BaseSanitizer
+  def self.sanitize(file)
+    file.libraries.map! do |lib|
+      ident = MavenIdentifier.new(lib.name)
+      if 'net.minecraftforge' == ident.group && 'forge' == ident.artifact
+        lib = lib.clone
+        ident.classifier = 'universal'
+        lib.name = ident.to_name()
+      end
+      lib
+    end
+    file
   end
 end
 
