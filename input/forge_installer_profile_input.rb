@@ -89,7 +89,7 @@ class ForgePackXZUrlsSanitizer < BaseSanitizer
     file.libraries.map! do |lib|
       if @@packXZLibs.include? MavenIdentifier.new(lib.name).group
         lib = lib.clone
-        lib.url = 'https://repo1.maven.org/maven2/'
+        lib.url = 'http://repo.spongepowered.org/maven/'
       end
       lib
     end
