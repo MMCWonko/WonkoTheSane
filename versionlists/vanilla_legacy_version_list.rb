@@ -31,8 +31,8 @@ class VanillaLegacyVersionList < BaseVersionList
     file.folders['minecraft/saves'] = ['mc.saves.anvil'] if file.time >= 1330552800
     file.folders['minecraft/saves'] = ['mc.saves.region'] if file.time >= 1298325600 and file.time < 1330552800
     file.folders['minecraft/saves'] = ['mc.saves.infdev'] if file.time >= 1291327200 and file.time < 1298325600
-    file.traits.remove 'texturepacks'
-    file.traits.remove 'no-resourcepacks'
+    file.traits.delete 'texturepacks' if file.traits
+    file.traits.delete 'no-resourcepacks' if file.traits
 
     BaseSanitizer.sanitize file, MojangProcessArgumentsSanitizer
   end
