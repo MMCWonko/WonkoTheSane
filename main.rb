@@ -190,6 +190,34 @@ $modLists.each do |list|
   $lists[list.artifact.to_sym] = list
 end
 
+require 'optparse'
+options = {
+    server: false,
+    refreshAll: false
+}
+OptionParser.new do |opts|
+  opts.banner = 'Usage: ./main.rb [options]'
+  opts.on '-s', '--server', 'Start the WebSocket/HTTP server' do
+    options[:server] = true
+  end
+  opts.on '-r', '--refresh-all', 'Refreshes all lists' do
+    options[:refreshAll] = true
+  end
+end.parse!
+
+if options[:refreshAll]
+  puts 'Refreshing lists...'
+  $lists.each_value do |list|
+    list.refresh
+  end
+end
+
+if not options[:server]
+  exit 0
+end
+
+puts 'Starting server...'
+
 $broadcastChannel = EM::Channel.new
 class WonkoHttpServer < EM::Connection
   include EM::HttpServer
