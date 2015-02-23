@@ -21,6 +21,9 @@ class ForgeInstallerProfileInput < BaseInput
     file.libraries = info[:libraries].map do |obj|
       MojangInput.sanetize_mojang_library obj
     end
+    file.folders['minecraft/mods'] = ['mc.forgemods']
+    file.folders['minecraft/mods'] << 'mc.forgecoremods' if object[:install][:minecraft].match /[^1]*1\.[0-6]/
+    file.folders['minecraft/coremods'] = ['mc.forgecoremods'] if object[:install][:minecraft].match /[^1]*1\.[0-6]/
 
     return BaseSanitizer.sanitize file, MojangExtractTweakersSanitizer, MojangSplitLWJGLSanitizer, ForgeRemoveMinecraftSanitizer, ForgeFixJarSanitizer, ForgePackXZUrlsSanitizer
   end

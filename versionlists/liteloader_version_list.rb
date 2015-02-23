@@ -59,6 +59,7 @@ class LiteLoaderVersionList < BaseVersionList
       end
       lib
     end
+    file.folders['minecraft/mods'] = ['mc.liteloadermods']
     file.libraries.unshift liteloaderLib
     return file
   end

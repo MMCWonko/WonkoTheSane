@@ -49,6 +49,7 @@ class Version
   attr_accessor :libraries # list of VersionLibrary
   attr_accessor :mainLib # VersionLibrary
   attr_accessor :serverLib # VersionLibrary
+  attr_accessor :folders # Path => [Type]
 
   # for communication between sanitizers, parsers etc.
   attr_accessor :extra
@@ -56,6 +57,7 @@ class Version
   def initialize
     @extra = {}
     @requires = []
+    @folders = {}
   end
 
   def time=(time)

@@ -95,6 +95,14 @@ class MojangInput
     file.serverLib = VersionLibrary.new
     file.serverLib.name = 'net.minecraft:minecraft_server:' + file.version
     file.serverLib.absoluteUrl = 'http://s3.amazonaws.com/Minecraft.Download/versions/' + file.version + '/minecraft_server.' + file.version + '.jar'
+
+    file.folders['minecraft/screenshots'] = ['general.screenshots']
+    file.folders['minecraft/resourcepackks'] = ['mc.resourcepacks'] if file.time >= 1372430921
+    file.folders['minecraft/texturepacks'] = ['mc.texturepacks'] if file.time < 1372430921
+    file.folders['minecraft/saves'] = ['mc.saves.anvil'] if file.time >= 1330552800
+    file.folders['minecraft/saves'] = ['mc.saves.region'] if file.time >= 1298325600 and file.time < 1330552800
+    file.folders['minecraft/saves'] = ['mc.saves.infdev'] if file.time >= 1291327200 and file.time < 1298325600
+
     return BaseSanitizer.sanitize file, MojangSplitLWJGLSanitizer
   end
 end

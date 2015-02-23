@@ -46,6 +46,7 @@ module Reader
 
     json.data do |data|
       file.traits = data[:'general.traits'] if data[:'general.traits']
+      file.folders = data[:'general.folders'] if data[:'general.folders']
       file.libraries = []
       data[:'java.libraries'].each do |lib|
         file.libraries << read_library(lib)
@@ -115,6 +116,7 @@ module Writer
     data = {}
     data[:'general.traits'] = version.traits                      if version.traits and not version.traits.empty?
     data[:'general.launcher'] = :minecraft
+    data[:'general.folders'] = version.folders if version.folders and not version.folders.empty?
 
     data[:'java.mainClass'] = version.mainClass                   if version.mainClass and version.mainClass != ''
     data[:'java.mainLib'] = write_library version.mainLib         if version.mainLib
