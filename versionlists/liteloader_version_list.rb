@@ -47,7 +47,7 @@ class LiteLoaderVersionList < BaseVersionList
     file = Version.new
     file.uid = 'com.mumfrey.liteloader'
     file.version = id.first
-    file.type = id[1][:type]
+    file.type =  'release' # id[1][:type]
     file.time = id[1][:timestamp]
     file.requires << Referenced.new('net.minecraft', id[1][:minecraft])
     file.tweakers = [ id[1][:tweakClass] ]
