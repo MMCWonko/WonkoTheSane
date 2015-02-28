@@ -21,9 +21,10 @@ class VanillaLegacyVersionList < BaseVersionList
     file.extra[:processArguments] = data[:processArguments]
     file.mainClass = data[:mainClass] if data.has_key? :mainClass
     file.appletClass = data[:appletClass] if data.has_key? :appletClass
-    file.mainLib = VersionLibrary.new
-    file.mainLib.name = 'net.minecraft:minecraft:' + file.version
-    file.mainLib.absoluteUrl = 'http://s3.amazonaws.com/Minecraft.Download/versions/' + file.version + '/' + file.version + '.jar'
+    mainLib = VersionLibrary.new
+    mainLib.name = 'net.minecraft:minecraft:' + file.version
+    mainLib.absoluteUrl = 'http://s3.amazonaws.com/Minecraft.Download/versions/' + file.version + '/' + file.version + '.jar'
+    file.libraries = [ mainLib ]
 
     file.folders['minecraft/screenshots'] = ['general.screenshots']
     file.folders['minecraft/resourcepackks'] = ['mc.resourcepacks'] if file.time >= 1372430921

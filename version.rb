@@ -47,7 +47,6 @@ class Version
   attr_accessor :minecraftArguments
   attr_accessor :tweakers
   attr_accessor :libraries # list of VersionLibrary
-  attr_accessor :mainLib # VersionLibrary
   attr_accessor :serverLib # VersionLibrary
   attr_accessor :folders # Path => [Type]
 
