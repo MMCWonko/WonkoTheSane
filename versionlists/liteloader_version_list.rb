@@ -42,7 +42,7 @@ class LiteLoaderVersionList < BaseVersionList
   def get_version(id)
     liteloaderLib = VersionLibrary.new
     liteloaderLib.name = 'com.mumfrey:liteloader:' + id[1][:version]
-    liteloaderLib.absoluteUrl = 'http://dl.liteloader.com/versions/com/mumfrey/liteloader/' + id[1][:minecraft] + '/' + id[1][:file]
+    liteloaderLib.url = 'http://dl.liteloader.com/versions/com/mumfrey/liteloader/' + id[1][:minecraft] + '/' + id[1][:file]
 
     file = Version.new
     file.uid = 'com.mumfrey.liteloader'
@@ -52,7 +52,7 @@ class LiteLoaderVersionList < BaseVersionList
     file.requires << Referenced.new('net.minecraft', id[1][:minecraft])
     file.tweakers = [ id[1][:tweakClass] ]
     file.mainClass = 'net.minecraft.launchwrapper.Launch'
-    file.libraries = id[1][:libraries].map do |lib|
+    file.downloads = id[1][:libraries].map do |lib|
       lib = MojangInput.sanetize_mojang_library lib
       if lib.name == 'org.ow2.asm:asm-all:5.0.3'
         lib.url = 'http://repo.maven.apache.org/maven2/'
@@ -60,7 +60,7 @@ class LiteLoaderVersionList < BaseVersionList
       lib
     end
     file.folders['minecraft/mods'] = ['mc.liteloadermods']
-    file.libraries.unshift liteloaderLib
-    return file
+    file.downloads.unshift liteloaderLib
+    return BaseSanitizer.sanitize file
   end
 end

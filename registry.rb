@@ -21,24 +21,26 @@ class Registry
     if version.is_a? Array
       version.each do |f| store(f) end
     else
-      Dir.mkdir 'files/' + version.uid unless Dir.exist? 'files/' + version.uid
-      File.write version.local_filename, $rw.write_version(version)
+      BaseSanitizer.sanitize(version, DownloadsFixer).each do |version|
+        Dir.mkdir 'files/' + version.uid unless Dir.exist? 'files/' + version.uid
+        File.write version.local_filename, $rw.write_version(version)
 
-      vindex = version_index version.uid
-      vindex.add_version version
-      File.write VersionIndex.local_filename(vindex.uid), $rw.write_version_index(vindex)
+        vindex = version_index version.uid
+        vindex.add_version version
+        File.write VersionIndex.local_filename(vindex.uid), $rw.write_version_index(vindex)
 
-      ind = index
-      ind[:formatVersion] = 0
-      ind[:index].each do |i|
-        if version.uid == i[:uid]
-          return
+        ind = index
+        ind[:formatVersion] = 0
+        ind[:index].each do |i|
+          if version.uid == i[:uid]
+            return
+          end
         end
+        ind[:index] << {
+            uid: version.uid
+        }
+        File.write 'files/index.json', $rw.write_index(ind)
       end
-      ind[:index] << {
-          uid: version.uid
-      }
-      File.write 'files/index.json', $rw.write_index(ind)
     end
   rescue Exception => e
     puts 'Unable to store ' + version.uid + ':' + version.version

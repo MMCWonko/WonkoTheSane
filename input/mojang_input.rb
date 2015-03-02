@@ -4,9 +4,9 @@ class MojangInput
   # reads a general mojang-style library
   # TODO os versions
   def self.sanetize_mojang_library(object)
-    lib = VersionLibrary.new
+    lib = if object.key? :natives then VersionLibraryNative.new else VersionLibrary.new end
     lib.name = object[:name]
-    lib.url = object.key?(:url) ? object[:url] : 'https://libraries.minecraft.net/'
+    lib.mavenBaseUrl = object.key?(:url) ? object[:url] : 'https://libraries.minecraft.net/'
     lib.oldRules = object[:rules] if object.key? :rules
     lib.oldNatives = object[:natives] if object.key? :natives
 
@@ -86,16 +86,16 @@ class MojangInput
     file.mainClass = object[:mainClass]
     file.assets = object[:assets]
     file.minecraftArguments = object[:minecraftArguments]
-    file.libraries = object[:libraries].map do |obj|
+    file.downloads = object[:libraries].map do |obj|
       MojangInput.sanetize_mojang_library obj
     end
     mainLib = VersionLibrary.new
     mainLib.name = 'net.minecraft:minecraft:' + file.version
-    mainLib.absoluteUrl = 'http://s3.amazonaws.com/Minecraft.Download/versions/' + file.version + '/' + file.version + '.jar'
-    file.libraries << mainLib
+    mainLib.url = 'http://s3.amazonaws.com/Minecraft.Download/versions/' + file.version + '/' + file.version + '.jar'
+    file.downloads << mainLib
     file.serverLib = VersionLibrary.new
     file.serverLib.name = 'net.minecraft:minecraft_server:' + file.version
-    file.serverLib.absoluteUrl = 'http://s3.amazonaws.com/Minecraft.Download/versions/' + file.version + '/minecraft_server.' + file.version + '.jar'
+    file.serverLib.url = 'http://s3.amazonaws.com/Minecraft.Download/versions/' + file.version + '/minecraft_server.' + file.version + '.jar'
 
     file.folders['minecraft/screenshots'] = ['general.screenshots']
     file.folders['minecraft/resourcepackks'] = ['mc.resourcepacks'] if file.time >= 1372430921
@@ -125,15 +125,14 @@ class MojangSplitLWJGLSanitizer < BaseSanitizer
     lwjgl = Version.new
     lwjgl.uid = 'org.lwjgl'
     lwjgl.type = 'release'
-    lwjgl.libraries = []
-    file.libraries.select! do |lib|
+    file.downloads.select! do |lib|
       if lib.name.include? @@lwjglMaster
         lwjgl.version = MavenIdentifier.new(lib.name).version
         lwjgl.time = nil
       end
       nil == @@lwjglList.find do |lwjglCandidate|
         if lib.name.include? lwjglCandidate
-          lwjgl.libraries << lib
+          lwjgl.downloads << lib
           true
         else
           false

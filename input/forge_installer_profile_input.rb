@@ -18,7 +18,7 @@ class ForgeInstallerProfileInput < BaseInput
     file.minecraftArguments = info[:minecraftArguments]
     file.assets = info[:assets]
     file.requires << Referenced.new('net.minecraft', object[:install][:minecraft])
-    file.libraries = info[:libraries].map do |obj|
+    file.downloads = info[:libraries].map do |obj|
       MojangInput.sanetize_mojang_library obj
     end
     file.folders['minecraft/mods'] = ['mc.forgemods']
@@ -31,7 +31,7 @@ end
 
 class ForgeFixJarSanitizer < BaseSanitizer
   def self.sanitize(file)
-    file.libraries.map! do |lib|
+    file.downloads.map! do |lib|
       ident = MavenIdentifier.new(lib.name)
       if 'net.minecraftforge' == ident.group && 'forge' == ident.artifact
         lib = lib.clone
@@ -65,8 +65,8 @@ class ForgeRemoveMinecraftSanitizer < BaseSanitizer
       file.mainClass = nil if minecraft.mainClass == file.mainClass
       file.minecraftArguments = nil if minecraft.minecraftArguments == file.minecraftArguments
       file.assets = nil if minecraft.assets == file.assets
-      file.libraries.select! do |lib|
-        nil == minecraft.libraries.find do |mcLib|
+      file.downloads.select! do |lib|
+        nil == minecraft.downloads.find do |mcLib|
           lib.name == mcLib.name
         end
       end
@@ -89,7 +89,7 @@ end
 class ForgePackXZUrlsSanitizer < BaseSanitizer
   @@packXZLibs = [ 'org.scala-lang', 'com.typesafe', 'com.typesafe.akka' ]
   def self.sanitize(file)
-    file.libraries.map! do |lib|
+    file.downloads.map! do |lib|
       if @@packXZLibs.include? MavenIdentifier.new(lib.name).group
         lib = lib.clone
         lib.url = 'http://repo.spongepowered.org/maven/'

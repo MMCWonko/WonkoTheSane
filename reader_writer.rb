@@ -19,17 +19,6 @@ module Reader
     return index
   end
 
-  def read_library(json)
-    lib = VersionLibrary.new
-    lib.name = json.name
-    lib.url = json.url
-    lib.absoluteUrl = json.absoluteUrl
-    lib.checksums = json.checksums
-    lib.platforms = json.platforms
-    lib.natives = json[:natives] if json[:natives]
-    return lib
-  end
-
   def read_version(data)
     json = Hashie::Mash.new JSON.parse(data)
 
@@ -47,9 +36,12 @@ module Reader
     json.data do |data|
       file.traits = data[:'general.traits'] if data[:'general.traits']
       file.folders = data[:'general.folders'] if data[:'general.folders']
-      file.libraries = []
+      file.downloads = data[:'general.downloads'].map do |dl|
+        Download.from_json dl
+      end
+      file.downloads = []
       data[:'java.libraries'].each do |lib|
-        file.libraries << read_library(lib)
+        file.downloads << read_library(lib)
       end if data[:'java.libraries']
 
       file.mainClass = data[:'java.mainClass']
@@ -86,17 +78,6 @@ module Writer
     return JSON.pretty_generate json
   end
 
-  def write_library(library)
-    json = { name: library.name }
-    json[:url] = library.url                 if library.url and library.url != ''
-    json[:absoluteUrl] = library.absoluteUrl if library.absoluteUrl and library.absoluteUrl != ''
-    json[:checksums] = library.checksums     if library.checksums and library.checksums != ''
-    json[:platforms] = library.platforms     if library.platforms and library.platforms != VersionLibrary.possiblePlatforms
-    json[:natives] = library.oldNatives      if library.oldNatives
-    json[:rules] = library.oldRules          if library.oldRules
-    return json
-  end
-
   def write_version(version)
     # metadata
     json = {
@@ -116,12 +97,12 @@ module Writer
     data[:'general.traits'] = version.traits                      if version.traits and not version.traits.empty?
     data[:'general.launcher'] = :minecraft
     data[:'general.folders'] = version.folders if version.folders and not version.folders.empty?
+    data[:'general.downloads'] = version.downloads.map do |dl|
+      dl.to_json
+    end if version.downloads and not version.downloads.empty?
 
     data[:'java.mainClass'] = version.mainClass                   if version.mainClass and version.mainClass != ''
-    data[:'java.serverLib'] = write_library version.serverLib     if version.serverLib
-    data[:'java.libraries'] = version.libraries.reverse.map do |lib|
-      write_library lib
-    end if version.libraries
+    data[:'java.serverLib'] = version.serverLib.to_json     if version.serverLib
 
     data[:'mc.tweakers'] = version.tweakers                  if version.tweakers and not version.tweakers.empty?
     data[:'mc.appletClass'] = version.appletClass               if version.appletClass and version.appletClass != ''

@@ -24,3 +24,18 @@ class BaseSanitizer
     return output
   end
 end
+
+class DownloadsFixer < BaseSanitizer
+  def self.sanitize(file)
+    file.downloads.map! do |download|
+      if not download.size or not download.sha256 or download.sha256 == ''
+        libFile = HTTPCatcher.file download.url, download.url
+        download.size = libFile.size
+        download.sha256 = Digest::SHA256.hexdigest libFile.read
+        download
+      end
+      download
+    end
+    file
+  end
+end
