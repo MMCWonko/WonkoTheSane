@@ -53,12 +53,12 @@ class LiteLoaderVersionList < BaseVersionList
     file.tweakers = [ id[1][:tweakClass] ]
     file.mainClass = 'net.minecraft.launchwrapper.Launch'
     file.downloads = id[1][:libraries].map do |lib|
-      lib = MojangInput.sanetize_mojang_library lib
+      libs = MojangInput.sanetize_mojang_library lib
       if lib.name == 'org.ow2.asm:asm-all:5.0.3'
-        lib.url = 'http://repo.maven.apache.org/maven2/'
+        libs[0].url = 'http://repo.maven.apache.org/maven2/'
       end
-      lib
-    end
+      libs
+    end.flatten 1
     file.folders['minecraft/mods'] = ['mc.liteloadermods']
     file.downloads.unshift liteloaderLib
     return BaseSanitizer.sanitize file

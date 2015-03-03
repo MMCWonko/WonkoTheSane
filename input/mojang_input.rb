@@ -7,36 +7,34 @@ class MojangInput
     lib = if object.key? :natives then VersionLibraryNative.new else VersionLibrary.new end
     lib.name = object[:name]
     lib.mavenBaseUrl = object.key?(:url) ? object[:url] : 'https://libraries.minecraft.net/'
-    lib.oldRules = object[:rules] if object.key? :rules
-    lib.oldNatives = object[:natives] if object.key? :natives
 
     allowed = VersionLibrary.possiblePlatforms
     if object.key? :rules
       object[:rules].each do |rule|
-        if rule[:action] == :allow
-          if rule.key? :os
-            if rule[:os] == 'windows'
+        if rule[:action] == 'allow'
+          if rule.key? :os and rule[:os].key? :name
+            if rule[:os][:name] == 'windows'
               allowed << 'win32'
               allowed << 'win64'
-            elsif rules[:os] == 'linux'
+            elsif rule[:os][:name] == 'linux'
               allowed << 'lin32'
               allowed << 'lin64'
-            elsif rules[:os] == 'osx'
-              allowed << 'osx'
+            elsif rule[:os][:name] == 'osx'
+              allowed << 'osx64'
             end
           else
-            allowed = allowed + VersionLibrary.possiblePlatforms
+            allowed = VersionLibrary.possiblePlatforms
           end
-        elsif rule[:action] == :disallow
-          if rule.key? :os
-            if rule[:os] == 'windows'
+        elsif rule[:action] == 'disallow'
+          if rule.key? :os and rule[:os].key? :name
+            if rule[:os][:name] == 'windows'
               allowed.delete 'win32'
               allowed.delete 'win64'
-            elsif rules[:os] == 'linux'
+            elsif rule[:os][:name] == 'linux'
               allowed.delete 'lin32'
               allowed.delete 'lin64'
-            elsif rules[:os] == 'osx'
-              allowed.delete 'osx'
+            elsif rule[:os][:name] == 'osx'
+              allowed.delete 'osx64'
             end
           else
             allowed = []
@@ -44,25 +42,41 @@ class MojangInput
         end
       end
     end
-    lib.platforms = allowed
 
-    if object.key? :natives
-      natives = object[:natives]
-      lib.natives = {} unless lib.natives
-      if natives.key? :windows
-        lib.natives['win32'] = natives[:windows].gsub "${arch}", '32'
-        lib.natives['win64'] = natives[:windows].gsub "${arch}", '64'
+    libs = []
+    if not lib.is_a? VersionLibraryNative
+      lib.platforms = allowed.uniq
+      libs << lib
+    else
+      nativeIds = {}
+      if object.key? :natives
+        natives = object[:natives]
+        if natives.key? :windows
+          nativeIds['win32'] = natives[:windows].gsub "${arch}", '32'
+          nativeIds['win64'] = natives[:windows].gsub "${arch}", '64'
+        end
+        if natives.key? :linux
+          nativeIds['lin32'] = natives[:linux].gsub "${arch}", '32'
+          nativeIds['lin64'] = natives[:linux].gsub "${arch}", '64'
+        end
+        if natives.key? :osx
+          nativeIds['osx64'] = natives[:osx].gsub "${arch}", '64'
+        end
       end
-      if natives.key? :linux
-        lib.natives['lin32'] = natives[:linux].gsub "${arch}", '32'
-        lib.natives['lin64'] = natives[:linux].gsub "${arch}", '64'
-      end
-      if natives.key? :osx
-        lib.natives['osx64'] = natives[:osx].gsub "${arch}", '64'
+
+      allowed.uniq.each do |platform|
+        if not nativeIds.key? platform
+          next
+        end
+
+        native = lib.clone
+        native.platforms = [platform]
+        native.url = native.url.sub '.jar', ('-' + nativeIds[platform] + '.jar')
+        libs << native
       end
     end
 
-    return lib
+    return libs
   end
 
   def initialize(artifact)
@@ -88,7 +102,7 @@ class MojangInput
     file.minecraftArguments = object[:minecraftArguments]
     file.downloads = object[:libraries].map do |obj|
       MojangInput.sanetize_mojang_library obj
-    end
+    end.flatten 1
     mainLib = VersionLibrary.new
     mainLib.name = 'net.minecraft:minecraft:' + file.version
     mainLib.url = 'http://s3.amazonaws.com/Minecraft.Download/versions/' + file.version + '/' + file.version + '.jar'

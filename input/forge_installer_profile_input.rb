@@ -20,7 +20,7 @@ class ForgeInstallerProfileInput < BaseInput
     file.requires << Referenced.new('net.minecraft', object[:install][:minecraft])
     file.downloads = info[:libraries].map do |obj|
       MojangInput.sanetize_mojang_library obj
-    end
+    end.flatten 1
     file.folders['minecraft/mods'] = ['mc.forgemods']
     file.folders['minecraft/mods'] << 'mc.forgecoremods' if object[:install][:minecraft].match /[^1]*1\.[0-6]/
     file.folders['minecraft/coremods'] = ['mc.forgecoremods'] if object[:install][:minecraft].match /[^1]*1\.[0-6]/

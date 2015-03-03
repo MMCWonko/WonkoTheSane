@@ -25,9 +25,26 @@ class Download
       dl = VersionLibrary.new
     when 'java.native'
       dl = VersionLibraryNative.new
+    when 'general.file'
+      dl = FileDownload.new
     end
 
     dl.from_json json
+  end
+end
+
+class FileDownload < Download
+  attr_accessor :destination
+
+  def to_json
+    obj = super 'general.file'
+    obj[:destination] = @destination
+    obj
+  end
+
+  def from_json(json)
+    super
+    @destination = json[:destination]
   end
 end
 
@@ -35,8 +52,6 @@ class VersionLibrary < Download
   attr_accessor :name
   attr_accessor :mavenBaseUrl
   attr_accessor :platforms # list of platforms ({lin,win,osx}{32,64}), or empty for all
-
-  attr_accessor :oldRules
 
   def url
     @url ? @url : (@mavenBaseUrl + MavenIdentifier.new(@name).to_path)
@@ -46,10 +61,10 @@ class VersionLibrary < Download
     obj = super 'java.library'
     obj[:name] = @name
     obj[:mavenBaseUrl] = @mavenBaseUrl if @mavenBaseUrl
-    obj[:platforms] = @platforms if @platforms and @platforms != @@possiblePlatforms
+    obj[:platforms] = @platforms if @platforms and @platforms != VersionLibrary.possiblePlatforms
     obj[:rules] = @oldRules if @oldRules
 
-    if obj[:url] == url
+    if not @url
       obj.delete :url
     end
 
@@ -70,25 +85,18 @@ class VersionLibrary < Download
 
   @@possiblePlatforms = [ 'win32', 'win64', 'lin32', 'lin64', 'osx64' ]
   def self.possiblePlatforms
-    @@possiblePlatforms
+    @@possiblePlatforms.uniq
   end
 end
 
 class VersionLibraryNative < VersionLibrary
-  attr_accessor :natives # map of platform => id
-  attr_accessor :oldNatives
-
   def to_json
     obj = super
     obj[:type] = 'java.native'
-    #obj[:natives] = @oldNatives
-    obj[:natives] = @oldNatives if @oldNatives
     obj
   end
-
   def from_json(json)
     super
-    @oldNatives = json[:natives]
   end
 end
 
