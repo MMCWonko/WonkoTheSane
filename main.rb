@@ -14,8 +14,8 @@ Dir['./versionlists/*.rb'].each do |file| require_relative file end
 lists = []
 
 sources = JSON.parse File.read('sources.json'), symbolize_names: true
-sources[:forgefiles].each do |artifact, urlId|
-  lists << ForgeFilesModsList.new(artifact.to_s, urlId)
+sources[:forgefiles].each do |uid, urlId|
+  lists << ForgeFilesModsList.new(uid.to_s, urlId)
 end
 sources[:jenkins].each do |obj|
   lists << JenkinsVersionList.new(obj[:uid], obj[:url], obj[:artifact])
@@ -46,6 +46,10 @@ OptionParser.new do |opts|
   end
   opts.on '--invalidate-all', 'Invalidates all versions on all lists' do
     lists.each do |list| list.invalidate end
+  end
+  opts.on '--update-nem', 'Updates sources.json with data from NEM' do
+    require_relative 'update_nem'
+    update_nem
   end
   opts.on '-h', '--help', 'Prints this help' do
     puts opts

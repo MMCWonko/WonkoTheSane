@@ -4,6 +4,7 @@ GEM
     binding_of_caller (0.7.2)
       debug_inspector (>= 0.0.1)
     coderay (1.1.0)
+    colorize (0.7.5)
     debug_inspector (0.0.2)
     hashie (3.4.0)
     method_source (0.8.2)
@@ -24,6 +25,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  colorize
   hashie
   pry
   pry-nav

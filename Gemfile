@@ -9,3 +9,4 @@ end
 gem 'rubyzip'
 gem 'hashie'
 gem 'yajl-ruby', require: 'yajl/json_gem'
+gem 'colorize'

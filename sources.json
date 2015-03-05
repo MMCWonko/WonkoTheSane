@@ -72,32 +72,32 @@
     },
     {
       "uid": "openblocks",
-      "url": "http://www.openmods.info:8080",
+      "url": "http://openmods.info:8080",
       "artifact": "OpenBlocks"
     },
     {
       "uid": "openeye",
-      "url": "http://www.openmods.info:8080",
+      "url": "http://openmods.info:8080",
       "artifact": "OpenEye"
     },
     {
       "uid": "openmodslib",
-      "url": "http://www.openmods.info:8080",
+      "url": "http://openmods.info:8080",
       "artifact": "OpenModsLib"
     },
     {
       "uid": "openperipheralsaddons",
-      "url": "http://www.openmods.info:8080",
+      "url": "http://openmods.info:8080",
       "artifact": "OpenPeripheralAddons"
     },
     {
       "uid": "openperipheralscore",
-      "url": "http://www.openmods.info:8080",
+      "url": "http://openmods.info:8080",
       "artifact": "OpenPeripheralCore"
     },
     {
       "uid": "openperipheralintegration",
-      "url": "http://www.openmods.info:8080",
+      "url": "http://openmods.info:8080",
       "artifact": "OpenPeripheralIntegration"
     },
     {
@@ -154,6 +154,256 @@
       "uid": "bdew.pressure",
       "url": "http://jenkins.bdew.net",
       "artifact": "pressure-1.7.10"
+    },
+    {
+      "uid": "modularpowersuits.addons",
+      "url": "http://build.technicpack.net",
+      "artifact": "ModularPowersuitsAddons"
+    },
+    {
+      "uid": "mffs2.classic",
+      "url": "http://minalien.com:8080",
+      "artifact": "Modular%20Forcefield%20System"
+    },
+    {
+      "uid": "powercrystals.core",
+      "url": "http://build.technicpack.net",
+      "artifact": "PowerCrystalsCore"
+    },
+    {
+      "uid": "powerconverters",
+      "url": "http://jamesmckay.id.au:8080",
+      "artifact": "Power%20Converters"
+    },
+    {
+      "uid": "vanityblocks",
+      "url": "http://2.iongaming.org:8080",
+      "artifact": "VanityBlocks"
+    },
+    {
+      "uid": "additionalbuildcraftobjects",
+      "url": "https://jenkins.ra-doersch.de",
+      "artifact": "AdditionalBuildcraftObjects"
+    },
+    {
+      "uid": "galacticraft",
+      "url": "http://ci.micdoodle8.com:8080",
+      "artifact": "Galacticraft-1.7"
+    },
+    {
+      "uid": "artifice",
+      "url": "http://76.72.175.100:8080",
+      "artifact": "Artifice"
+    },
+    {
+      "uid": "mekanism",
+      "url": "http://ci.indiewikis.com:8080",
+      "artifact": "Mekanism"
+    },
+    {
+      "uid": "denlib",
+      "url": "http://denoflions.servehttp.com:8080/view/All",
+      "artifact": "denLib%203.X"
+    },
+    {
+      "uid": "hdskinsandcloaks",
+      "url": "http://denoflions.servehttp.com:8080/view/All",
+      "artifact": "HDSAC%201.6.2"
+    },
+    {
+      "uid": "pluginsforforestry",
+      "url": "http://denoflions.servehttp.com:8080",
+      "artifact": "PluginsForForestry"
+    },
+    {
+      "uid": "appliedthermodynamics",
+      "url": "http://themattabase.com:9090",
+      "artifact": "Applied%20Thermodynamics"
+    },
+    {
+      "uid": "enderio",
+      "url": "http://ci.tterrag.com",
+      "artifact": "EnderIO"
+    },
+    {
+      "uid": "extracells",
+      "url": "http://shadowcity.net:8080",
+      "artifact": "ecrv1"
+    },
+    {
+      "uid": "supermassivetech",
+      "url": "http://ci.tterrag.com",
+      "artifact": "Super%20Massive%20Tech"
+    },
+    {
+      "uid": "forestry",
+      "url": "http://jenkins.ic2.player.to",
+      "artifact": "Forestry"
+    },
+    {
+      "uid": "projectred",
+      "url": "http://ci.indiewikis.com:8080",
+      "artifact": "Project%20Red"
+    },
+    {
+      "uid": "morpheus",
+      "url": "http://jenkins.qmunity.co.uk",
+      "artifact": "Morpheus%201.7.x"
+    },
+    {
+      "uid": "pay2spawn",
+      "url": "http://jenkins.dries007.net",
+      "artifact": "Pay2Spawn"
+    },
+    {
+      "uid": "holoinventory",
+      "url": "http://jenkins.dries007.net",
+      "artifact": "HoloInventory"
+    },
+    {
+      "uid": "placeabletools",
+      "url": "http://jenkins.dries007.net",
+      "artifact": "PlaceableTools"
+    },
+    {
+      "uid": "torchtools",
+      "url": "http://jenkins.dries007.net",
+      "artifact": "TorchTools"
+    },
+    {
+      "uid": "opencomputers",
+      "url": "http://ci.cil.li",
+      "artifact": "OpenComputers-1.5-MC1.7.10"
+    },
+    {
+      "uid": "autocrafter2000",
+      "url": "http://jenkins.dries007.net",
+      "artifact": "AutoCrafter2000"
+    },
+    {
+      "uid": "craycrafting",
+      "url": "http://jenkins.dries007.net",
+      "artifact": "CrayCrafting"
+    },
+    {
+      "uid": "d3core",
+      "url": "http://jenkins.dries007.net",
+      "artifact": "D3Core"
+    },
+    {
+      "uid": "greenthumb",
+      "url": "http://jenkins.dries007.net",
+      "artifact": "GreenThumb"
+    },
+    {
+      "uid": "letitburn",
+      "url": "http://jenkins.dries007.net",
+      "artifact": "Let-it-Burn"
+    },
+    {
+      "uid": "lumberjack",
+      "url": "http://jenkins.dries007.net",
+      "artifact": "Lumberjack"
+    },
+    {
+      "uid": "hexwool",
+      "url": "http://server.techjargaming.com:8080",
+      "artifact": "HexWool"
+    },
+    {
+      "uid": "madscience",
+      "url": "http://madsciencemod.com:8080",
+      "artifact": "Mad%20Science"
+    },
+    {
+      "uid": "minechem",
+      "url": "http://jenkins.jakimfett.com",
+      "artifact": "Minechem%201.7%20v5"
+    },
+    {
+      "uid": "alchemyplusplus",
+      "url": "http://jenkins.jakimfett.com",
+      "artifact": "AlchemyPlusPlus%201.7"
+    },
+    {
+      "uid": "betterstorage",
+      "url": "http://jenkins.rx14.co.uk/job/copygirl",
+      "artifact": "BetterStorage"
+    },
+    {
+      "uid": "launchgui",
+      "url": "http://tehnut.info/jenkins",
+      "artifact": "LaunchGUI-1.7.10"
+    },
+    {
+      "uid": "loaderlist",
+      "url": "http://tehnut.info/jenkins",
+      "artifact": "LoaderList"
+    },
+    {
+      "uid": "sunstroke",
+      "url": "http://tehnut.info/jenkins",
+      "artifact": "SunStroke"
+    },
+    {
+      "uid": "morechisels",
+      "url": "http://tehnut.info/jenkins",
+      "artifact": "MoreChisels"
+    },
+    {
+      "uid": "chiseltones",
+      "url": "http://tehnut.info/jenkins",
+      "artifact": "ChiselTones"
+    },
+    {
+      "uid": "cookiecore",
+      "url": "http://tehnut.info/jenkins",
+      "artifact": "CookieCore"
+    },
+    {
+      "uid": "modulararmour",
+      "url": "http://tehnut.info/jenkins",
+      "artifact": "ModularArmour"
+    },
+    {
+      "uid": "sanguimancy",
+      "url": "http://tehnut.info/jenkins",
+      "artifact": "Sanguimancy"
+    },
+    {
+      "uid": "tinkerssteelworks.ephys",
+      "url": "http://tehnut.info/jenkins",
+      "artifact": "TSteelworks"
+    },
+    {
+      "uid": "enderzoo",
+      "url": "http://ci.tterrag.com",
+      "artifact": "Ender%20Zoo"
+    },
+    {
+      "uid": "extracells",
+      "url": "http://shadowcity.net:8080",
+      "artifact": "ecrv2"
+    },
+    {
+      "uid": "forestry",
+      "url": "http://jenkins.ic2.player.to",
+      "artifact": "Forestry_Dev"
+    },
+    {
+      "uid": "morpheus",
+      "url": "http://jenkins.qmunity.co.uk",
+      "artifact": "Morpheus"
+    },
+    {
+      "uid": "opencomputers",
+      "url": "http://ci.cil.li",
+      "artifact": "OpenComputers-dev-MC1.7.10"
+    },
+    {
+      "uid": "launchgui",
+      "url": "http://tehnut.info/jenkins",
+      "artifact": "LaunchGUI-1.8"
     }
   ]
 }
