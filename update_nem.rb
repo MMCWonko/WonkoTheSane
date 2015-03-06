@@ -1,12 +1,21 @@
 require_relative 'util/cache'
 require 'json'
 
+def get_curse_id(name)
+  data = HTTPCatcher.get('http://minecraft.curseforge.com/mc-mods/' + name).gsub /[\n\r]/, ''
+  match = data.match /<li class="view-on?-cur?se"> *<a href="http:\/\/curse.com\/project\/(\d*)">/
+  return match[1]
+end
+
 def update_nem
   forgefilesCleaned = {
     IronChests: :IronChests2
   }
 
   sources = JSON.parse File.read('sources.json'), symbolize_names: true
+  sources[:forgefiles] = {} if not sources[:forgefiles]
+  sources[:jenkins] = [] if not sources[:jenkins]
+  sources[:curse] = [] if not sources[:curse]
 
   nemList = JSON.parse HTTPCatcher.get('https://raw.githubusercontent.com/SinZ163/NotEnoughMods/master/NEMP/mods.json', 'https://raw.githubusercontent.com/SinZ163/NotEnoughMods/master/NEMP/mods.json'), symbolize_names: true
   nemList.each do |key, value|
@@ -36,7 +45,18 @@ def update_nem
     when 'CheckChickenBones'
       # TODO
     when 'CheckCurse'
-      # TODO
+      curseId = value[:curse][:id] ? value[:curse][:id] : get_curse_id(value[:curse][:name] ? value[:curse][:name] : name.to_s.downcase)
+      if not sources[:curse].find do |obj| obj[:id] == curseId end
+        print "Please enter an uid for the #{"curse".cyan} artifact #{name.to_s.green} (id: #{curseId.yellow}): "
+        uid = gets.chomp
+        if not uid.empty?
+          sources[:curse] << {
+            uid: uid,
+            id: curseId,
+            fileregex: value[:curse][:regex]
+          }
+        end
+      end
     when 'CheckDropBox'
       # TODO
     when 'CheckGitHubRelease'
@@ -61,7 +81,8 @@ def update_nem
     when 'CheckSpacechase'
       # TODO
     end
-  end
 
-  File.write 'sources.json', JSON.pretty_generate(sources)
+    # keep the writing in the loop so we don't lose progress in case of crashes or similar
+    File.write 'sources.json', JSON.pretty_generate(sources)
+  end
 end

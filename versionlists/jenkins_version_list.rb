@@ -6,6 +6,10 @@ class JenkinsVersionList < BaseVersionList
     @baseUrl = baseUrl
     @job = job
     @input = JenkinsInput.new(artifact)
+
+    if @baseUrl[@baseUrl.length - 1] == '/'
+      @baseUrl[@baseUrl.length - 1] = ''
+    end
   end
 
   def get_versions

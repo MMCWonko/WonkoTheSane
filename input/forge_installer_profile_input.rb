@@ -58,7 +58,9 @@ class ForgeRemoveMinecraftSanitizer < BaseSanitizer
     minecraft = $registry.retrieve 'net.minecraft', mcversion
     if not minecraft
       # if we can't find the wanted version on the first try we try reloading the list to see if we get something
-      $vanilla.refresh
+      $globalLists.each do |list|
+        list.refresh if list.artifact == 'net.minecraft'
+      end
       minecraft = $registry.retrieve 'net.minecraft', mcversion
     end
     if minecraft
@@ -92,7 +94,7 @@ class ForgePackXZUrlsSanitizer < BaseSanitizer
     file.downloads.map! do |lib|
       if @@packXZLibs.include? MavenIdentifier.new(lib.name).group
         lib = lib.clone
-        lib.url = 'http://repo.spongepowered.org/maven/'
+        lib.mavenBaseUrl = 'http://repo.spongepowered.org/maven/'
       end
       lib
     end

@@ -25,6 +25,7 @@ class BaseVersionList
 
       # check if some versions aren't in @processed (likely new ones) and fetch and process them
       versions.each do |version|
+        next if not version
         id = version.is_a?(Array) ? version.first : version
         unless @processed.include? id
           files = get_version version

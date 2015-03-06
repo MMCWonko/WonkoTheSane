@@ -1,11 +1,15 @@
 class Download
+  attr_accessor :internalUrl # not serialized, used for DownloadsFixer when the url isn't direct (requires user interaction)
   attr_accessor :url
   attr_accessor :size
   attr_accessor :sha256
 
-  def to_json(type)
+  def type
+    'general.downloads'
+  end
+
+  def to_json
     {
-      type: type,
       url: url,
       size: @size,
       sha256: @sha256
@@ -18,18 +22,19 @@ class Download
     @sha256 = json[:sha256]
   end
 
-  def self.from_json(json)
+  def self.from_json(type, json)
     dl = nil
-    case json[:type]
-    when 'java.library'
+    case type
+    when 'java.libraries'
       dl = VersionLibrary.new
-    when 'java.native'
+    when 'java.natives'
       dl = VersionLibraryNative.new
-    when 'general.file'
+    when 'general.downloads'
       dl = FileDownload.new
     end
 
     dl.from_json json
+    return dl
   end
 end
 
@@ -37,7 +42,7 @@ class FileDownload < Download
   attr_accessor :destination
 
   def to_json
-    obj = super 'general.file'
+    obj = super
     obj[:destination] = @destination
     obj
   end
@@ -53,12 +58,15 @@ class VersionLibrary < Download
   attr_accessor :mavenBaseUrl
   attr_accessor :platforms # list of platforms ({lin,win,osx}{32,64}), or empty for all
 
+  def type
+    'java.libraries'
+  end
   def url
     @url ? @url : (@mavenBaseUrl + MavenIdentifier.new(@name).to_path)
   end
 
   def to_json
-    obj = super 'java.library'
+    obj = super
     obj[:name] = @name
     obj[:mavenBaseUrl] = @mavenBaseUrl if @mavenBaseUrl
     obj[:platforms] = @platforms if @platforms and @platforms != VersionLibrary.possiblePlatforms
@@ -90,13 +98,8 @@ class VersionLibrary < Download
 end
 
 class VersionLibraryNative < VersionLibrary
-  def to_json
-    obj = super
-    obj[:type] = 'java.native'
-    obj
-  end
-  def from_json(json)
-    super
+  def type
+    'java.natives'
   end
 end
 

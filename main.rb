@@ -16,36 +16,61 @@ lists = []
 sources = JSON.parse File.read('sources.json'), symbolize_names: true
 sources[:forgefiles].each do |uid, urlId|
   lists << ForgeFilesModsList.new(uid.to_s, urlId)
-end
+end if sources[:forgefiles]
 sources[:jenkins].each do |obj|
   lists << JenkinsVersionList.new(obj[:uid], obj[:url], obj[:artifact])
-end
+end if sources[:jenkins]
+sources[:curse].each do |obj|
+  lists << CurseVersionList.new(obj[:uid], obj[:id], obj[:fileregex])
+end if sources[:curse]
 
 lists << VanillaVersionList.new
 lists << VanillaLegacyVersionList.new
 lists << LiteLoaderVersionList.new
 lists << ForgeVersionList.new
 lists << FMLVersionList.new
+$globalLists = lists
 
 require 'optparse'
 OptionParser.new do |opts|
   opts.banner = 'Usage: main.rb [options]'
 
   opts.on '-rID', '--refresh=ID', 'Refresh the specified list' do |id|
+    foundList = false
     lists.each do |list|
-      list.refresh if list.artifact == id
+      if list.artifact == id
+        puts "Refreshing #{list.artifact.cyan}"
+        list.refresh
+        puts "Error: #{list.lastError.red}" if list.lastError
+        foundList = true
+      end
     end
+
+    puts "Couldn't find the specified list #{id.cyan}" if not foundList
   end
   opts.on '-a', '--refresh-all', 'Refresh all lists' do
-    lists.each do |list| list.refresh end
-  end
-  opts.on '--invalidate=ID', 'Invalidates all versions on the specified list' do |id|
     lists.each do |list|
-      list.invalidate if list.artifact == id
+      puts "Refreshing #{list.artifact.cyan}"
+      list.refresh
     end
   end
+  opts.on '--invalidate=ID', 'Invalidates all versions on the specified list' do |id|
+    foundList = false
+    lists.each do |list|
+      if list.artifact == id
+        puts "Invalidating #{list.artifact.cyan}"
+        list.invalidate
+        foundList = true
+      end
+    end
+
+    puts "Couldn't find the specified list #{id.cyan}" if not foundList
+  end
   opts.on '--invalidate-all', 'Invalidates all versions on all lists' do
-    lists.each do |list| list.invalidate end
+    lists.each do |list|
+      puts "Invalidating #{list.artifact.cyan}"
+      list.invalidate
+    end
   end
   opts.on '--update-nem', 'Updates sources.json with data from NEM' do
     require_relative 'update_nem'

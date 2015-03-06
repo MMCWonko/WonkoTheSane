@@ -30,20 +30,28 @@ class HTTPCatcher
       puts "Getting file #{key} from cache"
     else
       puts "Getting file #{key} from URL #{url}"
-      resp = Net::HTTP.get_response(URI.parse(url))
+      resp = http_get url
       File.open(cached_path, 'w') do |f|
         f.puts resp.body
       end
     end
   end
+  def http_get(url)
+    resp = Net::HTTP.get_response URI.parse(url)
+    if resp.is_a? Net::HTTPRedirection
+      return http_get URI.join(url, resp['Location']).to_s
+    else
+      return resp
+    end
+  end
 
   public
   @@defaultCatcher = HTTPCatcher.new 'cache/network'
-  def self.get(url, key)
-    @@defaultCatcher.get url, key
+  def self.get(url, key=nil)
+    @@defaultCatcher.get url, (key ? key : url)
   end
-  def self.file(url, key)
-    @@defaultCatcher.file url, key
+  def self.file(url, key=nil)
+    @@defaultCatcher.file url, (key ? key : url)
   end
 end
 

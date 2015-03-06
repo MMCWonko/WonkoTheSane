@@ -1,6 +1,7 @@
 GEM
   remote: https://rubygems.org/
   specs:
+    ast (2.0.0)
     binding_of_caller (0.7.2)
       debug_inspector (>= 0.0.1)
     coderay (1.1.0)
@@ -8,6 +9,9 @@ GEM
     debug_inspector (0.0.2)
     hashie (3.4.0)
     method_source (0.8.2)
+    oga (0.2.3)
+      ast
+      racc (~> 1.4, >= 1.4.12)
     pry (0.10.1)
       coderay (~> 1.1.0)
       method_source (~> 0.8.1)
@@ -17,6 +21,7 @@ GEM
     pry-stack_explorer (0.4.9.1)
       binding_of_caller (>= 0.7)
       pry (>= 0.9.11)
+    racc (1.4.12)
     rubyzip (1.1.7)
     slop (3.6.0)
     yajl-ruby (1.2.1)
@@ -27,6 +32,7 @@ PLATFORMS
 DEPENDENCIES
   colorize
   hashie
+  oga
   pry
   pry-nav
   pry-stack_explorer

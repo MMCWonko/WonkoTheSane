@@ -54,8 +54,8 @@ class LiteLoaderVersionList < BaseVersionList
     file.mainClass = 'net.minecraft.launchwrapper.Launch'
     file.downloads = id[1][:libraries].map do |lib|
       libs = MojangInput.sanetize_mojang_library lib
-      if lib.name == 'org.ow2.asm:asm-all:5.0.3'
-        libs[0].url = 'http://repo.maven.apache.org/maven2/'
+      if lib[:name] == 'org.ow2.asm:asm-all:5.0.3'
+        libs[0].mavenBaseUrl = 'http://repo.maven.apache.org/maven2/'
       end
       libs
     end.flatten 1

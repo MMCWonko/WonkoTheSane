@@ -19,6 +19,16 @@ module Reader
     return index
   end
 
+  def read_download(data, key)
+    if data[key.to_sym]
+      return data[key.to_sym].map do |dl|
+        Download.from_json key, dl
+      end
+    else
+      return []
+    end
+  end
+
   def read_version(data)
     json = Hashie::Mash.new JSON.parse(data)
 
@@ -36,20 +46,18 @@ module Reader
     json.data do |data|
       file.traits = data[:'general.traits'] if data[:'general.traits']
       file.folders = data[:'general.folders'] if data[:'general.folders']
-      file.downloads = data[:'general.downloads'].map do |dl|
-        Download.from_json dl
-      end
       file.downloads = []
-      data[:'java.libraries'].each do |lib|
-        file.downloads << read_library(lib)
-      end if data[:'java.libraries']
+      file.downloads << read_download(data, 'general.downloads')
+      file.downloads << read_download(data, 'java.libraries')
+      file.downloads << read_download(data, 'java.natives')
+      file.downloads.flatten!
 
       file.mainClass = data[:'java.mainClass']
       file.appletClass = data[:'mc.appletClass']
       file.assets = data[:'mc.assets']
       file.minecraftArguments = data[:'mc.arguments']
       file.tweakers = data[:'mc.tweakers']
-      file.serverLib = read_library data[:'java.serverLib'] if data[:'java.serverLib']
+      file.serverLib = Download.from_json 'java.libraries', data[:'java.serverLib'] if data[:'java.serverLib']
     end if json.data
 
     return file
@@ -97,10 +105,10 @@ module Writer
     data[:'general.traits'] = version.traits                      if version.traits and not version.traits.empty?
     data[:'general.launcher'] = :minecraft
     data[:'general.folders'] = version.folders if version.folders and not version.folders.empty?
-    data[:'general.downloads'] = version.downloads.map do |dl|
-      dl.to_json
-    end if version.downloads and not version.downloads.empty?
-
+    version.downloads.each do |dl|
+      data[dl.type] = [] if not data[dl.type]
+      data[dl.type] << dl.to_json
+    end
     data[:'java.mainClass'] = version.mainClass                   if version.mainClass and version.mainClass != ''
     data[:'java.serverLib'] = version.serverLib.to_json     if version.serverLib
 

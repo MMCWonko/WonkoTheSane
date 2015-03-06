@@ -405,5 +405,57 @@
       "url": "http://tehnut.info/jenkins",
       "artifact": "LaunchGUI-1.8"
     }
+  ],
+  "curse": [
+    {
+      "uid": "compactmachines",
+      "id": "224218",
+      "fileregex": "compactmachines-(?P<mc>.+?)-(?P<version>.+?).jar$"
+    },
+    {
+      "uid": "minefactoryreloaded",
+      "id": "66672",
+      "fileregex": "MineFactoryReloaded-\\[(?P<mc>.+?)\\](?P<version>.+?).jar"
+    },
+    {
+      "uid": "lanteacraft",
+      "id": "77342",
+      "fileregex": "LanteaCraft-(?P<mc>.+?)-(?P<version>.+?).jar$"
+    },
+    {
+      "uid": "tinkersconstruct",
+      "id": "74072",
+      "fileregex": "TConstruct-(?P<mc>.+?)-(?P<version>.+?).jar"
+    },
+    {
+      "uid": "tinkersmechworks",
+      "id": "78057",
+      "fileregex": "TMechworks-(?P<mc>.+?)-(?P<version>.+?).jar"
+    },
+    {
+      "uid": "endertech",
+      "id": "223428",
+      "fileregex": "EnderTech-(?P<mc>.+?)-(?P<version>.+?).jar"
+    },
+    {
+      "uid": "bloodmagic",
+      "id": "224791",
+      "fileregex": "BloodMagic-(?P<mc>.+?)-(?P<version>.+?)-.+?.jar"
+    },
+    {
+      "uid": "creepercollateral",
+      "id": "223801",
+      "fileregex": "CreeperCollateral-\\[(?P<mc>.+?)\\](?P<version>.+?).jar"
+    },
+    {
+      "uid": "inpurecore",
+      "id": "223792",
+      "fileregex": "INpureCore-\\[(?P<mc>.+?)\\](?P<version>.+?).jar"
+    },
+    {
+      "uid": "enderio",
+      "id": "64578",
+      "fileregex": "EnderIO-(?P<mc>.+?)-(?P<version>.+?).jar"
+    }
   ]
 }
