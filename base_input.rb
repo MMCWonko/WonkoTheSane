@@ -31,7 +31,7 @@ class DownloadsFixer < BaseSanitizer
       if not download.size or not download.sha256 or download.sha256 == ''
         libFile = HTTPCatcher.file download.url, download.url
         download.size = libFile.size
-        download.sha256 = Digest::SHA256.hexdigest libFile.read
+        download.sha256 = FileHashCache.get libFile
         download
       end
       download

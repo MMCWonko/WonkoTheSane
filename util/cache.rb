@@ -77,3 +77,34 @@ class ExtractionCache
     @basedir + '/' + File.basename(archive) + '/' + file
   end
 end
+
+class FileHashCache
+  def initialize(file)
+    @file = file
+    @data = {}
+    if File.exists? @file
+      @data = JSON.parse File.read(@file), symbolize_names: true
+    end
+  end
+
+  def get(file)
+    name = (file.is_a?(File) ? file.path : file).to_sym
+    timestamp = (file.is_a?(File) ? file.mtime : File.mtime(file)).to_i
+    size = file.is_a?(File) ? file.size : File.size(file)
+    if not @data[name] or not @data[name][:timestamp] == timestamp or not @data[name][:size] == size
+      hash = Digest::SHA256.hexdigest(file.is_a?(File) ? file.read : File.read(file))
+      @data[name] = {
+        timestamp: timestamp,
+        size: size,
+        hash: hash
+      }
+      File.write @file, JSON.pretty_generate(@data)
+    end
+    return @data[name][:hash]
+  end
+
+  @@defaultCache = FileHashCache.new 'cache/filehashes'
+  def self.get(file)
+    @@defaultCache.get file
+  end
+end
