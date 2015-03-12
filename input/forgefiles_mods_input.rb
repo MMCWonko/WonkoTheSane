@@ -23,7 +23,7 @@ class ForgeFilesModsInput < BaseInput
     dl = FileDownload.new
     dl.url = f[:url]
     dl.destination = "mods/#{file.uid}-#{file.version}.jar"
-    file.downloads << dl
+    file.common.downloads << dl
 
     return BaseSanitizer.sanitize file
   end

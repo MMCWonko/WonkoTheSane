@@ -97,26 +97,26 @@ class MojangInput
     file.version = object[:id]
     file.time = object[:releaseTime]
     file.type = object[:type]
-    file.mainClass = object[:mainClass]
-    file.assets = object[:assets]
-    file.minecraftArguments = object[:minecraftArguments]
-    file.downloads = object[:libraries].map do |obj|
+    file.client.mainClass = object[:mainClass]
+    file.client.assets = object[:assets]
+    file.client.minecraftArguments = object[:minecraftArguments]
+    file.client.downloads = object[:libraries].map do |obj|
       MojangInput.sanetize_mojang_library obj
     end.flatten 1
     mainLib = VersionLibrary.new
     mainLib.name = 'net.minecraft:minecraft:' + file.version
     mainLib.url = 'http://s3.amazonaws.com/Minecraft.Download/versions/' + file.version + '/' + file.version + '.jar'
-    file.downloads << mainLib
-    file.serverLib = VersionLibrary.new
-    file.serverLib.name = 'net.minecraft:minecraft_server:' + file.version
-    file.serverLib.url = 'http://s3.amazonaws.com/Minecraft.Download/versions/' + file.version + '/minecraft_server.' + file.version + '.jar'
+    file.client.downloads << mainLib
+    file.server.serverLib = VersionLibrary.new
+    file.server.serverLib.name = 'net.minecraft:minecraft_server:' + file.version
+    file.server.serverLib.url = 'http://s3.amazonaws.com/Minecraft.Download/versions/' + file.version + '/minecraft_server.' + file.version + '.jar'
 
-    file.folders['minecraft/screenshots'] = ['general.screenshots']
-    file.folders['minecraft/resourcepackks'] = ['mc.resourcepacks'] if file.time >= 1372430921
-    file.folders['minecraft/texturepacks'] = ['mc.texturepacks'] if file.time < 1372430921
-    file.folders['minecraft/saves'] = ['mc.saves.anvil'] if file.time >= 1330552800
-    file.folders['minecraft/saves'] = ['mc.saves.region'] if file.time >= 1298325600 and file.time < 1330552800
-    file.folders['minecraft/saves'] = ['mc.saves.infdev'] if file.time >= 1291327200 and file.time < 1298325600
+    file.client.folders['minecraft/screenshots'] = ['general.screenshots']
+    file.client.folders['minecraft/resourcepackks'] = ['mc.resourcepacks'] if file.time >= 1372430921
+    file.client.folders['minecraft/texturepacks'] = ['mc.texturepacks'] if file.time < 1372430921
+    file.client.folders['minecraft/saves'] = ['mc.saves.anvil'] if file.time >= 1330552800
+    file.client.folders['minecraft/saves'] = ['mc.saves.region'] if file.time >= 1298325600 and file.time < 1330552800
+    file.client.folders['minecraft/saves'] = ['mc.saves.infdev'] if file.time >= 1291327200 and file.time < 1298325600
 
     return BaseSanitizer.sanitize file, MojangSplitLWJGLSanitizer
   end
@@ -124,8 +124,8 @@ end
 
 class MojangExtractTweakersSanitizer < BaseSanitizer
   def self.sanitize(file)
-    file.tweakers = file.minecraftArguments.scan(/--tweakClass ([^ ]*)/).flatten
-    file.minecraftArguments = file.minecraftArguments.gsub /\ ?--tweakClass ([^ ]*)/, ''
+    file.client.tweakers = file.client.minecraftArguments.scan(/--tweakClass ([^ ]*)/).flatten
+    file.client.minecraftArguments = file.client.minecraftArguments.gsub /\ ?--tweakClass ([^ ]*)/, ''
     return file
   end
 end
@@ -139,14 +139,14 @@ class MojangSplitLWJGLSanitizer < BaseSanitizer
     lwjgl = Version.new
     lwjgl.uid = 'org.lwjgl'
     lwjgl.type = 'release'
-    file.downloads.select! do |lib|
+    file.client.downloads.select! do |lib|
       if lib.name.include? @@lwjglMaster
         lwjgl.version = MavenIdentifier.new(lib.name).version
         lwjgl.time = nil
       end
       nil == @@lwjglList.find do |lwjglCandidate|
         if lib.name.include? lwjglCandidate
-          lwjgl.downloads << lib
+          lwjgl.client.downloads << lib
           true
         else
           false
@@ -169,16 +169,16 @@ end
 
 class MojangProcessArgumentsSanitizer < BaseSanitizer
   def self.sanitize(file)
-    if file.extra[:processArguments]
-      case file.extra[:processArguments]
+    if file.client.extra[:processArguments]
+      case file.client.extra[:processArguments]
         when 'legacy'
-          file.minecraftArguments = ' ${auth_player_name} ${auth_session}'
+          file.client.minecraftArguments = ' ${auth_player_name} ${auth_session}'
         when 'username_session'
-          file.minecraftArguments = '--username ${auth_player_name} --session ${auth_session}'
+          file.client.minecraftArguments = '--username ${auth_player_name} --session ${auth_session}'
         when 'username_session_version'
-          file.minecraftArguments = '--username ${auth_player_name} --session ${auth_session} --version ${profile_name}'
+          file.client.minecraftArguments = '--username ${auth_player_name} --session ${auth_session} --version ${profile_name}'
       end
-      file.extra.delete :processArguments
+      file.client.extra.delete :processArguments
     end
     file
   end

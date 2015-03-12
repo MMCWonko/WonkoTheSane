@@ -14,16 +14,16 @@ class ForgeInstallerProfileInput < BaseInput
     file.version = version
     file.time = info[:time]
     file.type = info[:type]
-    file.mainClass = info[:mainClass]
-    file.minecraftArguments = info[:minecraftArguments]
-    file.assets = info[:assets]
+    file.client.mainClass = info[:mainClass]
+    file.client.minecraftArguments = info[:minecraftArguments]
+    file.client.assets = info[:assets]
     file.requires << Referenced.new('net.minecraft', object[:install][:minecraft])
-    file.downloads = info[:libraries].map do |obj|
+    file.client.downloads = info[:libraries].map do |obj|
       MojangInput.sanetize_mojang_library obj
     end.flatten 1
-    file.folders['minecraft/mods'] = ['mc.forgemods']
-    file.folders['minecraft/mods'] << 'mc.forgecoremods' if object[:install][:minecraft].match /[^1]*1\.[0-6]/
-    file.folders['minecraft/coremods'] = ['mc.forgecoremods'] if object[:install][:minecraft].match /[^1]*1\.[0-6]/
+    file.client.folders['minecraft/mods'] = ['mc.forgemods']
+    file.client.folders['minecraft/mods'] << 'mc.forgecoremods' if object[:install][:minecraft].match /[^1]*1\.[0-6]/
+    file.client.folders['minecraft/coremods'] = ['mc.forgecoremods'] if object[:install][:minecraft].match /[^1]*1\.[0-6]/
 
     return BaseSanitizer.sanitize file, MojangExtractTweakersSanitizer, MojangSplitLWJGLSanitizer, ForgeRemoveMinecraftSanitizer, ForgeFixJarSanitizer, ForgePackXZUrlsSanitizer
   end
@@ -31,7 +31,7 @@ end
 
 class ForgeFixJarSanitizer < BaseSanitizer
   def self.sanitize(file)
-    file.downloads.map! do |lib|
+    file.client.downloads.map! do |lib|
       ident = MavenIdentifier.new(lib.name)
       if 'net.minecraftforge' == ident.group && 'forge' == ident.artifact
         lib = lib.clone
@@ -64,11 +64,11 @@ class ForgeRemoveMinecraftSanitizer < BaseSanitizer
       minecraft = $registry.retrieve 'net.minecraft', mcversion
     end
     if minecraft
-      file.mainClass = nil if minecraft.mainClass == file.mainClass
-      file.minecraftArguments = nil if minecraft.minecraftArguments == file.minecraftArguments
-      file.assets = nil if minecraft.assets == file.assets
-      file.downloads.select! do |lib|
-        nil == minecraft.downloads.find do |mcLib|
+      file.client.mainClass = nil if minecraft.client.mainClass == file.client.mainClass
+      file.client.minecraftArguments = nil if minecraft.client.minecraftArguments == file.client.minecraftArguments
+      file.client.assets = nil if minecraft.client.assets == file.client.assets
+      file.client.downloads.select! do |lib|
+        nil == minecraft.client.downloads.find do |mcLib|
           lib.name == mcLib.name
         end
       end
@@ -91,7 +91,7 @@ end
 class ForgePackXZUrlsSanitizer < BaseSanitizer
   @@packXZLibs = [ 'org.scala-lang', 'com.typesafe', 'com.typesafe.akka' ]
   def self.sanitize(file)
-    file.downloads.map! do |lib|
+    file.client.downloads.map! do |lib|
       if @@packXZLibs.include? MavenIdentifier.new(lib.name).group
         lib = lib.clone
         lib.mavenBaseUrl = 'http://repo.spongepowered.org/maven/'

@@ -25,7 +25,7 @@ class JenkinsInput < BaseInput
       dl = FileDownload.new
       dl.destination = "mods/#{file.uid}-#{file.version}.jar"
       dl.url = "#{clean_url data[:url]}/artifact/#{artifact[:relativePath]}"
-      file.downloads << dl
+      file.common.downloads << dl
     end
 
     return BaseSanitizer.sanitize file

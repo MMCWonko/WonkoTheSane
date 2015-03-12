@@ -10,7 +10,7 @@ module Reader
       v = Version.new
       v.is_complete = false
       v.uid = json.uid
-      v.version = ver[:id]
+      v.version = ver[:version]
       v.type = ver[:type]
       v.time = ver[:time]
       index.versions << v
@@ -29,6 +29,24 @@ module Reader
     end
   end
 
+  def read_resource(data, res)
+    return if not data or not data.is_a? Object
+    res.traits = data[:'general.traits'] if data[:'general.traits']
+    res.folders = data[:'general.folders'] if data[:'general.folders']
+    res.downloads = []
+    res.downloads << read_download(data, 'general.downloads')
+    res.downloads << read_download(data, 'java.libraries')
+    res.downloads << read_download(data, 'java.natives')
+    res.downloads.flatten!
+
+    res.mainClass = data[:'java.mainClass']
+    res.appletClass = data[:'mc.appletClass']
+    res.assets = data[:'mc.assets']
+    res.minecraftArguments = data[:'mc.arguments']
+    res.tweakers = data[:'mc.tweakers']
+    res.serverLib = Download.from_json 'java.libraries', data[:'java.serverLib'] if data[:'java.serverLib']
+  end
+
   def read_version(data)
     json = Hashie::Mash.new JSON.parse(data)
 
@@ -43,22 +61,9 @@ module Reader
       Referenced.new(req[:uid], req[:version])
     end if json.requires
 
-    json.data do |data|
-      file.traits = data[:'general.traits'] if data[:'general.traits']
-      file.folders = data[:'general.folders'] if data[:'general.folders']
-      file.downloads = []
-      file.downloads << read_download(data, 'general.downloads')
-      file.downloads << read_download(data, 'java.libraries')
-      file.downloads << read_download(data, 'java.natives')
-      file.downloads.flatten!
-
-      file.mainClass = data[:'java.mainClass']
-      file.appletClass = data[:'mc.appletClass']
-      file.assets = data[:'mc.assets']
-      file.minecraftArguments = data[:'mc.arguments']
-      file.tweakers = data[:'mc.tweakers']
-      file.serverLib = Download.from_json 'java.libraries', data[:'java.serverLib'] if data[:'java.serverLib']
-    end if json.data
+    read_resource json[:client], file.client
+    read_resource json[:server], file.server
+    read_resource json[:common], file.common
 
     return file
   end
@@ -77,13 +82,33 @@ module Writer
         versions: []
     }
     index.versions.each do |ver|
-      obj = { id: ver.version }
+      obj = { version: ver.version }
       obj[:type] = ver.type
       obj[:time] = ver.time
       json[:versions] << obj
     end
 
     return JSON.pretty_generate json
+  end
+
+  def write_resource(resource)
+    data = {}
+    data[:'general.traits'] = resource.traits                      if resource.traits and not resource.traits.empty?
+    data[:'general.launcher'] = :minecraft
+    data[:'general.folders'] = resource.folders if resource.folders and not resource.folders.empty?
+    resource.downloads.each do |dl|
+      data[dl.type] = [] if not data[dl.type]
+      data[dl.type] << dl.to_json
+    end
+    data[:'java.mainClass'] = resource.mainClass                   if resource.mainClass and resource.mainClass != ''
+    data[:'java.serverLib'] = resource.serverLib.to_json     if resource.serverLib
+
+    data[:'mc.tweakers'] = resource.tweakers                  if resource.tweakers and not resource.tweakers.empty?
+    data[:'mc.appletClass'] = resource.appletClass               if resource.appletClass and resource.appletClass != ''
+    data[:'mc.assets'] = resource.assets                         if resource.assets and resource.assets != ''
+    data[:'mc.arguments'] = resource.minecraftArguments if resource.minecraftArguments and resource.minecraftArguments != ''
+
+    return data
   end
 
   def write_version(version)
@@ -101,22 +126,9 @@ module Writer
       obj
     end if version.requires and not version.requires.empty?
 
-    data = {}
-    data[:'general.traits'] = version.traits                      if version.traits and not version.traits.empty?
-    data[:'general.launcher'] = :minecraft
-    data[:'general.folders'] = version.folders if version.folders and not version.folders.empty?
-    version.downloads.each do |dl|
-      data[dl.type] = [] if not data[dl.type]
-      data[dl.type] << dl.to_json
-    end
-    data[:'java.mainClass'] = version.mainClass                   if version.mainClass and version.mainClass != ''
-    data[:'java.serverLib'] = version.serverLib.to_json     if version.serverLib
-
-    data[:'mc.tweakers'] = version.tweakers                  if version.tweakers and not version.tweakers.empty?
-    data[:'mc.appletClass'] = version.appletClass               if version.appletClass and version.appletClass != ''
-    data[:'mc.assets'] = version.assets                         if version.assets and version.assets != ''
-    data[:'mc.arguments'] = version.minecraftArguments if version.minecraftArguments and version.minecraftArguments != ''
-    json[:data] = data
+    json[:client] = write_resource version.client if version.is_complete
+    json[:server] = write_resource version.server if version.is_complete
+    json[:common] = write_resource version.common if version.is_complete
 
     return JSON.pretty_generate json
   end

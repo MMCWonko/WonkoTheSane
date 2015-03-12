@@ -36,6 +36,6 @@ class ForgeVersionList < BaseVersionList
     else
       # non-installer versions of forge
     end
-    return result
+    return result.flatten
   end
 end

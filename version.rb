@@ -124,27 +124,40 @@ class Version
   attr_accessor :type
   attr_accessor :is_complete
 
-  attr_accessor :traits
   attr_accessor :requires # list of Referenced
 
-  # resources
-  attr_accessor :mainClass
-  attr_accessor :appletClass
-  attr_accessor :assets
-  attr_accessor :minecraftArguments
-  attr_accessor :tweakers
-  attr_accessor :serverLib # VersionLibrary
-  attr_accessor :folders # Path => [Type]
-  attr_accessor :downloads # [Download]
+  class Resources
+    attr_accessor :traits
 
-  # for communication between sanitizers, parsers etc.
-  attr_accessor :extra
+    # resources
+    attr_accessor :mainClass
+    attr_accessor :appletClass
+    attr_accessor :assets
+    attr_accessor :minecraftArguments
+    attr_accessor :tweakers
+    attr_accessor :serverLib # VersionLibrary
+    attr_accessor :folders # Path => [Type]
+    attr_accessor :downloads # [Download]
+
+    # for communication between sanitizers, parsers etc.
+    attr_accessor :extra
+
+    def initialize
+      @extra = {}
+      @folders = {}
+      @downloads = []
+    end
+  end
+
+  attr_reader :client
+  attr_reader :server
+  attr_reader :common
 
   def initialize
-    @extra = {}
     @requires = []
-    @folders = {}
-    @downloads = []
+    @client = Resources.new
+    @server = Resources.new
+    @common = Resources.new
   end
 
   def time=(time)

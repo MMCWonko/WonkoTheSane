@@ -46,7 +46,7 @@ class CurseVersionList < BaseVersionList
     file.type =  id[1][:type]
     file.time = id[1][:timestamp]
     file.requires << Referenced.new('net.minecraft', id[1][:mcVersion])
-    file.downloads << dl
+    file.common.downloads << dl
     return BaseSanitizer.sanitize file
   end
 end

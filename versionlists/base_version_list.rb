@@ -32,8 +32,10 @@ class BaseVersionList
           next if files.nil? or (files.is_a? Array and files.empty?)
 
           files.each do |file|
+            file.is_complete = true
             $registry.store file
           end if files and files.is_a? Array
+          files.is_complete = true if files and files.is_a? Version
           $registry.store files if files and files.is_a? Version
 
           @processed << id
@@ -43,6 +45,7 @@ class BaseVersionList
 
       FileUtils.touch cache_file
     rescue Exception => e
+      binding.pry
       @lastError = e.message
     end
   end

@@ -50,17 +50,17 @@ class LiteLoaderVersionList < BaseVersionList
     file.type =  'release' # id[1][:type]
     file.time = id[1][:timestamp]
     file.requires << Referenced.new('net.minecraft', id[1][:minecraft])
-    file.tweakers = [ id[1][:tweakClass] ]
-    file.mainClass = 'net.minecraft.launchwrapper.Launch'
-    file.downloads = id[1][:libraries].map do |lib|
+    file.client.tweakers = [ id[1][:tweakClass] ]
+    file.client.mainClass = 'net.minecraft.launchwrapper.Launch'
+    file.client.downloads = id[1][:libraries].map do |lib|
       libs = MojangInput.sanetize_mojang_library lib
       if lib[:name] == 'org.ow2.asm:asm-all:5.0.3'
         libs[0].mavenBaseUrl = 'http://repo.maven.apache.org/maven2/'
       end
       libs
     end.flatten 1
-    file.folders['minecraft/mods'] = ['mc.liteloadermods']
-    file.downloads.unshift liteloaderLib
+    file.client.folders['minecraft/mods'] = ['mc.liteloadermods']
+    file.client.downloads.unshift liteloaderLib
     return BaseSanitizer.sanitize file
   end
 end
