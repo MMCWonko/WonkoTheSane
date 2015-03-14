@@ -1,6 +1,7 @@
 class JenkinsInput < BaseInput
-  def initialize(artifact)
+  def initialize(artifact, fileRegex)
     @artifact = artifact
+    @fileRegex = fileRegex
   end
 
   def parse(data)
@@ -15,8 +16,12 @@ class JenkinsInput < BaseInput
     file.time = data[:timestamp]
 
     artifact = data[:artifacts].find do |art|
-      path = art[:displayPath]
-      not path.include? '-api.' and not path.include? '-deobf.' and not path.include? '-dev.' and not path.include? '-javadoc.' and not path.include? '-library.' and not path.include? '-sources.' and not path.include? '-src.' and not path.include? '-util.'
+      path = art[:fileName]
+      if @fileRegex
+        path.match @fileRegex
+      else
+        not path.include? '-api.' and not path.include? '-deobf.' and not path.include? '-dev.' and not path.include? '-javadoc.' and not path.include? '-library.' and not path.include? '-sources.' and not path.include? '-src.' and not path.include? '-util.'
+      end
     end
 
     if not artifact

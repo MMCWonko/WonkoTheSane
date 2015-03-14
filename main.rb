@@ -18,7 +18,7 @@ sources[:forgefiles].each do |uid, urlId|
   lists << ForgeFilesModsList.new(uid.to_s, urlId)
 end if sources[:forgefiles]
 sources[:jenkins].each do |obj|
-  lists << JenkinsVersionList.new(obj[:uid], obj[:url], obj[:artifact])
+  lists << JenkinsVersionList.new(obj[:uid], obj[:url], obj[:artifact], obj[:fileRegex])
 end if sources[:jenkins]
 sources[:curse].each do |obj|
   lists << CurseVersionList.new(obj[:uid], obj[:id], obj[:fileregex])
@@ -70,6 +70,11 @@ OptionParser.new do |opts|
     lists.each do |list|
       puts "Invalidating #{list.artifact.cyan}"
       list.invalidate
+    end
+  end
+  opts.on '--list-all', 'Shows which list IDs are available' do
+    lists.each do |list|
+      puts list.artifact
     end
   end
   opts.on '--update-nem', 'Updates sources.json with data from NEM' do

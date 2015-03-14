@@ -1,11 +1,11 @@
 require 'pry'
 
 class JenkinsVersionList < BaseVersionList
-  def initialize(artifact, baseUrl, job)
+  def initialize(artifact, baseUrl, job, fileRegex)
     super(artifact)
     @baseUrl = baseUrl
     @job = job
-    @input = JenkinsInput.new(artifact)
+    @input = JenkinsInput.new(artifact, fileRegex)
 
     if @baseUrl[@baseUrl.length - 1] == '/'
       @baseUrl[@baseUrl.length - 1] = ''

@@ -53,7 +53,8 @@
     {
       "uid": "modularpowersuits",
       "url": "http://build.technicpack.net",
-      "artifact": "ModularPowersuits"
+      "artifact": "ModularPowersuits",
+      "fileRegex": "ModularPowersuits-[\\.\\d\\-]*\\.jar"
     },
     {
       "uid": "numina",
