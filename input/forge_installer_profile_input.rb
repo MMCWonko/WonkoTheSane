@@ -96,8 +96,7 @@ class ForgeRemoveMinecraftSanitizer < BaseSanitizer
 end
 
 class ForgePackXZUrlsSanitizer < BaseSanitizer
-  @@packXZLibs = ['org.scala-lang', 'com.typesafe', 'com.typesafe.akka']
-
+  @@packXZLibs = [ 'org.scala-lang', 'com.typesafe', 'com.typesafe.akka' ]
   def self.sanitize(file)
     file.client.downloads.map! do |lib|
       if @@packXZLibs.include? MavenIdentifier.new(lib.name).group
