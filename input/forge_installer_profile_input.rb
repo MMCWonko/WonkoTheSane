@@ -30,10 +30,9 @@ class ForgeInstallerProfileInput < BaseInput
     file.server.downloads = info[:libraries].map do |obj|
       MojangInput.sanetize_mojang_library obj
     end.flatten 1
-    file.server.serverLaunchTarget = "net.minecraftforge:forge:#{object[:install][:minecraft]}-#{version}:universal"
-    file.server.launchMethod = 'java.extract-jar'
+    file.server.launchMethod = 'java.mainClass'
 
-    return BaseSanitizer.sanitize file, MojangExtractTweakersSanitizer, MojangSplitLWJGLSanitizer, ForgeRemoveMinecraftSanitizer, ForgeFixJarSanitizer, ForgePackXZUrlsSanitizer
+    return BaseSanitizer.sanitize file, MojangExtractTweakersSanitizer, MojangSplitLWJGLSanitizer, ForgeRemoveMinecraftSanitizer, ForgeFixJarSanitizer, ForgePackXZUrlsSanitizer, ForgeServerMainClassSanitizer
   end
 end
 
@@ -97,7 +96,8 @@ class ForgeRemoveMinecraftSanitizer < BaseSanitizer
 end
 
 class ForgePackXZUrlsSanitizer < BaseSanitizer
-  @@packXZLibs = [ 'org.scala-lang', 'com.typesafe', 'com.typesafe.akka' ]
+  @@packXZLibs = ['org.scala-lang', 'com.typesafe', 'com.typesafe.akka']
+
   def self.sanitize(file)
     file.client.downloads.map! do |lib|
       if @@packXZLibs.include? MavenIdentifier.new(lib.name).group
@@ -105,6 +105,30 @@ class ForgePackXZUrlsSanitizer < BaseSanitizer
         lib.mavenBaseUrl = 'http://repo.spongepowered.org/maven/'
       end
       lib
+    end
+    file
+  end
+end
+
+class ForgeServerMainClassSanitizer < BaseSanitizer
+  def self.sanitize(file)
+    file.server.downloads.map! do |download|
+      if download.name == "net.minecraftforge:forge:#{object[:install][:minecraft]}-#{version}:universal"
+        url = download.internalUrl ? download.internalUrl : download.url
+        libFile = HTTPCatcher.file url
+        Zip::File.open(libFile) do |zip_file|
+          # Handle entries one by one
+          text = zip_file.read 'META-INF/MANIFEST.MF'
+          lines = text.lines('\n')
+          lines.each do |l|
+            if (m = (l =~ /Main-Class: (.*)/))
+              file.server.mainClass = m[1]
+              break
+            end
+          end
+        end
+      end
+      download
     end
     file
   end

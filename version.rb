@@ -131,7 +131,7 @@ class Version
     attr_accessor :assets
     attr_accessor :minecraftArguments
     attr_accessor :tweakers
-    attr_accessor :serverLaunchTarget
+    attr_accessor :jarModTarget
     attr_accessor :folders # Path => [Type]
     attr_accessor :downloads # [Download]
 

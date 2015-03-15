@@ -112,6 +112,7 @@ class MojangInput
     file.client.mainClass = object[:mainClass]
     file.client.assets = object[:assets]
     file.client.minecraftArguments = object[:minecraftArguments]
+    file.server.jarModTarget = "net.minecraft:minecraft:#{file.version}"
     file.client.downloads = object[:libraries].map do |obj|
       MojangInput.sanetize_mojang_library obj
     end.flatten 1
@@ -123,7 +124,7 @@ class MojangInput
     serverLib.name = "net.minecraft:minecraft_server:#{file.version}"
     serverLib.url = 'http://s3.amazonaws.com/Minecraft.Download/versions/' + file.version + '/minecraft_server.' + file.version + '.jar'
     file.server.downloads << serverLib
-    file.server.serverLaunchTarget = "net.minecraft:minecraft_server:#{file.version}"
+    file.server.jarModTarget = "net.minecraft:minecraft_server:#{file.version}"
     file.server.launchMethod = 'java.jar'
 
     file.client.folders['minecraft/screenshots'] = ['general.screenshots']

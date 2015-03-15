@@ -45,7 +45,7 @@ module Reader
     res.assets = data[:'mc.assets']
     res.minecraftArguments = data[:'mc.arguments']
     res.tweakers = data[:'mc.tweakers']
-    res.serverLaunchTarget = data[:'mc.serverLaunchTarget'] if data[:'mc.serverLaunchTarget']
+    res.jarModTarget = data[:'mc.jarModTarget'] if data[:'mc.jarModTarget']
   end
 
   def read_version(data)
@@ -110,7 +110,7 @@ module Writer
       data[dl.type] << dl.to_json
     end
     data[:'java.mainClass'] = resource.mainClass                   if resource.mainClass and resource.mainClass != ''
-    data[:'mc.serverLaunchTarget'] = resource.serverLaunchTarget     if resource.serverLaunchTarget
+    data[:'mc.jarModTarget'] = resource.jarModTarget     if resource.jarModTarget
 
     data[:'mc.tweakers'] = resource.tweakers                  if resource.tweakers and not resource.tweakers.empty?
     data[:'mc.appletClass'] = resource.appletClass               if resource.appletClass and resource.appletClass != ''
