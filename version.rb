@@ -123,6 +123,7 @@ class Version
 
   class Resources
     attr_accessor :traits
+    attr_accessor :launchMethod
 
     # resources
     attr_accessor :mainClass
@@ -130,7 +131,7 @@ class Version
     attr_accessor :assets
     attr_accessor :minecraftArguments
     attr_accessor :tweakers
-    attr_accessor :serverLib # VersionLibrary
+    attr_accessor :serverLaunchTarget
     attr_accessor :folders # Path => [Type]
     attr_accessor :downloads # [Download]
 

@@ -116,12 +116,15 @@ class MojangInput
       MojangInput.sanetize_mojang_library obj
     end.flatten 1
     mainLib = VersionLibrary.new
-    mainLib.name = 'net.minecraft:minecraft:' + file.version
+    mainLib.name = "net.minecraft:minecraft:#{file.version}"
     mainLib.url = 'http://s3.amazonaws.com/Minecraft.Download/versions/' + file.version + '/' + file.version + '.jar'
     file.client.downloads << mainLib
-    file.server.serverLib = VersionLibrary.new
-    file.server.serverLib.name = 'net.minecraft:minecraft_server:' + file.version
-    file.server.serverLib.url = 'http://s3.amazonaws.com/Minecraft.Download/versions/' + file.version + '/minecraft_server.' + file.version + '.jar'
+    serverLib = VersionLibrary.new
+    serverLib.name = "net.minecraft:minecraft_server:#{file.version}"
+    serverLib.url = 'http://s3.amazonaws.com/Minecraft.Download/versions/' + file.version + '/minecraft_server.' + file.version + '.jar'
+    file.server.downloads << serverLib
+    file.server.serverLaunchTarget = "net.minecraft:minecraft_server:#{file.version}"
+    file.server.launchMethod = 'java.jar'
 
     file.client.folders['minecraft/screenshots'] = ['general.screenshots']
     file.client.folders['minecraft/resourcepackks'] = ['mc.resourcepacks'] if file.time >= 1372430921
