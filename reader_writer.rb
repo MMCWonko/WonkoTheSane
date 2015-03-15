@@ -45,7 +45,7 @@ module Reader
     res.assets = data[:'mc.assets']
     res.minecraftArguments = data[:'mc.arguments']
     res.tweakers = data[:'mc.tweakers']
-    res.serverLaunchTarget = data[:'mc.serverLaunchMethod'] if data[:'mc.serverLaunchMethod']
+    res.serverLaunchTarget = data[:'mc.serverLaunchTarget'] if data[:'mc.serverLaunchTarget']
   end
 
   def read_version(data)
@@ -83,7 +83,7 @@ module Writer
         versions: []
     }
     index.versions.each do |ver|
-      obj = {version: ver.version}
+      obj = { version: ver.version }
       obj[:type] = ver.type
       obj[:time] = ver.time
       json[:versions] << obj
@@ -97,24 +97,24 @@ module Writer
 
     if side == :client or side == :server
       data[:rules] = [
-          ImplicitRule.new(:disallow).to_json,
-          SidedRule.new(:allow, side).to_json
+        ImplicitRule.new(:disallow).to_json,
+        SidedRule.new(:allow, side).to_json
       ]
     end
 
-    data[:'general.traits'] = resource.traits if resource.traits and not resource.traits.empty?
+    data[:'general.traits'] = resource.traits                      if resource.traits and not resource.traits.empty?
     data[:'general.launcher'] = resource.launchMethod || :minecraft
     data[:'general.folders'] = resource.folders if resource.folders and not resource.folders.empty?
     resource.downloads.each do |dl|
       data[dl.type] = [] if not data[dl.type]
       data[dl.type] << dl.to_json
     end
-    data[:'java.mainClass'] = resource.mainClass if resource.mainClass and resource.mainClass != ''
-    data[:'java.serverLaunchTarget'] = resource.serverLaunchTarget if resource.serverLaunchTarget
+    data[:'java.mainClass'] = resource.mainClass                   if resource.mainClass and resource.mainClass != ''
+    data[:'mc.serverLaunchTarget'] = resource.serverLaunchTarget     if resource.serverLaunchTarget
 
-    data[:'mc.tweakers'] = resource.tweakers if resource.tweakers and not resource.tweakers.empty?
-    data[:'mc.appletClass'] = resource.appletClass if resource.appletClass and resource.appletClass != ''
-    data[:'mc.assets'] = resource.assets if resource.assets and resource.assets != ''
+    data[:'mc.tweakers'] = resource.tweakers                  if resource.tweakers and not resource.tweakers.empty?
+    data[:'mc.appletClass'] = resource.appletClass               if resource.appletClass and resource.appletClass != ''
+    data[:'mc.assets'] = resource.assets                         if resource.assets and resource.assets != ''
     data[:'mc.arguments'] = resource.minecraftArguments if resource.minecraftArguments and resource.minecraftArguments != ''
 
     return data
@@ -128,9 +128,9 @@ module Writer
         version: version.version,
         time: version.time
     }
-    json[:type] = version.type if version.type and version.type != ''
+    json[:type] = version.type                             if version.type and version.type != ''
     json[:requires] = version.requires.map do |req|
-      obj = {uid: req.uid}
+      obj = { uid: req.uid }
       obj[:version] = req.version if req.version
       obj
     end if version.requires and not version.requires.empty?
