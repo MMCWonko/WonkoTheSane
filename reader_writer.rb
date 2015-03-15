@@ -91,8 +91,16 @@ module Writer
     return JSON.pretty_generate json
   end
 
-  def write_resource(resource)
+  def write_resource(side, resource)
     data = {}
+
+    if side == :client or side == :server
+      data[:rules] = [
+        ImplicitRule.new(:disallow).to_json,
+        SidedRule.new(:allow, side).to_json
+      ]
+    end
+
     data[:'general.traits'] = resource.traits                      if resource.traits and not resource.traits.empty?
     data[:'general.launcher'] = :minecraft
     data[:'general.folders'] = resource.folders if resource.folders and not resource.folders.empty?
@@ -126,9 +134,9 @@ module Writer
       obj
     end if version.requires and not version.requires.empty?
 
-    json[:client] = write_resource version.client if version.is_complete
-    json[:server] = write_resource version.server if version.is_complete
-    json[:common] = write_resource version.common if version.is_complete
+    json[:client] = write_resource :client, version.client if version.is_complete
+    json[:server] = write_resource :server, version.server if version.is_complete
+    json[:common] = write_resource :common, version.common if version.is_complete
 
     return JSON.pretty_generate json
   end

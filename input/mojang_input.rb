@@ -1,51 +1,57 @@
 require_relative '../base_input'
 
+def allowedPlatformsForRules(rules)
+  possible = ['win32', 'win64', 'lin32', 'lin64', 'osx64']
+
+  allowed = possible
+  if rules
+    rules.each do |rule|
+      if rule.action == :allow
+        if rule.is_a? OsRule
+          if rule.os == 'windows'
+            allowed << 'win32'
+            allowed << 'win64'
+          elsif rule.os == 'linux'
+            allowed << 'lin32'
+            allowed << 'lin64'
+          elsif rule.os == 'osx'
+            allowed << 'osx64'
+          end
+        elsif rule.is_a? ImplicitRule
+          allowed = possible
+        end
+      elsif rule.action == :disallow
+        if rule.is_a? OsRule
+          if rule.os == 'windows'
+            allowed.delete 'win32'
+            allowed.delete 'win64'
+          elsif rule.os == 'linux'
+            allowed.delete 'lin32'
+            allowed.delete 'lin64'
+          elsif rule.os == 'osx'
+            allowed.delete 'osx64'
+          end
+        elsif rule.is_a? ImplicitRule
+          allowed = []
+        end
+      end
+    end
+  end
+
+  return allowed
+end
+
 class MojangInput
   # reads a general mojang-style library
-  # TODO os versions
   def self.sanetize_mojang_library(object)
     lib = if object.key? :natives then VersionLibraryNative.new else VersionLibrary.new end
     lib.name = object[:name]
     lib.mavenBaseUrl = object.key?(:url) ? object[:url] : 'https://libraries.minecraft.net/'
 
-    allowed = VersionLibrary.possiblePlatforms
-    if object.key? :rules
-      object[:rules].each do |rule|
-        if rule[:action] == 'allow'
-          if rule.key? :os and rule[:os].key? :name
-            if rule[:os][:name] == 'windows'
-              allowed << 'win32'
-              allowed << 'win64'
-            elsif rule[:os][:name] == 'linux'
-              allowed << 'lin32'
-              allowed << 'lin64'
-            elsif rule[:os][:name] == 'osx'
-              allowed << 'osx64'
-            end
-          else
-            allowed = VersionLibrary.possiblePlatforms
-          end
-        elsif rule[:action] == 'disallow'
-          if rule.key? :os and rule[:os].key? :name
-            if rule[:os][:name] == 'windows'
-              allowed.delete 'win32'
-              allowed.delete 'win64'
-            elsif rule[:os][:name] == 'linux'
-              allowed.delete 'lin32'
-              allowed.delete 'lin64'
-            elsif rule[:os][:name] == 'osx'
-              allowed.delete 'osx64'
-            end
-          else
-            allowed = []
-          end
-        end
-      end
-    end
+    lib.rules = object[:rules].map do |obj| Rule.from_json obj end if object[:rules]
 
     libs = []
     if not lib.is_a? VersionLibraryNative
-      lib.platforms = allowed.uniq
       libs << lib
     else
       nativeIds = {}
@@ -64,13 +70,19 @@ class MojangInput
         end
       end
 
-      allowed.uniq.each do |platform|
+      allowedPlatformsForRules(lib.rules).uniq.each do |platform|
         if not nativeIds.key? platform
           next
         end
 
         native = lib.clone
-        native.platforms = [platform]
+        native.rules = [
+          ImplicitRule.new(:disallow),
+          OsRule.new(:allow,
+          {'win32': :windows, 'win64': :windows, 'lin32': :linux, 'lin64': :linux, 'osx64': :osx}[platform.to_sym],
+          nil,
+          '32')
+        ]
         native.url = native.url.sub '.jar', ('-' + nativeIds[platform] + '.jar')
         libs << native
       end

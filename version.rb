@@ -3,23 +3,27 @@ class Download
   attr_accessor :url
   attr_accessor :size
   attr_accessor :sha256
+  attr_accessor :rules # [Rule]
 
   def type
     'general.downloads'
   end
 
   def to_json
-    {
+    obj = {
       url: url,
       size: @size,
       sha256: @sha256
     }
+    obj[:rules] = @rules.map do |rule| rule.to_json end if @rules and not @rules.empty?
+    return obj
   end
 
   def from_json(json)
     @url = json[:url]
     @size = json[:size]
     @sha256 = json[:sha256]
+    @rules = json[:rules].map do |obj| Rule.from_json obj end if json[:rules]
   end
 
   def self.from_json(type, json)
@@ -56,7 +60,6 @@ end
 class VersionLibrary < Download
   attr_accessor :name
   attr_accessor :mavenBaseUrl
-  attr_accessor :platforms # list of platforms ({lin,win,osx}{32,64}), or empty for all
 
   def type
     'java.libraries'
@@ -69,8 +72,6 @@ class VersionLibrary < Download
     obj = super
     obj[:name] = @name
     obj[:mavenBaseUrl] = @mavenBaseUrl if @mavenBaseUrl
-    obj[:platforms] = @platforms if @platforms and @platforms != VersionLibrary.possiblePlatforms
-    obj[:rules] = @oldRules if @oldRules
 
     if not @url
       obj.delete :url
@@ -83,17 +84,11 @@ class VersionLibrary < Download
     super
     @name = json[:name]
     @mavenBaseUrl = json[:mavenBaseUrl]
-    @oldRules = json[:rules]
 
     # if the absolute url is equal to the expected maven url we clear the absolute url
     if @url == url
       @url = nil
     end
-  end
-
-  @@possiblePlatforms = [ 'win32', 'win64', 'lin32', 'lin64', 'osx64' ]
-  def self.possiblePlatforms
-    @@possiblePlatforms.uniq
   end
 end
 
