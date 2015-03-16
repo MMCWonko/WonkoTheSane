@@ -9,6 +9,18 @@ class Rule
     { action: @action }
   end
 
+  def self.allowed_on_side(rules, side)
+    allowed = :allow
+    rules.each do |rule|
+      if rule.is_a? ImplicitRule
+        allowed = rule.action
+      elsif rule.is_a? SidedRule
+        allowed = rule.action if rule.side = side
+      end
+    end
+    return allowed
+  end
+
   def self.from_json(obj)
     if obj.key? :os
       return OsRule.new obj[:action].to_sym, obj[:os][:name], obj[:os][:version], obj[:os][:arch]

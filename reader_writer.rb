@@ -61,9 +61,16 @@ module Reader
       Referenced.new(req[:uid], req[:version])
     end if json.requires
 
-    read_resource json[:client], file.client
-    read_resource json[:server], file.server
-    read_resource json[:common], file.common
+    json[:data].each do |data|
+      rules = data[:rules] ? data[:rules] : [ImplicitRule.new(:allow)]
+      if Rule.allowed_on_side rules, :client
+        read_resource data, file.client
+      elsif Rule.allowed_on_side rules, :server
+        read_resource data, file.server
+      else
+        read_resource data, file.common
+      end
+    end if json[:data]
 
     return file
   end
@@ -134,9 +141,10 @@ module Writer
       obj
     end if version.requires and not version.requires.empty?
 
-    json[:client] = write_resource :client, version.client if version.is_complete
-    json[:server] = write_resource :server, version.server if version.is_complete
-    json[:common] = write_resource :common, version.common if version.is_complete
+    json[:data] = []
+    json[:data] << write_resource(:client, version.client) if version.is_complete
+    json[:data] << write_resource(:server, version.server) if version.is_complete
+    json[:data] << write_resource(:common, version.common) if version.is_complete
 
     return JSON.pretty_generate json
   end
