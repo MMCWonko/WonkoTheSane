@@ -24,8 +24,16 @@ class ForgeInstallerProfileInput < BaseInput
     file.client.folders['minecraft/mods'] = ['mc.forgemods']
     file.client.folders['minecraft/mods'] << 'mc.forgecoremods' if object[:install][:minecraft].match /[^1]*1\.[0-6]/
     file.client.folders['minecraft/coremods'] = ['mc.forgecoremods'] if object[:install][:minecraft].match /[^1]*1\.[0-6]/
+    file.server.folders['minecraft/mods'] = ['mc.forgemods']
+    file.server.folders['minecraft/mods'] << 'mc.forgecoremods' if object[:install][:minecraft].match /[^1]*1\.[0-6]/
+    file.server.folders['minecraft/coremods'] = ['mc.forgecoremods'] if object[:install][:minecraft].match /[^1]*1\.[0-6]/
+    file.server.downloads = info[:libraries].map do |obj|
+      MojangInput.sanetize_mojang_library obj
+    end.flatten 1
+    file.server.launchMethod = 'java.mainClass'
+    file.server.extra[:forgeLibraryName] = "net.minecraftforge:forge:#{object[:install][:minecraft]}-#{version}:universal"
 
-    return BaseSanitizer.sanitize file, MojangExtractTweakersSanitizer, MojangSplitLWJGLSanitizer, ForgeRemoveMinecraftSanitizer, ForgeFixJarSanitizer, ForgePackXZUrlsSanitizer
+    return BaseSanitizer.sanitize file, MojangExtractTweakersSanitizer, MojangSplitLWJGLSanitizer, ForgeRemoveMinecraftSanitizer, ForgeFixJarSanitizer, ForgePackXZUrlsSanitizer, ForgeServerMainClassSanitizer
   end
 end
 
@@ -97,6 +105,30 @@ class ForgePackXZUrlsSanitizer < BaseSanitizer
         lib.mavenBaseUrl = 'http://repo.spongepowered.org/maven/'
       end
       lib
+    end
+    file
+  end
+end
+
+class ForgeServerMainClassSanitizer < BaseSanitizer
+  def self.sanitize(file)
+    file.server.downloads.map! do |download|
+      if download.name == file.server.extra[:forgeLibraryName]
+        url = download.internalUrl ? download.internalUrl : download.url
+        libFile = HTTPCatcher.file url
+        Zip::File.open(libFile) do |zip_file|
+          # Handle entries one by one
+          text = zip_file.read 'META-INF/MANIFEST.MF'
+          lines = text.lines('\n')
+          lines.each do |l|
+            if (m = (l =~ /Main-Class: (.*)/))
+              file.server.mainClass = m[1]
+              break
+            end
+          end
+        end
+      end
+      download
     end
     file
   end

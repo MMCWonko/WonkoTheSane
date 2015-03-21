@@ -33,6 +33,7 @@ module Reader
     return if not data or not data.is_a? Object
     res.traits = data[:'general.traits'] if data[:'general.traits']
     res.folders = data[:'general.folders'] if data[:'general.folders']
+    res.launchMethod = data[:'general.launcher'] if data[:'general.launcher']
     res.downloads = []
     res.downloads << read_download(data, 'general.downloads')
     res.downloads << read_download(data, 'java.libraries')
@@ -44,7 +45,7 @@ module Reader
     res.assets = data[:'mc.assets']
     res.minecraftArguments = data[:'mc.arguments']
     res.tweakers = data[:'mc.tweakers']
-    res.serverLib = Download.from_json 'java.libraries', data[:'java.serverLib'] if data[:'java.serverLib']
+    res.jarModTarget = data[:'mc.jarModTarget'] if data[:'mc.jarModTarget']
   end
 
   def read_version(data)
@@ -109,14 +110,14 @@ module Writer
     end
 
     data[:'general.traits'] = resource.traits                      if resource.traits and not resource.traits.empty?
-    data[:'general.launcher'] = :minecraft
+    data[:'general.launcher'] = resource.launchMethod || :minecraft
     data[:'general.folders'] = resource.folders if resource.folders and not resource.folders.empty?
     resource.downloads.each do |dl|
       data[dl.type] = [] if not data[dl.type]
       data[dl.type] << dl.to_json
     end
     data[:'java.mainClass'] = resource.mainClass                   if resource.mainClass and resource.mainClass != ''
-    data[:'java.serverLib'] = resource.serverLib.to_json     if resource.serverLib
+    data[:'mc.jarModTarget'] = resource.jarModTarget     if resource.jarModTarget
 
     data[:'mc.tweakers'] = resource.tweakers                  if resource.tweakers and not resource.tweakers.empty?
     data[:'mc.appletClass'] = resource.appletClass               if resource.appletClass and resource.appletClass != ''
