@@ -81,7 +81,7 @@ class MojangInput
           OsRule.new(:allow,
           {'win32': :windows, 'win64': :windows, 'lin32': :linux, 'lin64': :linux, 'osx64': :osx}[platform.to_sym],
           nil,
-          '32')
+          {'win32': '32', 'win64': '64', 'lin32': '32', 'lin64': '64', 'osx64': '64'}[platform.to_sym])
         ]
         native.url = native.url.sub '.jar', ('-' + nativeIds[platform] + '.jar')
         libs << native
@@ -112,7 +112,7 @@ class MojangInput
     file.client.mainClass = object[:mainClass]
     file.client.assets = object[:assets]
     file.client.minecraftArguments = object[:minecraftArguments]
-    file.server.jarModTarget = "net.minecraft:minecraft:#{file.version}"
+    file.client.jarModTarget = "net.minecraft:minecraft:#{file.version}"
     file.client.downloads = object[:libraries].map do |obj|
       MojangInput.sanetize_mojang_library obj
     end.flatten 1
@@ -120,6 +120,8 @@ class MojangInput
     mainLib.name = "net.minecraft:minecraft:#{file.version}"
     mainLib.url = 'http://s3.amazonaws.com/Minecraft.Download/versions/' + file.version + '/' + file.version + '.jar'
     file.client.downloads << mainLib
+    file.client.launchMethod = 'minecraft'
+
     serverLib = VersionLibrary.new
     serverLib.name = "net.minecraft:minecraft_server:#{file.version}"
     serverLib.url = 'http://s3.amazonaws.com/Minecraft.Download/versions/' + file.version + '/minecraft_server.' + file.version + '.jar'
@@ -149,29 +151,42 @@ end
 # extract lwjgl specific libraries and natives
 class MojangSplitLWJGLSanitizer < BaseSanitizer
   @@lwjglList = ['org.lwjgl', 'net.java.jinput', 'net.java.jutils']
-  @@lwjglMaster = 'org.lwjgl.lwjgl:lwjgl:'
+  @@lwjglExtras = ['net.java.jinput', 'net.java.jutils']
 
   def self.sanitize(file)
-    lwjgl = Version.new
-    lwjgl.uid = 'org.lwjgl'
-    lwjgl.type = 'release'
+    file.requires = [] if file.requires.nil?
+    file.requires << Referenced.new('org.lwjgl')
+
+    extras = [] # [Download]
+    versioned = {} # String => [Download]
     file.client.downloads.select! do |lib|
-      if lib.name.include? @@lwjglMaster
-        lwjgl.version = MavenIdentifier.new(lib.name).version
-        lwjgl.time = nil
-      end
       nil == @@lwjglList.find do |lwjglCandidate|
         if lib.name.include? lwjglCandidate
-          lwjgl.client.downloads << lib
+          if @@lwjglExtras.include? lib.maven.group
+            extras << lib
+          else
+            versioned[lib.maven.version] ||= []
+            versioned[lib.maven.version] << lib
+          end
           true
         else
           false
         end
       end
     end
-    file.requires = [] if file.requires.nil?
-    file.requires << Referenced.new('org.lwjgl')
-    return [file, lwjgl]
+
+    files = [file]
+    versioned.each do |version, downloads|
+      lwjgl = Version.new
+      lwjgl.uid = 'org.lwjgl'
+      lwjgl.type = 'release'
+      lwjgl.version = version
+      lwjgl.time = nil # re-fetches the time for the version from storage
+      lwjgl.client.downloads = extras + downloads
+      files << lwjgl
+    end
+
+    return files
   end
 end
 

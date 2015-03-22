@@ -68,6 +68,10 @@ class VersionLibrary < Download
     @url ? @url : (@mavenBaseUrl + MavenIdentifier.new(@name).to_path)
   end
 
+  def maven
+    MavenIdentifier.new @name
+  end
+
   def to_json
     obj = super
     obj[:name] = @name

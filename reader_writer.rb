@@ -99,32 +99,33 @@ module Writer
     return JSON.pretty_generate json
   end
 
-  def write_resource(side, resource)
+  def write_resource(side, resource, out)
     data = {}
 
-    if side == :client or side == :server
-      data[:rules] = [
-        ImplicitRule.new(:disallow).to_json,
-        SidedRule.new(:allow, side).to_json
-      ]
-    end
-
     data[:'general.traits'] = resource.traits                      if resource.traits and not resource.traits.empty?
-    data[:'general.launcher'] = resource.launchMethod || :minecraft
-    data[:'general.folders'] = resource.folders if resource.folders and not resource.folders.empty?
+    data[:'general.launcher'] = resource.launchMethod              if resource.launchMethod
+    data[:'general.folders'] = resource.folders                    if resource.folders and not resource.folders.empty?
     resource.downloads.each do |dl|
       data[dl.type] = [] if not data[dl.type]
       data[dl.type] << dl.to_json
     end
     data[:'java.mainClass'] = resource.mainClass                   if resource.mainClass and resource.mainClass != ''
-    data[:'mc.jarModTarget'] = resource.jarModTarget     if resource.jarModTarget
+    data[:'mc.jarModTarget'] = resource.jarModTarget               if resource.jarModTarget
 
-    data[:'mc.tweakers'] = resource.tweakers                  if resource.tweakers and not resource.tweakers.empty?
-    data[:'mc.appletClass'] = resource.appletClass               if resource.appletClass and resource.appletClass != ''
-    data[:'mc.assets'] = resource.assets                         if resource.assets and resource.assets != ''
-    data[:'mc.arguments'] = resource.minecraftArguments if resource.minecraftArguments and resource.minecraftArguments != ''
+    data[:'mc.tweakers'] = resource.tweakers                       if resource.tweakers and not resource.tweakers.empty?
+    data[:'mc.appletClass'] = resource.appletClass                 if resource.appletClass and resource.appletClass != ''
+    data[:'mc.assets'] = resource.assets                           if resource.assets and resource.assets != ''
+    data[:'mc.arguments'] = resource.minecraftArguments            if resource.minecraftArguments and resource.minecraftArguments != ''
 
-    return data
+    if not data.empty?
+      if side == :client or side == :server
+        data[:rules] = [
+          ImplicitRule.new(:disallow).to_json,
+          SidedRule.new(:allow, side).to_json
+        ]
+      end
+      out << data
+    end
   end
 
   def write_version(version)
@@ -143,9 +144,9 @@ module Writer
     end if version.requires and not version.requires.empty?
 
     json[:data] = []
-    json[:data] << write_resource(:client, version.client) if version.is_complete
-    json[:data] << write_resource(:server, version.server) if version.is_complete
-    json[:data] << write_resource(:common, version.common) if version.is_complete
+    write_resource(:client, version.client, json[:data]) if version.is_complete
+    write_resource(:server, version.server, json[:data]) if version.is_complete
+    write_resource(:common, version.common, json[:data]) if version.is_complete
 
     return JSON.pretty_generate json
   end
