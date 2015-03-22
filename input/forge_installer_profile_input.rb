@@ -18,20 +18,19 @@ class ForgeInstallerProfileInput < BaseInput
     file.client.minecraftArguments = info[:minecraftArguments]
     file.client.assets = info[:assets]
     file.requires << Referenced.new('net.minecraft', object[:install][:minecraft])
-    file.client.downloads = info[:libraries].map do |obj|
+    libraries = info[:libraries].map do |obj|
       MojangInput.sanetize_mojang_library obj
     end.flatten 1
+    file.client.downloads = libraries
     file.client.folders['minecraft/mods'] = ['mc.forgemods']
     file.client.folders['minecraft/mods'] << 'mc.forgecoremods' if object[:install][:minecraft].match /[^1]*1\.[0-6]/
     file.client.folders['minecraft/coremods'] = ['mc.forgecoremods'] if object[:install][:minecraft].match /[^1]*1\.[0-6]/
     file.server.folders['minecraft/mods'] = ['mc.forgemods']
     file.server.folders['minecraft/mods'] << 'mc.forgecoremods' if object[:install][:minecraft].match /[^1]*1\.[0-6]/
     file.server.folders['minecraft/coremods'] = ['mc.forgecoremods'] if object[:install][:minecraft].match /[^1]*1\.[0-6]/
-    file.server.downloads = info[:libraries].map do |obj|
-      MojangInput.sanetize_mojang_library obj
-    end.flatten 1
+    file.server.downloads = libraries
     file.server.launchMethod = 'java.mainClass'
-    file.server.extra[:forgeLibraryName] = "net.minecraftforge:forge:#{object[:install][:minecraft]}-#{version}:universal"
+    file.server.extra[:forgeLibraryName] = %W(net.minecraftforge:forge:#{object[:install][:minecraft]}-#{version}:universal net.minecraftforge:forge:#{object[:install][:minecraft]}-#{version})
 
     return BaseSanitizer.sanitize file, MojangExtractTweakersSanitizer, MojangSplitLWJGLSanitizer, ForgeRemoveMinecraftSanitizer, ForgeFixJarSanitizer, ForgePackXZUrlsSanitizer, ForgeServerMainClassSanitizer
   end
@@ -97,7 +96,8 @@ class ForgeRemoveMinecraftSanitizer < BaseSanitizer
 end
 
 class ForgePackXZUrlsSanitizer < BaseSanitizer
-  @@packXZLibs = [ 'org.scala-lang', 'com.typesafe', 'com.typesafe.akka' ]
+  @@packXZLibs = ['org.scala-lang', 'com.typesafe', 'com.typesafe.akka']
+
   def self.sanitize(file)
     file.client.downloads.map! do |lib|
       if @@packXZLibs.include? MavenIdentifier.new(lib.name).group
@@ -113,7 +113,7 @@ end
 class ForgeServerMainClassSanitizer < BaseSanitizer
   def self.sanitize(file)
     file.server.downloads.map! do |download|
-      if download.name == file.server.extra[:forgeLibraryName]
+      if file.server.extra[:forgeLibraryName].include? download.name
         url = download.internalUrl ? download.internalUrl : download.url
         libFile = HTTPCatcher.file url
         Zip::File.open(libFile) do |zip_file|
