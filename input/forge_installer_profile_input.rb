@@ -30,7 +30,7 @@ class ForgeInstallerProfileInput < BaseInput
     file.server.folders['minecraft/coremods'] = ['mc.forgecoremods'] if object[:install][:minecraft].match /[^1]*1\.[0-6]/
     file.server.downloads = libraries
     file.server.launchMethod = 'java.mainClass'
-    file.server.extra[:forgeLibraryName] = %W(net.minecraftforge:forge:#{object[:install][:minecraft]}-#{version}:universal net.minecraftforge:forge:#{object[:install][:minecraft]}-#{version})
+    file.server.extra[:forgeLibraryName] = %W(net.minecraftforge:forge:#{object[:install][:minecraft]}-#{version}:universal net.minecraftforge:forge:#{object[:install][:minecraft]}-#{version} net.minecraftforge:forge:#{version}:universal net.minecraftforge:forge:#{version} net.minecraftforge:minecraftforge:#{object[:install][:minecraft]}-#{version}:universal net.minecraftforge:minecraftforge:#{object[:install][:minecraft]}-#{version} net.minecraftforge:minecraftforge:#{version}:universal net.minecraftforge:minecraftforge:#{version})
 
     return BaseSanitizer.sanitize file, MojangExtractTweakersSanitizer, MojangSplitLWJGLSanitizer, ForgeRemoveMinecraftSanitizer, ForgeFixJarSanitizer, ForgePackXZUrlsSanitizer, ForgeServerMainClassSanitizer
   end
@@ -40,10 +40,22 @@ class ForgeFixJarSanitizer < BaseSanitizer
   def self.sanitize(file)
     file.client.downloads.map! do |lib|
       ident = MavenIdentifier.new(lib.name)
-      if 'net.minecraftforge' == ident.group && 'forge' == ident.artifact
-        lib = lib.clone
-        ident.classifier = 'universal'
-        lib.name = ident.to_name()
+      if 'net.minecraftforge' == ident.group
+        if 'minecraftforge' == ident.artifact
+          ident.artifact = 'forge'
+        end
+        if 'forge' == ident.artifact
+          mcversion = nil
+          file.requires.each do |req|
+            if req.uid == 'net.minecraft'
+              mcversion = req.version
+            end
+          end
+          lib = lib.clone
+          ident.classifier = 'universal'
+          ident.version = "#{mcversion}-#{ident.version}"
+          lib.name = ident.to_name()
+        end
       end
       lib
     end
@@ -112,7 +124,7 @@ end
 
 class ForgeServerMainClassSanitizer < BaseSanitizer
   def self.sanitize(file)
-    file.server.downloads.map! do |download|
+    file.server.downloads.each do |download|
       if file.server.extra[:forgeLibraryName].include? download.name
         url = download.internalUrl ? download.internalUrl : download.url
         libFile = HTTPCatcher.file url
@@ -121,14 +133,13 @@ class ForgeServerMainClassSanitizer < BaseSanitizer
           text = zip_file.read 'META-INF/MANIFEST.MF'
           lines = text.lines('\n')
           lines.each do |l|
-            if (m = (l =~ /Main-Class: (.*)/))
-              file.server.mainClass = m[1]
+            if l =~ /Main-Class: (.*)/
+              file.server.mainClass = $1.strip
               break
             end
           end
         end
       end
-      download
     end
     file
   end
