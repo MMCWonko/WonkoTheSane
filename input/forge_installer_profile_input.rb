@@ -53,7 +53,7 @@ class ForgeFixJarSanitizer < BaseSanitizer
           end
           lib = lib.clone
           ident.classifier = 'universal'
-          ident.version = "#{mcversion}-#{ident.version}"
+          ident.version = "#{mcversion}-#{ident.version}" unless ident.version.start_with? "#{mcversion}"
           lib.name = ident.to_name()
         end
       end
@@ -128,15 +128,12 @@ class ForgeServerMainClassSanitizer < BaseSanitizer
       if file.server.extra[:forgeLibraryName].include? download.name
         url = download.internalUrl ? download.internalUrl : download.url
         libFile = HTTPCatcher.file url
-        Zip::File.open(libFile) do |zip_file|
-          # Handle entries one by one
-          text = zip_file.read 'META-INF/MANIFEST.MF'
-          lines = text.lines('\n')
-          lines.each do |l|
-            if l =~ /Main-Class: (.*)/
-              file.server.mainClass = $1.strip
-              break
-            end
+        # Handle entries one by one
+        text = ExtractionCache.get(libFile, :zip, 'META-INF/MANIFEST.MF')
+        lines = text.lines
+        lines.each do |l|
+          if l =~ /Main-Class: (.*)/
+            file.server.mainClass = $1.strip
           end
         end
       end
