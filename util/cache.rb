@@ -1,6 +1,7 @@
 require 'fileutils'
 require 'rubygems'
 require 'zip'
+require 'set'
 
 # http://www.ericson.net/content/2011/04/caching-http-requests-with-ruby/
 # TODO etags and other caching stuff
@@ -26,23 +27,86 @@ class HTTPCatcher
     cached_path = @basedir + '/' + key
     cached_dir = File.dirname cached_path
     FileUtils.mkdir_p cached_dir unless Dir.exist? cached_dir
-    if File.exists?(cached_path)
-      puts "Getting file #{key} from cache"
-    else
-      puts "Getting file #{key} from URL #{url}"
-      resp = http_get url
+
+    if should_check(cached_path)
+      puts "DL: #{url}"
+      resp = http_get(url, cached_path)
+      if resp == nil
+        return
+      end
       File.open(cached_path, 'w') do |f|
         f.puts resp.body
       end
     end
   end
-  def http_get(url)
-    resp = Net::HTTP.get_response URI.parse(url)
-    if resp.is_a? Net::HTTPRedirection
-      return http_get URI.join(url, resp['Location']).to_s
-    else
-      return resp
+
+  # get a file, using the local cached file modified timestamp to make sture we don't re-download stuff pointlessly
+  # this also *should* handle redirection properly
+  def http_get(url, cached_path, limit = 10)
+    # too many redirects...
+    raise ArgumentError, 'too many HTTP redirects' if limit == 0
+
+    uri = URI.parse(url)
+    head_req = Net::HTTP::Head.new(uri)
+
+    localDate = Time.parse("1985-10-28")
+    if File.exists?(cached_path)
+      file = File.stat cached_path
+      localDate = file.mtime
     end
+
+    head_resp = Net::HTTP.start(uri.hostname, uri.port, :use_ssl => uri.scheme == 'https') {|http|
+      http.request(head_req)
+    }
+
+    case head_resp
+    when Net::HTTPSuccess
+      checked(cached_path)
+      remoteDate = Time.httpdate(head_resp['Last-Modified'])
+      # if the remote resource has been modified later than the local file, grab it and return it
+      puts "Comparing #{localDate.httpdate} to #{remoteDate.httpdate}"
+      if(remoteDate > localDate)
+        req = Net::HTTP::Get.new(uri)
+        resp = Net::HTTP.start(uri.hostname, uri.port, :use_ssl => uri.scheme == 'https') {|http|
+          http.request(req)
+        }
+        puts "GOT FULL FILE"
+        return resp
+      end
+      puts "CACHE HIT"
+      return nil # otherwise
+    when Net::HTTPRedirection
+      if head_resp.code == "304"
+        puts "THIS SHOULDN'T BE!"
+        checked(cached_path)
+        return nil
+      end
+      location = head_resp['Location']
+      puts "Redirected to #{location} - code #{head_resp.code}"
+      newurl=URI.parse(head_resp.header['location'])
+      if(newurl.relative?)
+        newurl=URI.join(url, head_resp.header['location'])
+      end
+      return http_get(newurl, cached_path, limit - 1)
+    else
+      puts "Failed: #{head_resp.code}"
+      checked(cached_path)
+      return nil
+    end
+  end
+
+  def should_check(cached_path)
+    if $checked_paths == nil
+      return true
+    end
+    return not( $checked_paths.include? cached_path)
+  end
+
+  def checked(cached_path)
+    if $checked_paths == nil
+      $checked_paths = Set.new
+    end
+    $checked_paths.add cached_path
   end
 
   public

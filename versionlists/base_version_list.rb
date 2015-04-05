@@ -44,9 +44,10 @@ class BaseVersionList
       end
 
       FileUtils.touch cache_file
-    rescue => e
-      binding.pry if $stdout.isatty
-      @lastError = e.message
+    #rescue => e
+    #  puts (e.message)
+    #  binding.pry if $stdout.isatty
+    #  @lastError = e.message
     end
   end
 
