@@ -30,7 +30,7 @@ class DownloadsFixer < BaseSanitizer
     file.client.downloads.map! do |download|
       if not download.size or not download.sha256 or download.sha256 == ''
         url = download.internalUrl ? download.internalUrl : download.url
-        libFile = HTTPCatcher.file url
+        libFile = HTTPCatcher.file(url, nil, false)
         download.size = libFile.size
         download.sha256 = FileHashCache.get libFile
         download
@@ -40,7 +40,7 @@ class DownloadsFixer < BaseSanitizer
     file.server.downloads.map! do |download|
       if not download.size or not download.sha256 or download.sha256 == ''
         url = download.internalUrl ? download.internalUrl : download.url
-        libFile = HTTPCatcher.file url
+        libFile = HTTPCatcher.file(url, nil, false)
         download.size = libFile.size
         download.sha256 = FileHashCache.get libFile
         download

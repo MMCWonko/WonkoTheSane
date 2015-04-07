@@ -14,7 +14,7 @@ class VanillaVersionList < BaseVersionList
   end
 
   def get_version(id)
-    files = @input.parse BaseVersionList.get_json('http://s3.amazonaws.com/Minecraft.Download/versions/' + id + '/' + id + '.json')
+    files = @input.parse BaseVersionList.get_json_cached('http://s3.amazonaws.com/Minecraft.Download/versions/' + id + '/' + id + '.json')
     mcfile = files.find do |file|
       file.uid == 'net.minecraft'
     end

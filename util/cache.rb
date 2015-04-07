@@ -4,7 +4,7 @@ require 'zip'
 require 'set'
 
 # http://www.ericson.net/content/2011/04/caching-http-requests-with-ruby/
-# TODO etags and other caching stuff
+# TODO proper etags and other caching stuff
 class HTTPCatcher
   def initialize(basedir)
     @basedir = basedir
@@ -12,23 +12,23 @@ class HTTPCatcher
   end
 
   # HTTP GETs a url if it doesn't exist locally
-  def get(url, key)
-    fetch url, key
+  def get(url, key, check_stale = true)
+    fetch url, key, check_stale
     IO.read @basedir + '/' + key
   end
 
-  def file(url, key)
-    fetch url, key
+  def file(url, key, check_stale = true)
+    fetch url, key, check_stale
     File.new @basedir + '/' + key, 'r'
   end
 
   private
-  def fetch(url, key)
+  def fetch(url, key, check_stale)
     cached_path = @basedir + '/' + key
     cached_dir = File.dirname cached_path
     FileUtils.mkdir_p cached_dir unless Dir.exist? cached_dir
 
-    if should_check(cached_path)
+    if should_check(cached_path, check_stale)
       puts "DL: #{url}"
       resp = http_get(url, cached_path)
       if resp == nil
@@ -95,11 +95,14 @@ class HTTPCatcher
     end
   end
 
-  def should_check(cached_path)
-    if $checked_paths == nil
-      return true
+  def should_check(cached_path, check_stale)
+    # if the file doesn't exist locally, or we should check for stale cache
+    if (not File.exist? cached_path) or check_stale
+      # but only once per run
+      return ($checked_paths == nil or not( $checked_paths.include? cached_path))
     end
-    return not( $checked_paths.include? cached_path)
+    # otherwise don't check
+    return false
   end
 
   def checked(cached_path)
@@ -111,11 +114,11 @@ class HTTPCatcher
 
   public
   @@defaultCatcher = HTTPCatcher.new 'cache/network'
-  def self.get(url, key=nil)
-    @@defaultCatcher.get url, (key ? key : url)
+  def self.get(url, key=nil, check_stale = true)
+    @@defaultCatcher.get(url, (key ? key : url), check_stale)
   end
-  def self.file(url, key=nil)
-    @@defaultCatcher.file url, (key ? key : url)
+  def self.file(url, key=nil, check_stale = true)
+    @@defaultCatcher.file(url, (key ? key : url), check_stale)
   end
 end
 
