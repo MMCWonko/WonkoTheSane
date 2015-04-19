@@ -75,7 +75,7 @@ class HTTPCatcher
       # don't re-check this
       checked cached_path
 
-      remote_date = Time.httpdate(head_resp['Last-Modified'])
+      remote_date = head_resp['Last-Modified'] ? Time.httpdate(head_resp['Last-Modified']) : Time.now
       new_etag = head_resp['ETag']
 
       # if the remote resource has been modified later than the local file, grab it and return it
