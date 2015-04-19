@@ -4,6 +4,10 @@ group :development do
   gem 'pry'
   gem 'pry-nav'
   gem 'pry-stack_explorer'
+
+  gem 'guard'
+  gem 'guard-bundler'
+  gem 'guard-shell'
 end
 
 gem 'rubyzip'
