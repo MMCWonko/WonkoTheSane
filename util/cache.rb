@@ -80,7 +80,7 @@ class HTTPCatcher
 
       # if the remote resource has been modified later than the local file, grab it and return it
       puts "Comparing #{local_date.httpdate} to #{remote_date.httpdate}"
-      if remote_date > local_date && existing_etag != new_etag
+      if remote_date > local_date || existing_etag != new_etag || !file_valid?(head_resp, cached_path)
         req = Net::HTTP::Get.new(uri)
         resp = http.request Net::HTTP::Get.new(uri)
         puts "GOT FULL FILE"
@@ -110,6 +110,16 @@ class HTTPCatcher
       checked cached_path
       return nil
     end
+  end
+
+  def file_valid?(response, path)
+    if response['Content-Length']
+      return false if response['Content-Length'].to_i != File.size(path)
+    end
+    if response['Content-MD5']
+      return false if response['Content-MD5'] != FileHashCache.get_md5(path)
+    end
+    return true
   end
 
   @@checked_paths = Set.new
@@ -169,8 +179,9 @@ class ExtractionCache
 end
 
 class FileHashCache
-  def initialize(file)
+  def initialize(file, algorithm)
     @file = file
+    @algorithm = algorithm
     @data = {}
     if File.exists? @file
       @data = JSON.parse File.read(@file), symbolize_names: true
@@ -182,7 +193,7 @@ class FileHashCache
     timestamp = (file.is_a?(File) ? file.mtime : File.mtime(file)).to_i
     size = file.is_a?(File) ? file.size : File.size(file)
     if not @data[name] or not @data[name][:timestamp] == timestamp or not @data[name][:size] == size
-      hash = Digest::SHA256.hexdigest(file.is_a?(File) ? file.read : File.read(file))
+      hash = digest(file.is_a?(File) ? file.read : File.read(file))
       @data[name] = {
         timestamp: timestamp,
         size: size,
@@ -193,8 +204,21 @@ class FileHashCache
     return @data[name][:hash]
   end
 
-  @@defaultCache = FileHashCache.new 'cache/filehashes'
+  def digest(data)
+    if @algorithm == :sha256
+      Digest::SHA256.hexdigest data
+    elsif @algorithm == :md5
+      Digest::MD5.hexdigest data
+    end
+  end
+
+  @@defaultCache = FileHashCache.new 'cache/filehashes', :sha256
   def self.get(file)
     @@defaultCache.get file
+  end
+
+  @@md5Cache = FileHashCache.new 'cache/filehashes.md5', :md5
+  def self.get_md5(file)
+    @@md5Cache.get file
   end
 end
