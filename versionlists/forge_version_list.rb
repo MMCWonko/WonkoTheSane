@@ -30,7 +30,7 @@ class ForgeVersionList < BaseVersionList
     installerFile = files.find do |file| file[1] == 'installer' end
     # installer versions of forge
     if not installerFile.nil? and id[1][:mcversion] != '1.5.2'
-      path = version + '/' + id[1][:artifact] + '-' + version + '-' + installerFile[1] + '.' + installerFile[0]
+      path = "#{version}/#{id[1][:artifact]}-#{version}-#{installerFile[1]}.#{installerFile[0]}"
       url = id[1][:baseurl] + '/' + path
       HTTPCatcher.get url, ctxt: @artifact, key: 'forgeinstallers/' + path, check_stale: false
       result << @input.parse(ExtractionCache.get('cache/network/forgeinstallers/' + path, :zip, 'install_profile.json'), id[1][:version])

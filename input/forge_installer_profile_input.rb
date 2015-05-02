@@ -40,22 +40,18 @@ class ForgeFixJarSanitizer < BaseSanitizer
   def self.sanitize(file)
     file.client.downloads.map! do |lib|
       ident = MavenIdentifier.new(lib.name)
-      if 'net.minecraftforge' == ident.group
-        if 'minecraftforge' == ident.artifact
-          ident.artifact = 'forge'
-        end
-        if 'forge' == ident.artifact
-          mcversion = nil
-          file.requires.each do |req|
-            if req.uid == 'net.minecraft'
-              mcversion = req.version
-            end
+      ident.artifact = 'forge' if 'net.minecraftforge' == ident.group && 'minecraftforge' == ident.artifact
+      if ['forge', 'fml'].include?(ident.artifact) && ['net.minecraftforge', 'cpw.mods'].include?(ident.group)
+        mcversion = nil
+        file.requires.each do |req|
+          if req.uid == 'net.minecraft'
+            mcversion = req.version
           end
-          lib = lib.clone
-          ident.classifier = 'universal'
-          ident.version = "#{mcversion}-#{ident.version}" unless ident.version.start_with? "#{mcversion}"
-          lib.name = ident.to_name()
         end
+        lib = lib.clone
+        ident.classifier = 'universal'
+        ident.version = "#{mcversion}-#{ident.version}" unless ident.version.start_with? "#{mcversion}"
+        lib.name = ident.to_name()
       end
       lib
     end
