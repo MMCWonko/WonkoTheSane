@@ -43,7 +43,8 @@ class BaseVersionList
             write_cache_file
           end
         rescue => e
-          puts "#{@artifact}: #{e.message}"
+          logger.error e.message
+          logger.warn e.backtrace.first
           binding.pry if $stdout.isatty && ENV['DEBUG_ON_ERROR']
           @lastError = e.message
         end
@@ -51,6 +52,10 @@ class BaseVersionList
 
       FileUtils.touch cache_file
     end
+  end
+
+  def logger
+    Logging.logger[@artifact]
   end
 
   def invalidate(version = nil)

@@ -43,7 +43,7 @@ class Registry
       end
     end
   rescue Exception => e
-    puts 'Unable to store ' + version.uid + ':' + version.version
+    Logging.logger[version.uid].error 'Unable to store: ' + version.version
     raise e
   end
   def retrieve(id, version)

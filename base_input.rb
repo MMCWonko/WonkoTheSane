@@ -1,4 +1,7 @@
 class BaseInput
+  def logger
+    Logging.logger[@artifact]
+  end
 end
 
 class BaseSanitizer

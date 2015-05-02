@@ -6,10 +6,28 @@ Bundler.require(:default)
 
 Dir.chdir(File.dirname(__FILE__))
 
-Dir['./*.rb'].each do |file| require_relative file end
+Logging.color_scheme 'bright',
+                     levels: {
+                         debug: :gray,
+                         info: :green,
+                         warn: :yellow,
+                         error: :red,
+                         fatal: [:white, :on_red]
+                     },
+                     date: :blue,
+                     logger: :cyan
+Logging.appenders.stdout 'stdout',
+                         layout: Logging.layouts.pattern(pattern: '[%d] %-5l %c: %m\n', color_scheme: 'bright'),
+                         level: :debug
+Logging.appenders.file 'file', filename: 'wonko.log', pattern: Logging.layouts.pattern(pattern: '[%d] %-5l %c: %m\n')
+Logging.logger.root.add_appenders 'stdout', 'file'
+
+Dir['./*.rb'].each do |file| require_relative file if !file.include?('main.rb') end
 Dir['./util/*.rb'].each do |file| require_relative file end
 Dir['./input/*.rb'].each do |file| require_relative file end
 Dir['./versionlists/*.rb'].each do |file| require_relative file end
+
+Logging.logger['General'].info 'Welcome to WonkoTheSane!'.yellow
 
 lists = []
 
@@ -57,40 +75,40 @@ OptionParser.new do |opts|
     lists.each do |list|
       if list.artifact == id
         TaskStack.push(Proc.new do
-          puts "#{list.artifact.cyan}: Refreshing"
-          list.refresh
-          puts "#{list.artifact.cyan}: Error: #{list.lastError.red}" if list.lastError
-        end)
+                         Logging.logger[list.artifact].info 'Refreshing'
+                         list.refresh
+                         Logging.logger[list.artifact].error list.lastError if list.lastError
+                       end)
         foundList = true
       end
     end
 
-    puts "#{'General'.yellow}: Couldn't find the specified list #{id.cyan}" if not foundList
+    Logging.logger['General'].warn "Couldn't find the specified list #{id.cyan}" if !foundList
   end
   opts.on '-a', '--refresh-all', 'Refresh all lists' do
     lists.each do |list|
       TaskStack.push(Proc.new do
-        puts "#{list.artifact.cyan}: Refreshing"
-        list.refresh
-        puts "#{list.artifact.cyan}: Error: #{list.lastError.red}" if list.lastError
-      end)
+                       Logging.logger[list.artifact].info 'Refreshing'
+                       list.refresh
+                       Logging.logger[list.artifact].error list.lastError if list.lastError
+                     end)
     end
   end
   opts.on '--invalidate=ID', 'Invalidates all versions on the specified list' do |id|
     foundList = false
     lists.each do |list|
       if list.artifact == id
-        puts "#{list.artifact.cyan}: Invalidating"
+        Logging.logger[list.artifact].info 'Invalidating'
         list.invalidate
         foundList = true
       end
     end
 
-    puts "#{'General'.yellow}: Couldn't find the specified list #{id.cyan}" if not foundList
+    Logging.logger['General'].warn "Couldn't find the specified list #{id.cyan}" if !foundList
   end
   opts.on '--invalidate-all', 'Invalidates all versions on all lists' do
     lists.each do |list|
-      puts "#{list.artifact.cyan}: Invalidating"
+      Logging.logger[list.artifact].info 'Invalidating'
       list.invalidate
     end
   end

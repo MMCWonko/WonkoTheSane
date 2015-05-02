@@ -32,8 +32,8 @@ class HTTPCatcher
 
     thread = Thread.new do
       if should_check cached_path, check_stale
-        puts "#{ctxt.to_s.cyan}: DL: #{url}"
-        resp = http_get ctxt.to_s.cyan, url, cached_path
+        Logging.logger[ctxt.to_s].debug "DL: #{url}"
+        resp = http_get ctxt.to_s, url, cached_path
         unless resp == nil
           File.open(cached_path, 'w') do |f|
             f.puts resp.body
@@ -86,30 +86,30 @@ class HTTPCatcher
       if remote_date > local_date || existing_etag != new_etag || !file_valid?(head_resp, cached_path)
         req = Net::HTTP::Get.new(uri)
         resp = http.request Net::HTTP::Get.new(uri)
-        puts "#{ctxt}: GOT FULL FILE"
+        Logging.logger[ctxt].debug 'GOT FULL FILE'
 
         @etags[uri] = new_etag if new_etag
         File.write @basedir + '/etags.json', JSON.generate(@etags)
 
         return resp
       else
-        puts "#{ctxt}: CACHE HIT"
+        Logging.logger[ctxt].debug 'CACHE HIT'
         return nil
       end
     when Net::HTTPRedirection
       if head_resp.code == "304"
-        puts "#{ctxt}: CACHE HIT"
+        Logging.logger[ctxt].debug 'CACHE HIT'
         checked cached_path
         return nil
       end
 
       location = head_resp['Location']
-      puts "#{ctxt}: Redirected to #{location} - code #{head_resp.code}"
+      Logging.logger[ctxt].debug "Redirected to #{location} - code #{head_resp.code}"
       newurl = URI.parse location
       newurl = URI.join uri.to_s, location if newurl.relative?
       return http_get ctxt, newurl, cached_path, limit - 1, http
     else
-      puts "#{ctxt}: Failed: #{head_resp.code}"
+      Logging.logger[ctxt].warn "#{location} failed: #{head_resp.code}"
       checked cached_path
       return nil
     end

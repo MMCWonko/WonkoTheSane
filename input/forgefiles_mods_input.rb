@@ -15,7 +15,7 @@ class ForgeFilesModsInput < BaseInput
       (file[:ext] == 'jar' or file[:ext] == 'zip') and (type == 'universal' or type == 'client' or type == 'main') #not type.include? 'src' and not type.include? 'deobf' and not type.include? 'api' and not type.include? 'backup'
     end
     if not f
-      puts 'No file found for ' + file.uid + ' version ' + file.version
+      logger.warn 'No file found for ' + file.uid + ' version ' + file.version
       return []
     end
     file.requires << Referenced.new('net.minecraft', f[:mcver])

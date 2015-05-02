@@ -25,7 +25,7 @@ class JenkinsInput < BaseInput
     end
 
     if not artifact
-      puts 'no valid artifact found for ' + @artifact + ' version ' + file.version
+      logger.warn 'No valid artifact found for ' + file.version
     else
       dl = FileDownload.new
       dl.destination = "mods/#{file.uid}-#{file.version}.jar"
