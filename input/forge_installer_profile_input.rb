@@ -22,12 +22,9 @@ class ForgeInstallerProfileInput < BaseInput
       MojangInput.sanetize_mojang_library obj
     end.flatten 1
     file.client.downloads = libraries
-    file.client.folders['minecraft/mods'] = ['mc.forgemods']
-    file.client.folders['minecraft/mods'] << 'mc.forgecoremods' if object[:install][:minecraft].match /[^1]*1\.[0-6]/
-    file.client.folders['minecraft/coremods'] = ['mc.forgecoremods'] if object[:install][:minecraft].match /[^1]*1\.[0-6]/
-    file.server.folders['minecraft/mods'] = ['mc.forgemods']
-    file.server.folders['minecraft/mods'] << 'mc.forgecoremods' if object[:install][:minecraft].match /[^1]*1\.[0-6]/
-    file.server.folders['minecraft/coremods'] = ['mc.forgecoremods'] if object[:install][:minecraft].match /[^1]*1\.[0-6]/
+    file.common.folders['minecraft/mods'] = ['mc.forgemods']
+    file.common.folders['minecraft/mods'] << 'mc.forgecoremods' if object[:install][:minecraft].match /[^1]*1\.[0-6]/
+    file.common.folders['minecraft/coremods'] = ['mc.forgecoremods'] if object[:install][:minecraft].match /[^1]*1\.[0-6]/
     file.server.downloads = libraries
     file.server.launchMethod = 'java.mainClass'
     file.server.extra[:forgeLibraryName] = %W(net.minecraftforge:forge:#{object[:install][:minecraft]}-#{version}:universal net.minecraftforge:forge:#{object[:install][:minecraft]}-#{version} net.minecraftforge:forge:#{version}:universal net.minecraftforge:forge:#{version} net.minecraftforge:minecraftforge:#{object[:install][:minecraft]}-#{version}:universal net.minecraftforge:minecraftforge:#{object[:install][:minecraft]}-#{version} net.minecraftforge:minecraftforge:#{version}:universal net.minecraftforge:minecraftforge:#{version})

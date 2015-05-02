@@ -45,6 +45,11 @@ end
 class FileDownload < Download
   attr_accessor :destination
 
+  def initialize(url = nil, destination = nil)
+    @url = url
+    @destination = destination
+  end
+
   def to_json
     obj = super
     obj[:destination] = @destination
@@ -99,6 +104,12 @@ end
 class VersionLibraryNative < VersionLibrary
   def type
     'java.natives'
+  end
+end
+
+class Jarmod < VersionLibrary
+  def type
+    'mc.jarmod'
   end
 end
 

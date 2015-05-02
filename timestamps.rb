@@ -11,14 +11,15 @@ class Timestamps
     elsif default.nil?
       raise 'No timestamp available for ' + uid + ': ' + version
     elsif default.is_a? String
-      int = default.to_i
-      if int.to_s == default
-        return int
+      if default.to_i.to_s == default
+        return default.to_i
       else
         return DateTime.parse(default).to_time.to_i
       end
     elsif default.is_a? Fixnum
       return default
+    elsif default.is_a? Float
+      return default.to_i
     else
       raise 'InvalidTimeFormat'
     end
