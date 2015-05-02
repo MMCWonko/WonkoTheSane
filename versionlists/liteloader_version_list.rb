@@ -8,7 +8,7 @@ class LiteLoaderVersionList < BaseVersionList
   end
 
   def get_versions
-    result = BaseVersionList.get_json 'http://dl.liteloader.com/versions/versions.json'
+    result = get_json 'http://dl.liteloader.com/versions/versions.json'
 
     out = []
     result[:versions].each do |mcver|

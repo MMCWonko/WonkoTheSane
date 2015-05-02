@@ -17,7 +17,7 @@ def update_nem
   sources[:jenkins] = [] if not sources[:jenkins]
   sources[:curse] = [] if not sources[:curse]
 
-  nemList = JSON.parse HTTPCatcher.get('https://raw.githubusercontent.com/SinZ163/NotEnoughMods/master/NEMP/mods.json', 'https://raw.githubusercontent.com/SinZ163/NotEnoughMods/master/NEMP/mods.json'), symbolize_names: true
+  nemList = JSON.parse HTTPCatcher.get('https://raw.githubusercontent.com/SinZ163/NotEnoughMods/master/NEMP/mods.json', key: 'https://raw.githubusercontent.com/SinZ163/NotEnoughMods/master/NEMP/mods.json'), symbolize_names: true
   nemList.each do |key, value|
     name = (value[:name] ? value[:name] : key).to_sym
     case value[:function]

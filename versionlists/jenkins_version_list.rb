@@ -13,7 +13,7 @@ class JenkinsVersionList < BaseVersionList
   end
 
   def get_versions
-    result = BaseVersionList.get_json "#{@baseUrl}/job/#{@job}/api/json"
+    result = get_json "#{@baseUrl}/job/#{@job}/api/json"
 
     return result[:builds].map do |build|
       [
@@ -24,6 +24,6 @@ class JenkinsVersionList < BaseVersionList
   end
 
   def get_version(id)
-    @input.parse BaseVersionList.get_json id[1] + 'api/json'
+    @input.parse get_json_cached id[1] + 'api/json'
   end
 end

@@ -25,29 +25,31 @@ class BaseVersionList
 
       # check if some versions aren't in @processed (likely new ones) and fetch and process them
       versions.each do |version|
-        next if not version
-        id = version.is_a?(Array) ? version.first : version
-        unless @processed.include? id
-          files = get_version version
-          next if files.nil? or (files.is_a? Array and files.empty?)
+        begin
+          next if not version
+          id = version.is_a?(Array) ? version.first : version
+          unless @processed.include? id
+            files = get_version version
+            next if files.nil? or (files.is_a? Array and files.empty?)
 
-          files.each do |file|
-            file.is_complete = true
-            $registry.store file
-          end if files and files.is_a? Array
-          files.is_complete = true if files and files.is_a? Version
-          $registry.store files if files and files.is_a? Version
+            files.flatten.each do |file|
+              file.is_complete = true
+              $registry.store file
+            end if files and files.is_a? Array
+            files.is_complete = true if files and files.is_a? Version
+            $registry.store files if files and files.is_a? Version
 
-          @processed << id
-          write_cache_file
+            @processed << id
+            write_cache_file
+          end
+        rescue => e
+          puts "#{@artifact}: #{e.message}"
+          binding.pry if $stdout.isatty && ENV['DEBUG_ON_ERROR']
+          @lastError = e.message
         end
       end
 
       FileUtils.touch cache_file
-    #rescue => e
-    #  puts (e.message)
-    #  binding.pry if $stdout.isatty
-    #  @lastError = e.message
     end
   end
 
@@ -87,12 +89,12 @@ class BaseVersionList
     raise :AbstractMethodCallError
   end
 
-  def self.get_json(url)
-    Yajl::Parser.parse HTTPCatcher.file(url, nil, true), symbolize_names: true
+  def get_json(url)
+    Yajl::Parser.parse HTTPCatcher.file(url, ctxt: @artifact, check_stale: true), symbolize_names: true
   end
 
-  def self.get_json_cached(url)
-    Yajl::Parser.parse HTTPCatcher.file(url, nil, false), symbolize_names: true
+  def get_json_cached(url)
+    Yajl::Parser.parse HTTPCatcher.file(url, ctxt: @artifact, check_stale: false), symbolize_names: true
   end
 end
 Dir.mkdir 'cache' unless Dir.exist? 'cache'

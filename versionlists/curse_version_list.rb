@@ -10,7 +10,7 @@ class CurseVersionList < BaseVersionList
   end
 
   def get_versions
-    result = Oga.parse_html HTTPCatcher.file('http://curse.com/project/' + @curseId, 'curse/' + @curseId + '.html')
+    result = Oga.parse_html HTTPCatcher.file('http://curse.com/project/' + @curseId, ctxt: @artifact, key: 'curse/' + @curseId + '.html', check_stale: false)
     # start by getting rid of some elements that standard xml parsers have issues with
     result.each_node do |node| node.remove if node.is_a? Oga::XML::Element and ['script', 'like'].include? node.name end
     rows = result.xpath("html/body/#{'div/' * 14}table/tbody/tr")

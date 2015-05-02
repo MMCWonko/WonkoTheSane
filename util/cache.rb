@@ -14,54 +14,58 @@ class HTTPCatcher
   end
 
   # HTTP GETs a url if it doesn't exist locally
-  def get(url, key, check_stale = true)
-    fetch url, key, check_stale
+  def get(ctxt, url, key, check_stale = true)
+    fetch ctxt, url, key, check_stale
     IO.read @basedir + '/' + key
   end
 
-  def file(url, key, check_stale = true)
-    fetch url, key, check_stale
+  def file(ctxt, url, key, check_stale = true)
+    fetch ctxt, url, key, check_stale
     File.new @basedir + '/' + key, 'r'
   end
 
   private
-  def fetch(url, key, check_stale)
+  def fetch(ctxt, url, key, check_stale)
     cached_path = @basedir + '/' + key
     cached_dir = File.dirname cached_path
     FileUtils.mkdir_p cached_dir unless Dir.exist? cached_dir
 
-    if should_check cached_path, check_stale
-      puts "DL: #{url}"
-      resp = http_get url, cached_path
-      if resp == nil
-        return
-      end
-      File.open(cached_path, 'w') do |f|
-        f.puts resp.body
+    thread = Thread.new do
+      if should_check cached_path, check_stale
+        puts "#{ctxt.to_s.cyan}: DL: #{url}"
+        resp = http_get ctxt.to_s.cyan, url, cached_path
+        unless resp == nil
+          File.open(cached_path, 'w') do |f|
+            f.puts resp.body
+          end
+        end
       end
     end
+
+    TaskStack.pop_all
+    thread.join
   end
 
   # get a file, using the local cached file modified timestamp to make sture we don't re-download stuff pointlessly
   # this also *should* handle redirection properly
-  def http_get(url, cached_path, limit = 10, http = nil)
+  def http_get(ctxt, url, cached_path, limit = 10, http = nil)
     # too many redirects...
     raise ArgumentError, 'too many HTTP redirects' if limit == 0
 
-    uri = URI.parse(url)
+    uri = url.is_a?(URI) ? url : URI.parse(url)
 
     local_date = Time.parse("1985-10-28")
     local_date = File.mtime cached_path if File.exists? cached_path
 
     if http.nil?
       Net::HTTP.start uri.hostname, uri.port, :use_ssl => uri.scheme == 'https' do |http|
-        return http_get_internal uri, cached_path, limit, http, local_date
+        return http_get_internal ctxt, uri, cached_path, limit, http, local_date
       end
     else
-      return http_get_internal uri, cached_path, limit, http, local_date
+      return http_get_internal ctxt, uri, cached_path, limit, http, local_date
     end
   end
-  def http_get_internal(uri, cached_path, limit = 10, http = nil, local_date = nil)
+  def http_get_internal(ctxt, uri, cached_path, limit = 10, http = nil, local_date = nil)
     existing_etag = @etags[uri]
 
     # start by doing a HEAD request
@@ -79,34 +83,33 @@ class HTTPCatcher
       new_etag = head_resp['ETag']
 
       # if the remote resource has been modified later than the local file, grab it and return it
-      puts "Comparing #{local_date.httpdate} to #{remote_date.httpdate}"
       if remote_date > local_date || existing_etag != new_etag || !file_valid?(head_resp, cached_path)
         req = Net::HTTP::Get.new(uri)
         resp = http.request Net::HTTP::Get.new(uri)
-        puts "GOT FULL FILE"
+        puts "#{ctxt}: GOT FULL FILE"
 
         @etags[uri] = new_etag if new_etag
         File.write @basedir + '/etags.json', JSON.generate(@etags)
 
         return resp
       else
-        puts "CACHE HIT"
+        puts "#{ctxt}: CACHE HIT"
         return nil
       end
     when Net::HTTPRedirection
       if head_resp.code == "304"
-        puts "CACHE HIT"
+        puts "#{ctxt}: CACHE HIT"
         checked cached_path
         return nil
       end
 
       location = head_resp['Location']
-      puts "Redirected to #{location} - code #{head_resp.code}"
+      puts "#{ctxt}: Redirected to #{location} - code #{head_resp.code}"
       newurl = URI.parse location
       newurl = URI.join uri.to_s, location if newurl.relative?
-      return http_get newurl, cached_path, limit - 1, http
+      return http_get ctxt, newurl, cached_path, limit - 1, http
     else
-      puts "Failed: #{head_resp.code}"
+      puts "#{ctxt}: Failed: #{head_resp.code}"
       checked cached_path
       return nil
     end
@@ -139,11 +142,11 @@ class HTTPCatcher
 
   public
   @@defaultCatcher = HTTPCatcher.new 'cache/network'
-  def self.get(url, key=nil, check_stale = true)
-    @@defaultCatcher.get(url, (key ? key : url), check_stale)
+  def self.get(url, options = {})
+    @@defaultCatcher.get(options[:ctxt] || 'Download', url, (options.key?(:key) ? options[:key] : url), options[:check_stale] || false)
   end
-  def self.file(url, key=nil, check_stale = true)
-    @@defaultCatcher.file(url, (key ? key : url), check_stale)
+  def self.file(url, options = {})
+    @@defaultCatcher.file(options[:ctxt] || 'Download', url, (options.key?(:key) ? options[:key] : url), options[:check_stale] || false)
   end
 end
 

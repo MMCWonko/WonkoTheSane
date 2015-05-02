@@ -31,6 +31,23 @@ lists << ForgeVersionList.new
 lists << FMLVersionList.new
 $globalLists = lists
 
+class TaskStack
+  @@queue = []
+  def self.push(task)
+    @@queue.push task
+  end
+  def self.push_defered(task)
+    @@queue.unshift task
+  end
+  def self.pop
+    task = @@queue.pop
+    task.call
+  end
+  def self.pop_all
+    self.pop until @@queue.empty?
+  end
+end
+
 require 'optparse'
 OptionParser.new do |opts|
   opts.banner = 'Usage: main.rb [options]'
@@ -39,36 +56,41 @@ OptionParser.new do |opts|
     foundList = false
     lists.each do |list|
       if list.artifact == id
-        puts "Refreshing #{list.artifact.cyan}"
-        list.refresh
-        puts "Error: #{list.lastError.red}" if list.lastError
+        TaskStack.push(Proc.new do
+          puts "#{list.artifact.cyan}: Refreshing"
+          list.refresh
+          puts "#{list.artifact.cyan}: Error: #{list.lastError.red}" if list.lastError
+        end)
         foundList = true
       end
     end
 
-    puts "Couldn't find the specified list #{id.cyan}" if not foundList
+    puts "#{'General'.yellow}: Couldn't find the specified list #{id.cyan}" if not foundList
   end
   opts.on '-a', '--refresh-all', 'Refresh all lists' do
     lists.each do |list|
-      puts "Refreshing #{list.artifact.cyan}"
-      list.refresh
+      TaskStack.push(Proc.new do
+        puts "#{list.artifact.cyan}: Refreshing"
+        list.refresh
+        puts "#{list.artifact.cyan}: Error: #{list.lastError.red}" if list.lastError
+      end)
     end
   end
   opts.on '--invalidate=ID', 'Invalidates all versions on the specified list' do |id|
     foundList = false
     lists.each do |list|
       if list.artifact == id
-        puts "Invalidating #{list.artifact.cyan}"
+        puts "#{list.artifact.cyan}: Invalidating"
         list.invalidate
         foundList = true
       end
     end
 
-    puts "Couldn't find the specified list #{id.cyan}" if not foundList
+    puts "#{'General'.yellow}: Couldn't find the specified list #{id.cyan}" if not foundList
   end
   opts.on '--invalidate-all', 'Invalidates all versions on all lists' do
     lists.each do |list|
-      puts "Invalidating #{list.artifact.cyan}"
+      puts "#{list.artifact.cyan}: Invalidating"
       list.invalidate
     end
   end
@@ -86,3 +108,5 @@ OptionParser.new do |opts|
     exit
   end
 end.parse!
+
+TaskStack.pop_all

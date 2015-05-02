@@ -8,7 +8,7 @@ class VanillaVersionList < BaseVersionList
   end
 
   def get_versions
-    result = BaseVersionList.get_json 'http://s3.amazonaws.com/Minecraft.Download/versions/versions.json'
+    result = get_json 'http://s3.amazonaws.com/Minecraft.Download/versions/versions.json'
     @latest_release = result[:latest][:release]
     @latest_snapshot = result[:latest][:snapshot]
 
@@ -16,8 +16,13 @@ class VanillaVersionList < BaseVersionList
   end
 
   def get_version(id)
-    fun = (@latest_release == id or @latest_snapshot == id) ? BaseVersionList.method(:get_json) : BaseVersionList.method(:get_json_cached)
-    files = @input.parse fun.call('http://s3.amazonaws.com/Minecraft.Download/versions/' + id + '/' + id + '.json')
+    url = 'http://s3.amazonaws.com/Minecraft.Download/versions/' + id + '/' + id + '.json'
+    json = if @latest_release == id || @latest_snapshot == id
+             get_json url
+           else
+             get_json_cached url
+           end
+    files = @input.parse json
     mcfile = files.find do |file|
       file.uid == 'net.minecraft'
     end

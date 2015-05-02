@@ -8,7 +8,7 @@ class ForgeFilesModsList < BaseVersionList
   end
 
   def get_versions
-    result = BaseVersionList.get_json "http://files.minecraftforge.net/#{@urlId}/json"
+    result = get_json "http://files.minecraftforge.net/#{@urlId}/json"
 
     return result[:builds].map do |build|
       [

@@ -127,7 +127,7 @@ class ForgeServerMainClassSanitizer < BaseSanitizer
     file.server.downloads.each do |download|
       if file.server.extra[:forgeLibraryName].include? download.name
         url = download.internalUrl ? download.internalUrl : download.url
-        libFile = HTTPCatcher.file(url, nil, false)
+        libFile = HTTPCatcher.file(url, ctxt: file.uid, check_stale: false)
         # Handle entries one by one
         text = ExtractionCache.get(libFile, :zip, 'META-INF/MANIFEST.MF')
         lines = text.lines
