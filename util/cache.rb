@@ -36,7 +36,7 @@ class HTTPCatcher
         resp = http_get ctxt.to_s, url, cached_path
         unless resp == nil
           File.open(cached_path, 'w') do |f|
-            f.puts resp.body
+            f.write resp.body
           end
         end
       end
