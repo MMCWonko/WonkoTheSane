@@ -13,4 +13,9 @@ class TaskStack
   def self.pop_all
     self.pop until @@queue.empty?
   end
+  def self.in_background(&block)
+    thread = Thread.new &block
+    TaskStack.pop_all
+    thread.join
+  end
 end

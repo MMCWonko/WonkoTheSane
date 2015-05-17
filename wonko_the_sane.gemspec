@@ -23,6 +23,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'pry'
   spec.add_development_dependency 'pry-nav'
   spec.add_development_dependency 'pry-stack_explorer'
+  spec.add_development_dependency 'pry-rescue'
   spec.add_development_dependency 'guard'
   spec.add_development_dependency 'guard-bundler'
   spec.add_development_dependency 'guard-shell'
@@ -33,4 +34,5 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency 'colorize'
   spec.add_runtime_dependency 'oga'
   spec.add_runtime_dependency 'logging'
+  spec.add_runtime_dependency 'aws-sdk'
 end

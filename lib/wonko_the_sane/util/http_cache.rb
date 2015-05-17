@@ -1,10 +1,6 @@
-require 'fileutils'
-require 'zip'
-require 'set'
-
 # http://www.ericson.net/content/2011/04/caching-http-requests-with-ruby/
 # TODO proper etags and other caching stuff
-class HTTPCatcher
+class HTTPCache
   def initialize(basedir)
     @basedir = basedir
     FileUtils.mkdir_p @basedir unless Dir.exist? @basedir
@@ -29,7 +25,7 @@ class HTTPCatcher
     cached_dir = File.dirname cached_path
     FileUtils.mkdir_p cached_dir unless Dir.exist? cached_dir
 
-    thread = Thread.new do
+    TaskStack.in_background do
       if should_check cached_path, check_stale
         Logging.logger[ctxt.to_s].debug "DL: #{url}"
         resp = http_get ctxt.to_s, url, cached_path
@@ -40,9 +36,6 @@ class HTTPCatcher
         end
       end
     end
-
-    TaskStack.pop_all
-    thread.join
   end
 
   # get a file, using the local cached file modified timestamp to make sture we don't re-download stuff pointlessly
@@ -140,85 +133,11 @@ class HTTPCatcher
   end
 
   public
-  @@defaultCatcher = HTTPCatcher.new 'cache/network'
+  @@defaultCatcher = HTTPCache.new 'cache/network'
   def self.get(url, options = {})
     @@defaultCatcher.get(options[:ctxt] || 'Download', url, (options.key?(:key) ? options[:key] : url), options[:check_stale] || false)
   end
   def self.file(url, options = {})
     @@defaultCatcher.file(options[:ctxt] || 'Download', url, (options.key?(:key) ? options[:key] : url), options[:check_stale] || false)
-  end
-end
-
-class ExtractionCache
-  def initialize(basedir)
-    @basedir = basedir
-    FileUtils.mkdir_p @basedir unless Dir.exist? @basedir
-  end
-
-  def get(archive, type, file)
-    out = path(archive, type, file)
-    FileUtils.mkdir_p File.dirname(out) unless Dir.exist? File.dirname(out)
-    if not File.exist? out
-      if type == :zip
-        Zip::File.open archive do |arch|
-          File.write out, arch.glob(file).first.get_input_stream.read
-        end
-      end
-    end
-
-    return File.read out
-  end
-
-  @@defaultCache = ExtractionCache.new 'cache/extraction'
-  def self.get(archive, type, file)
-    @@defaultCache.get archive, type, file
-  end
-
-  private
-  def path(archive, type, file)
-    @basedir + '/' + File.basename(archive) + '/' + file
-  end
-end
-
-class FileHashCache
-  def initialize(file, algorithm)
-    @file = file
-    @algorithm = algorithm
-    @data = JSON.parse File.read(@file), symbolize_names: true if File.exists? @file
-    @data ||= {}
-  end
-
-  def get(file)
-    name = (file.is_a?(File) ? file.path : file).to_sym
-    timestamp = (file.is_a?(File) ? file.mtime : File.mtime(file)).to_i
-    size = file.is_a?(File) ? file.size : File.size(file)
-    if not @data[name] or not @data[name][:timestamp] == timestamp or not @data[name][:size] == size
-      hash = digest(file.is_a?(File) ? file.read : File.read(file))
-      @data[name] = {
-        timestamp: timestamp,
-        size: size,
-        hash: hash
-      }
-      File.write @file, JSON.pretty_generate(@data)
-    end
-    return @data[name][:hash]
-  end
-
-  def digest(data)
-    if @algorithm == :sha256
-      Digest::SHA256.hexdigest data
-    elsif @algorithm == :md5
-      Digest::MD5.hexdigest data
-    end
-  end
-
-  @@defaultCache = FileHashCache.new 'cache/filehashes', :sha256
-  def self.get(file)
-    @@defaultCache.get file
-  end
-
-  @@md5Cache = FileHashCache.new 'cache/filehashes.md5', :md5
-  def self.get_md5(file)
-    @@md5Cache.get file
   end
 end

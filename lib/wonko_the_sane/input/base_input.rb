@@ -33,9 +33,9 @@ class DownloadsFixer < BaseSanitizer
     file.client.downloads.map! do |download|
       if not download.size or not download.sha256 or download.sha256 == ''
         url = download.internalUrl ? download.internalUrl : download.url
-        libFile = HTTPCatcher.file(url, ctxt: file.uid, check_stale: false)
-        download.size = libFile.size
-        download.sha256 = FileHashCache.get libFile
+        info = WonkoTheSane::Util::DeepStorageCache.get_info url, ctxt: file.uid
+        download.size = info[:size]
+        download.sha256 = info[:sha256]
         download
       end
       download
@@ -43,9 +43,9 @@ class DownloadsFixer < BaseSanitizer
     file.server.downloads.map! do |download|
       if not download.size or not download.sha256 or download.sha256 == ''
         url = download.internalUrl ? download.internalUrl : download.url
-        libFile = HTTPCatcher.file(url, ctxt: file.uid, check_stale: false)
-        download.size = libFile.size
-        download.sha256 = FileHashCache.get libFile
+        info = WonkoTheSane::Util::DeepStorageCache.get_info url, ctxt: file.uid
+        download.size = info[:size]
+        download.sha256 = info[:sha256]
         download
       end
       download

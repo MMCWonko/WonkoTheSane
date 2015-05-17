@@ -92,7 +92,7 @@ class ForgeVersionList < BaseVersionList
     if not installerFile.nil? and id[1][:mcversion] != '1.5.2'
       path = "#{version}/#{id[1][:artifact]}-#{version}-#{installerFile[1]}.#{installerFile[0]}"
       url = id[1][:baseurl] + '/' + path
-      HTTPCatcher.get url, ctxt: @artifact, key: 'forgeinstallers/' + path, check_stale: false
+      HTTPCache.get url, ctxt: @artifact, key: 'forgeinstallers/' + path, check_stale: false
       result << @input.parse(ExtractionCache.get('cache/network/forgeinstallers/' + path, :zip, 'install_profile.json'), id[1][:version])
     elsif not universalFile.nil?
       res = construct_base_version id[1]

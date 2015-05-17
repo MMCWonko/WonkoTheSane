@@ -1,5 +1,6 @@
 cache/
 files/
 .idea/
-wonko.log
 pkg/
+wonko.log
+.aws-credentials

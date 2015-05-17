@@ -93,11 +93,11 @@ class BaseVersionList
   end
 
   def get_json(url)
-    JSON.parse HTTPCatcher.file(url, ctxt: @artifact, check_stale: true), symbolize_names: true
+    JSON.parse HTTPCache.file(url, ctxt: @artifact, check_stale: true), symbolize_names: true
   end
 
   def get_json_cached(url)
-    JSON.parse HTTPCatcher.file(url, ctxt: @artifact, check_stale: false), symbolize_names: true
+    JSON.parse HTTPCache.file(url, ctxt: @artifact, check_stale: false), symbolize_names: true
   end
 end
 Dir.mkdir 'cache' unless Dir.exist? 'cache'

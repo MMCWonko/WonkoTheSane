@@ -1,5 +1,5 @@
 def get_curse_id(name)
-  data = HTTPCatcher.get('http://minecraft.curseforge.com/mc-mods/' + name).gsub /[\n\r]/, ''
+  data = HTTPCache.get('http://minecraft.curseforge.com/mc-mods/' + name).gsub /[\n\r]/, ''
   match = data.match /<li class="view-on?-cur?se"> *<a href="http:\/\/curse.com\/project\/(\d*)">/
   return match[1]
 end
@@ -14,7 +14,7 @@ def update_nem
   sources[:jenkins] = [] if not sources[:jenkins]
   sources[:curse] = [] if not sources[:curse]
 
-  nemList = JSON.parse HTTPCatcher.get('https://raw.githubusercontent.com/SinZ163/NotEnoughMods/master/NEMP/mods.json'), symbolize_names: true
+  nemList = JSON.parse HTTPCache.get('https://raw.githubusercontent.com/SinZ163/NotEnoughMods/master/NEMP/mods.json'), symbolize_names: true
   nemList.each do |key, value|
     name = (value[:name] ? value[:name] : key).to_sym
     case value[:function]
