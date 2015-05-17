@@ -11,7 +11,7 @@ Gem::Specification.new do |spec|
   spec.homepage = 'https://github.com/MultiMC/WonkoTheSane'
   spec.license = 'MIT'
 
-  spec.files = Dir['lib/**/*.rb']
+  spec.files = Dir['lib/**/*.rb'] + Dir['data/**/*']
   spec.bindir = 'bin'
   spec.executables = ['wonko_the_sane']
   spec.test_files = Dir['tests/test_*.rb']
