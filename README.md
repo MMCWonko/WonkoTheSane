@@ -1,4 +1,4 @@
-# WonkoTheSane
+# WonkoTheSane [![Gem Version](https://badge.fury.io/rb/wonko_the_sane.svg)](http://badge.fury.io/rb/wonko_the_sane)
 
 From _So Long and Thanks for All the Fish_ by Douglas Adams:
 
