@@ -19,7 +19,7 @@ module WonkoTheSane
         ctxt = options[:ctxt] || 'DeepStorageCache'
 
         file = HTTPCache.file url, check_stale: false, ctxt: options[:ctxt]
-        info = info_for_file file, url
+        info = self.class.info_for_file file, url
 
         @entries[url] = info
         @manifest.put body: JSON.pretty_generate(@entries)
@@ -31,8 +31,18 @@ module WonkoTheSane
             # http://anthonylewis.com/2011/02/09/to-hex-and-back-with-ruby/
             md5 = [info[:md5].scan(/../).map { |x| x.hex.chr }.join].pack 'm0'
 
+            content_type = case url
+                           when /\.zip$/, /\.jar$/
+                             'application/zip'
+                           else
+                             ''
+                           end
+
             Logging.logger[ctxt].debug "Uploading backup of #{url} to S3..."
-            object.put body: file, content_md5: md5, metadata: Hash[info.map { |k,v| [k.to_s, v.to_s]}]
+            object.put body: file,
+                       content_md5: md5,
+                       content_type: content_type,
+                       metadata: Hash[info.map { |k,v| [k.to_s, v.to_s]}]
             Logging.logger[ctxt].debug 'Backup successfully uploaded to S3'
           end
         end
@@ -51,7 +61,7 @@ module WonkoTheSane
 
       private
 
-      def info_for_file(file, url)
+      def self.info_for_file(file, url)
         {
             url: url,
             file: url.gsub(/[&:$@=+,?\\^`><\{\}\[\]#%'"~|]/, '_'),

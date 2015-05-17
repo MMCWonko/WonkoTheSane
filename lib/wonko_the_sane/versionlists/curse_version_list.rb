@@ -1,7 +1,3 @@
-require_relative 'base_version_list'
-require 'date'
-require 'time'
-
 class CurseVersionList < BaseVersionList
   def initialize(uid, curseId, fileRegex)
     super(uid)
