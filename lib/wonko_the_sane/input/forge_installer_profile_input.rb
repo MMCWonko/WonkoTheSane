@@ -1,5 +1,3 @@
-require_relative '../base_input'
-
 class ForgeInstallerProfileInput < BaseInput
   def initialize(artifact)
     @artifact = artifact
@@ -8,7 +6,7 @@ class ForgeInstallerProfileInput < BaseInput
   def parse(data, version)
     object = JSON.parse data, symbolize_names: true
     info = object[:versionInfo]
-    file = Version.new
+    file = WonkoVersion.new
 
     file.uid = @artifact
     file.version = version
@@ -36,7 +34,7 @@ end
 class ForgeFixJarSanitizer < BaseSanitizer
   def self.sanitize(file)
     file.client.downloads.map! do |lib|
-      ident = MavenIdentifier.new(lib.name)
+      ident = WonkoTheSane::Util::MavenIdentifier.new(lib.name)
       ident.artifact = 'forge' if 'net.minecraftforge' == ident.group && 'minecraftforge' == ident.artifact
       if ['forge', 'fml'].include?(ident.artifact) && ['net.minecraftforge', 'cpw.mods'].include?(ident.group)
         mcversion = nil
@@ -67,13 +65,13 @@ class ForgeRemoveMinecraftSanitizer < BaseSanitizer
         mcversion = req.version
       end
     end
-    minecraft = $registry.retrieve 'net.minecraft', mcversion
+    minecraft = Registry.instance.retrieve 'net.minecraft', mcversion
     if not minecraft
       # if we can't find the wanted version on the first try we try reloading the list to see if we get something
-      $globalLists.each do |list|
+      WonkoTheSane.lists.each do |list|
         list.refresh if list.artifact == 'net.minecraft'
       end
-      minecraft = $registry.retrieve 'net.minecraft', mcversion
+      minecraft = Registry.instance.retrieve 'net.minecraft', mcversion
     end
     if minecraft
       file.client.mainClass = nil if minecraft.client.mainClass == file.client.mainClass
@@ -105,7 +103,7 @@ class ForgePackXZUrlsSanitizer < BaseSanitizer
 
   def self.sanitize(file)
     file.client.downloads.map! do |lib|
-      if @@packXZLibs.include? MavenIdentifier.new(lib.name).group
+      if @@packXZLibs.include? WonkoTheSane::Util::MavenIdentifier.new(lib.name).group
         lib = lib.clone
         lib.mavenBaseUrl = 'http://repo.spongepowered.org/maven/'
       end

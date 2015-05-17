@@ -120,7 +120,7 @@ class ForgeVersionList < BaseVersionList
   end
 
   def construct_base_version(data)
-    version = Version.new
+    version = WonkoVersion.new
     version.uid = @artifact
     version.version = data[:version]
     version.requires << Referenced.new('net.minecraft', data[:mcversion])
@@ -129,8 +129,8 @@ class ForgeVersionList < BaseVersionList
         '-Dfml.ignoreInvalidMinecraftCertificates=true', '-Dfml.ignorePatchDiscrepancies=true'
     ]
     version.common.folders['minecraft/mods'] = ['mc.forgemods']
-    version.common.folders['minecraft/mods'] << 'mc.forgecoremods' if object[:install][:minecraft].match /[^1]*1\.[0-6]/
-    version.common.folders['minecraft/coremods'] = ['mc.forgecoremods'] if object[:install][:minecraft].match /[^1]*1\.[0-6]/
+    version.common.folders['minecraft/mods'] << 'mc.forgecoremods' if data[:mcversion].match /[^1]*1\.[0-6]/
+    version.common.folders['minecraft/coremods'] = ['mc.forgecoremods'] if data[:mcversion].match /[^1]*1\.[0-6]/
     version
   end
 end

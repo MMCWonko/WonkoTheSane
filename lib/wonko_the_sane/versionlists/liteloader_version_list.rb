@@ -44,7 +44,7 @@ class LiteLoaderVersionList < BaseVersionList
     liteloaderLib.name = 'com.mumfrey:liteloader:' + id[1][:version]
     liteloaderLib.url = 'http://dl.liteloader.com/versions/com/mumfrey/liteloader/' + id[1][:minecraft] + '/' + id[1][:file]
 
-    file = Version.new
+    file = WonkoVersion.new
     file.uid = 'com.mumfrey.liteloader'
     file.version = id.first
     file.type =  'release' # id[1][:type]

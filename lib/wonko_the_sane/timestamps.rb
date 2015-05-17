@@ -1,13 +1,11 @@
-require 'yajl/json_gem'
-
 class Timestamps
   def initialize
-    @json = JSON.parse File.read('timestamps.json')
+    @json = WonkoTheSane.data_json 'timestamps.json'
   end
 
   def get(uid, version, default = nil)
-    if @json[uid] and @json[uid][version]
-      return @json[uid][version]
+    if @json[uid.to_sym] and @json[uid.to_sym][version.to_sym.to_sym]
+      return @json[uid.to_sym][version.to_sym]
     elsif default.nil?
       raise 'No timestamp available for ' + uid + ': ' + version
     elsif default.is_a? String
@@ -25,8 +23,8 @@ class Timestamps
     end
   end
 
-  @@me = Timestamps.new
   def self.get(uid, version, default = nil)
+    @@me ||= Timestamps.new
     @@me.get uid, version, default
   end
 end

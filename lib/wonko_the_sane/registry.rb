@@ -47,12 +47,15 @@ class Registry
     raise e
   end
   def retrieve(id, version)
-    if File.exist? Version.local_filename(id, version)
-      return $rw.read_version File.read(Version.local_filename id, version)
+    if File.exist? WonkoVersion.local_filename(id, version)
+      return $rw.read_version File.read(WonkoVersion.local_filename id, version)
     else
       return nil
     end
   end
+
+  def self.instance
+    Dir.mkdir 'files' unless Dir.exist? 'files'
+    @@instance ||= Registry.new
+  end
 end
-Dir.mkdir 'files' unless Dir.exist? 'files'
-$registry = Registry.new

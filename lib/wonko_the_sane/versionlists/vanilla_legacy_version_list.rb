@@ -6,13 +6,12 @@ class VanillaLegacyVersionList < BaseVersionList
   end
 
   def get_versions
-    result = Yajl::Parser.parse File.open('minecraft.json', 'r'), symbolize_names: true
-    return result[:versions].map do |obj| [obj[:id], obj] end
+    WonkoTheSane.data_json('minecraft.json')[:versions].map do |obj| [obj[:id], obj] end
   end
 
   def get_version(id)
     data = id[1]
-    file = Version.new
+    file = WonkoVersion.new
     file.uid = 'net.minecraft'
     file.version = data[:id]
     file.time = data[:releaseTime]

@@ -1,5 +1,4 @@
 require 'fileutils'
-require 'rubygems'
 require 'zip'
 require 'set'
 
@@ -89,7 +88,7 @@ class HTTPCatcher
         Logging.logger[ctxt].debug 'GOT FULL FILE'
 
         @etags[uri] = new_etag if new_etag
-        File.write @basedir + '/etags.json', JSON.generate(@etags)
+        File.write @basedir + '/etags.json', JSON.pretty_generate(@etags)
 
         return resp
       else
@@ -185,10 +184,8 @@ class FileHashCache
   def initialize(file, algorithm)
     @file = file
     @algorithm = algorithm
-    @data = {}
-    if File.exists? @file
-      @data = JSON.parse File.read(@file), symbolize_names: true
-    end
+    @data = JSON.parse File.read(@file), symbolize_names: true if File.exists? @file
+    @data ||= {}
   end
 
   def get(file)

@@ -7,7 +7,7 @@ module Reader
     index = VersionIndex.new json.uid
     index.name = json.name
     json.versions.each do |ver|
-      v = Version.new
+      v = WonkoVersion.new
       v.is_complete = false
       v.uid = json.uid
       v.version = ver[:version]
@@ -51,7 +51,7 @@ module Reader
   def read_version(data)
     json = Hashie::Mash.new JSON.parse(data)
 
-    file = Version.new
+    file = WonkoVersion.new
     file.is_complete = true
 
     file.uid = json.uid
@@ -148,11 +148,11 @@ module Writer
     write_resource(:server, version.server, json[:data]) if version.is_complete
     write_resource(:common, version.common, json[:data]) if version.is_complete
 
-    return JSON.pretty_generate json
+    JSON.pretty_generate json
   end
 
   def write_index(index)
-    return JSON.pretty_generate index
+    JSON.pretty_generate index
   end
 end
 

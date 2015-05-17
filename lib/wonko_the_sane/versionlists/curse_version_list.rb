@@ -40,7 +40,7 @@ class CurseVersionList < BaseVersionList
     dl.url = "http://curse.com" + id[1][:url]
     dl.destination = "mods/#{@artifact}-#{id.first}.jar"
 
-    file = Version.new
+    file = WonkoVersion.new
     file.uid = @artifact
     file.version = id.first
     file.type =  id[1][:type]

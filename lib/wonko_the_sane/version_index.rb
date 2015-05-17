@@ -9,7 +9,7 @@ class VersionIndex
   end
 
   def add_version(version)
-    if version.is_a? Version
+    if version.is_a? WonkoVersion
       remove_version version # remove any previous versions
       @versions << version
     end

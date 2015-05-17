@@ -1,6 +1,3 @@
-require_relative 'util/cache'
-require 'json'
-
 def get_curse_id(name)
   data = HTTPCatcher.get('http://minecraft.curseforge.com/mc-mods/' + name).gsub /[\n\r]/, ''
   match = data.match /<li class="view-on?-cur?se"> *<a href="http:\/\/curse.com\/project\/(\d*)">/
@@ -12,12 +9,12 @@ def update_nem
     IronChests: :IronChests2
   }
 
-  sources = JSON.parse File.read('sources.json'), symbolize_names: true
+  sources = WonkoTheSane.data_json 'sources.json'
   sources[:forgefiles] = {} if not sources[:forgefiles]
   sources[:jenkins] = [] if not sources[:jenkins]
   sources[:curse] = [] if not sources[:curse]
 
-  nemList = JSON.parse HTTPCatcher.get('https://raw.githubusercontent.com/SinZ163/NotEnoughMods/master/NEMP/mods.json', key: 'https://raw.githubusercontent.com/SinZ163/NotEnoughMods/master/NEMP/mods.json'), symbolize_names: true
+  nemList = JSON.parse HTTPCatcher.get('https://raw.githubusercontent.com/SinZ163/NotEnoughMods/master/NEMP/mods.json'), symbolize_names: true
   nemList.each do |key, value|
     name = (value[:name] ? value[:name] : key).to_sym
     case value[:function]
@@ -83,6 +80,6 @@ def update_nem
     end
 
     # keep the writing in the loop so we don't lose progress in case of crashes or similar
-    File.write 'sources.json', JSON.pretty_generate(sources)
+    WonkoTheSane.set_data_json 'sources.json', sources
   end
 end

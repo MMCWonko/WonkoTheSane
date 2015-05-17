@@ -70,11 +70,11 @@ class VersionLibrary < Download
     'java.libraries'
   end
   def url
-    @url ? @url : (@mavenBaseUrl + MavenIdentifier.new(@name).to_path)
+    @url ? @url : (@mavenBaseUrl + WonkoTheSane::Util::MavenIdentifier.new(@name).to_path)
   end
 
   def maven
-    MavenIdentifier.new @name
+    WonkoTheSane::Util::MavenIdentifier.new @name
   end
 
   def to_json
@@ -127,7 +127,7 @@ class Referenced
   end
 end
 
-class Version
+class WonkoVersion
   attr_accessor :uid
   attr_accessor :version
   attr_reader :time # unix timestamp
@@ -176,7 +176,7 @@ class Version
   end
 
   def local_filename
-    Version.local_filename @uid, @version
+    WonkoVersion.local_filename @uid, @version
   end
   def self.local_filename(uid, version)
     'files/' + uid + '/' + version + '.json'

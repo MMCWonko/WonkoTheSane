@@ -4,7 +4,7 @@ class ForgeFilesModsInput < BaseInput
   end
 
   def parse(data, version)
-    file = Version.new
+    file = WonkoVersion.new
 
     file.uid = @artifact
     file.version = version

@@ -1,5 +1,3 @@
-require_relative '../base_input'
-
 def allowedPlatformsForRules(rules)
   possible = ['win32', 'win64', 'lin32', 'lin64', 'osx64']
 
@@ -103,7 +101,7 @@ class MojangInput
       return []
     end
 
-    file = Version.new
+    file = WonkoVersion.new
 
     file.uid = @artifact
     file.version = object[:id]
@@ -177,7 +175,7 @@ class MojangSplitLWJGLSanitizer < BaseSanitizer
 
     files = [file]
     versioned.each do |version, downloads|
-      lwjgl = Version.new
+      lwjgl = WonkoVersion.new
       lwjgl.uid = 'org.lwjgl'
       lwjgl.type = 'release'
       lwjgl.version = version

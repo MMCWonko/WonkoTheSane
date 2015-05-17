@@ -9,7 +9,7 @@ class JenkinsInput < BaseInput
       return nil
     end
 
-    file = Version.new
+    file = WonkoVersion.new
 
     file.uid = @artifact
     file.version = data[:number].to_s

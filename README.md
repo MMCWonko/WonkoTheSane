@@ -1,4 +1,4 @@
-## Wonko the Sane
+# WonkoTheSane
 
 From _So Long and Thanks for All the Fish_ by Douglas Adams:
 
@@ -59,3 +59,34 @@ This is a ruby application that queries, fetches, sanitizes and then stores reso
 #### Why?
 
 Having to reimplement all this hackery\^Wlogic in each client is a waste of resources, therefore this project aims at centralizing them. This means less hacks in the client (and thus the hacks can more easily be updated when needed) and overall simpler client design.
+
+## Installation
+
+Add this line to your application's Gemfile:
+
+```ruby
+gem 'wonko_the_sane'
+```
+
+And then execute:
+
+    $ bundle
+
+Or install it yourself as:
+
+    $ gem install wonko_the_sane
+
+## Usage
+
+TODO: Write usage instructions here
+
+## Development
+
+## Contributing
+
+1. Fork it ( https://github.com/MultiMC/WonkoTheSane/fork )
+2. Create your feature branch (`git checkout -b my-new-feature`)
+3. Commit your changes (`git commit -am 'Add some feature'`)
+4. Push to the branch (`git push origin my-new-feature`)
+5. Create a new Pull Request
+

@@ -1,5 +1,3 @@
-require_relative '../util/cache'
-
 class BaseVersionList
   attr_accessor :artifact
   # @processed contains a list of version ids for all versions that have been processed. simply clear it to invalidate caches
@@ -34,10 +32,10 @@ class BaseVersionList
 
             files.flatten.each do |file|
               file.is_complete = true
-              $registry.store file
+              Registry.instance.store file
             end if files and files.is_a? Array
-            files.is_complete = true if files and files.is_a? Version
-            $registry.store files if files and files.is_a? Version
+            files.is_complete = true if files and files.is_a? WonkoVersion
+            Registry.instance.store files if files and files.is_a? WonkoVersion
 
             @processed << id
             write_cache_file
@@ -76,10 +74,10 @@ class BaseVersionList
   end
 
   def write_cache_file
-    File.write cache_file, JSON.generate({
-                                             versions: @processed,
-                                             lastError: @lastError
-                                         })
+    File.write cache_file, JSON.pretty_generate({
+                                                    versions: @processed,
+                                                    lastError: @lastError
+                                                })
   end
 
   def cache_file
@@ -95,11 +93,11 @@ class BaseVersionList
   end
 
   def get_json(url)
-    Yajl::Parser.parse HTTPCatcher.file(url, ctxt: @artifact, check_stale: true), symbolize_names: true
+    JSON.parse HTTPCatcher.file(url, ctxt: @artifact, check_stale: true), symbolize_names: true
   end
 
   def get_json_cached(url)
-    Yajl::Parser.parse HTTPCatcher.file(url, ctxt: @artifact, check_stale: false), symbolize_names: true
+    JSON.parse HTTPCatcher.file(url, ctxt: @artifact, check_stale: false), symbolize_names: true
   end
 end
 Dir.mkdir 'cache' unless Dir.exist? 'cache'
