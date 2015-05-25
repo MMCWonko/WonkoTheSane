@@ -29,8 +29,9 @@ module Reader
     end
   end
 
-  def read_resource(data, res)
+  def read_resource(data)
     return if not data or not data.is_a? Object
+    res = WonkoVersion::Resources.new
     res.traits = data[:'general.traits'] if data[:'general.traits']
     res.folders = data[:'general.folders'] if data[:'general.folders']
     res.launchMethod = data[:'general.launcher'] if data[:'general.launcher']
@@ -38,6 +39,7 @@ module Reader
     res.downloads << read_download(data, 'general.downloads')
     res.downloads << read_download(data, 'java.libraries')
     res.downloads << read_download(data, 'java.natives')
+    res.downloads << read_download(data, 'mc.jarmods')
     res.downloads.flatten!
 
     res.mainClass = data[:'java.mainClass']
@@ -46,6 +48,7 @@ module Reader
     res.minecraftArguments = data[:'mc.arguments']
     res.tweakers = data[:'mc.tweakers']
     res.jarModTarget = data[:'mc.jarModTarget'] if data[:'mc.jarModTarget']
+    res
   end
 
   def read_version(data)
@@ -64,12 +67,12 @@ module Reader
 
     json[:data].each do |data|
       rules = data[:rules] ? data[:rules] : [ImplicitRule.new(:allow)]
-      if Rule.allowed_on_side rules, :client
-        read_resource data, file.client
+      if Rule.allowed_on_side(rules, :client) && Rule.allowed_on_side(rules, :server)
+        file.common = read_resource data
       elsif Rule.allowed_on_side rules, :server
-        read_resource data, file.server
+        file.server = read_resource data
       else
-        read_resource data, file.common
+        file.client = read_resource data
       end
     end if json[:data]
 

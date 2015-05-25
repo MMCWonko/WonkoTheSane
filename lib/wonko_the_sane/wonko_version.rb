@@ -35,6 +35,8 @@ class Download
       dl = VersionLibraryNative.new
     when 'general.downloads'
       dl = FileDownload.new
+    when 'mc.jarmods'
+      dl = Jarmod.new
     end
 
     dl.from_json json
@@ -109,7 +111,7 @@ end
 
 class Jarmod < VersionLibrary
   def type
-    'mc.jarmod'
+    'mc.jarmods'
   end
 end
 
@@ -160,9 +162,9 @@ class WonkoVersion
     end
   end
 
-  attr_reader :client
-  attr_reader :server
-  attr_reader :common
+  attr_accessor :client
+  attr_accessor :server
+  attr_accessor :common
 
   def initialize
     @requires = []

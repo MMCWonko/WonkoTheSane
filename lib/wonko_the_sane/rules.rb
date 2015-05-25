@@ -11,21 +11,21 @@ class Rule
 
   def self.allowed_on_side(rules, side)
     allowed = :allow
-    rules.each do |rule|
+    rules.map { |r| r.is_a?(Rule) ? r : Rule.from_json(r) }.each do |rule|
       if rule.is_a? ImplicitRule
         allowed = rule.action
       elsif rule.is_a? SidedRule
-        allowed = rule.action if rule.side = side
+        allowed = rule.action if rule.side == side
       end
     end
-    return allowed
+    allowed == :allow
   end
 
   def self.from_json(obj)
     if obj.key? :os
       return OsRule.new obj[:action].to_sym, obj[:os][:name], obj[:os][:version], obj[:os][:arch]
     elsif obj.key? :side
-      return SidedRule.new obj[:action].to_sym, obj[:side]
+      return SidedRule.new obj[:action].to_sym, obj[:side].to_sym
     else
       return ImplicitRule.new obj[:action].to_sym
     end
