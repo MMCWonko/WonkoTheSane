@@ -4,13 +4,14 @@ require 'wonko_the_sane/util/http_cache'
 module WonkoTheSane
   module Util
     class DeepStorageCache
-      def initialize(manifest_file)
-        lines = File.read('.aws-credentials').split "\n"
-        @resource = Aws::S3::Resource.new region: 'eu-west-1', credentials: Aws::Credentials.new(lines[0], lines[1])
+      def initialize
+        @resource = Aws::S3::Resource.new region: 'eu-west-1',
+                                          credentials: Aws::Credentials.new(Settings[:aws][:client_id],
+                                                                            Settings[:aws][:client_secret])
         @bucket = @resource.bucket 'wonkoweb-02jandal-xyz'
 
         @manifest = @bucket.object 'manifest.json'
-        @entries = @manifest.exists? ? JSON.parse(@manifest.get.body, symbolize_keys: true) : {}
+        @entries = @manifest.exists? ? JSON.parse(@manifest.get.body.read, symbolize_keys: true) : {}
       end
 
       def get_info(url, options = {})
@@ -51,8 +52,8 @@ module WonkoTheSane
       end
 
       def self.get_info(url, options = {})
-        if File.exists? '.aws-credentials'
-          @@instance ||= DeepStorageCache.new 'cache/deep_storage.json'
+        if Settings[:aws][:client_id]
+          @@instance ||= DeepStorageCache.new
           @@instance.get_info url, options
         else
           info_for_file HTTPCache.file(url, check_stale: false, ctxt: options[:ctxt]), url

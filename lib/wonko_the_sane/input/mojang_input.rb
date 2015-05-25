@@ -114,16 +114,16 @@ class MojangInput
     file.client.downloads = object[:libraries].map do |obj|
       MojangInput.sanetize_mojang_library obj
     end.flatten 1
-    mainLib = VersionLibrary.new
-    mainLib.name = "net.minecraft:minecraft:#{file.version}"
-    mainLib.url = 'http://s3.amazonaws.com/Minecraft.Download/versions/' + file.version + '/' + file.version + '.jar'
-    file.client.downloads << mainLib
+    main_lib = VersionLibrary.new
+    main_lib.name = "net.minecraft:minecraft:#{file.version}"
+    main_lib.url = 'http://s3.amazonaws.com/Minecraft.Download/versions/' + file.version + '/' + file.version + '.jar'
+    file.client.downloads << main_lib
     file.client.launchMethod = 'minecraft'
 
-    serverLib = VersionLibrary.new
-    serverLib.name = "net.minecraft:minecraft_server:#{file.version}"
-    serverLib.url = 'http://s3.amazonaws.com/Minecraft.Download/versions/' + file.version + '/minecraft_server.' + file.version + '.jar'
-    file.server.downloads << serverLib
+    server_lib = VersionLibrary.new
+    server_lib.name = "net.minecraft:minecraft_server:#{file.version}"
+    server_lib.url = 'http://s3.amazonaws.com/Minecraft.Download/versions/' + file.version + '/minecraft_server.' + file.version + '.jar'
+    file.server.downloads << server_lib
     file.server.jarModTarget = "net.minecraft:minecraft_server:#{file.version}"
     file.server.launchMethod = 'java.jar'
 

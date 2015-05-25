@@ -1,20 +1,17 @@
 class Registry
   def version_index(uid)
-    if File.exist? VersionIndex.local_filename(uid)
-      $rw.read_version_index File.read(VersionIndex.local_filename uid)
-    else
-      VersionIndex.new uid
-    end
+    return VersionIndex.new uid unless File.exists? VersionIndex.local_filename uid
+    $rw.read_version_index JSON.parse File.read(VersionIndex.local_filename uid)
+  end
+
+  def store_version_index(index)
+    File.write index.local_filename, JSON.pretty_generate($rw.write_version_index index)
+    WonkoTheSane.wonkoweb_uploader.file_changed index.uid
   end
 
   def index
-    if File.exists? 'files/index.json'
-      $rw.read_index File.read('files/index.json')
-    else
-      {
-          index: []
-      }
-    end
+    return { index: [] } unless File.exists? 'files/index.json'
+    $rw.read_index JSON.parse File.read 'files/index.json'
   end
 
   def store(version)
@@ -23,34 +20,30 @@ class Registry
     else
       BaseSanitizer.sanitize(version, DownloadsFixer).each do |version|
         Dir.mkdir 'files/' + version.uid unless Dir.exist? 'files/' + version.uid
-        File.write version.local_filename, $rw.write_version(version)
+        File.write version.local_filename, JSON.pretty_generate($rw.write_version version)
+        WonkoTheSane.wonkoweb_uploader.version_changed version.uid, version.version
 
         vindex = version_index version.uid
         vindex.add_version version
-        File.write VersionIndex.local_filename(vindex.uid), $rw.write_version_index(vindex)
+        store_version_index vindex
 
         ind = index
+        next if ind[:index].find { |i| version.uid == i[:uid] } # early exit if the uid already exists in the index
         ind[:formatVersion] = 0
-        ind[:index].each do |i|
-          if version.uid == i[:uid]
-            return
-          end
-        end
-        ind[:index] << {
-            uid: version.uid
-        }
-        File.write 'files/index.json', $rw.write_index(ind)
+        ind[:index] << { uid: version.uid }
+        File.write 'files/index.json', JSON.pretty_generate($rw.write_index ind)
       end
     end
   rescue Exception => e
     Logging.logger[version.uid].error 'Unable to store: ' + version.version
     raise e
   end
+
   def retrieve(id, version)
     if File.exist? WonkoVersion.local_filename(id, version)
-      return $rw.read_version File.read(WonkoVersion.local_filename id, version)
+      $rw.read_version JSON.parse File.read(WonkoVersion.local_filename id, version)
     else
-      return nil
+      nil
     end
   end
 

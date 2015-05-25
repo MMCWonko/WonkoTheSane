@@ -18,7 +18,7 @@ module WonkoTheSane
         end
       end
 
-      def register_lists_from(file)
+      def register_lists_from_sources
         sources = WonkoTheSane.data_json 'sources.json'
         sources[:forgefiles].each do |uid, urlId|
           register_list ForgeFilesModsList.new(uid.to_s, urlId)

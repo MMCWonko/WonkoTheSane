@@ -95,7 +95,7 @@ class VersionLibrary < Download
     @mavenBaseUrl = json[:mavenBaseUrl]
 
     # if the absolute url is equal to the expected maven url we clear the absolute url
-    if @url == url
+    if @mavenBaseUrl && @url == url
       @url = nil
     end
   end
@@ -134,7 +134,7 @@ class WonkoVersion
   attr_accessor :type
   attr_accessor :is_complete
 
-  attr_accessor :requires # list of Referenced
+  attr_accessor :requires # [Referenced]
 
   class Resources
     attr_accessor :traits

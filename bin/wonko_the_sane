@@ -1,3 +1,4 @@
+#!/usr/bin/env ruby
 require 'wonko_the_sane'
 require 'optparse'
 
@@ -21,7 +22,7 @@ Logging.logger['General'].info 'Welcome to WonkoTheSane!'.yellow
 
 WonkoTheSane.configure do |config|
     config.data_path = File.dirname(__FILE__) + '/../data'
-    config.register_lists_from 'data/sources.json'
+    config.register_lists_from_sources
     config.register_list VanillaVersionList
     config.register_list VanillaLegacyVersionList
     config.register_list LiteLoaderVersionList
@@ -82,6 +83,15 @@ OptionParser.new do |opts|
   opts.on '--update-nem', 'Updates sources.json with data from NEM' do
     update_nem
   end
+  opts.on '--set-config=VAL', 'Sets a configuration value' do |val|
+    parts = val.match /([^:=]*)([:=](.*))?/
+    if parts.length == 4 && !parts[3].nil?
+      Settings[parts[1]] = parts[3]
+    else
+      Settings.delete parts[1]
+    end
+    Settings.save! WonkoTheSane.settings_file
+  end
   opts.on '-h', '--help', 'Prints this help' do
     puts opts
     exit
@@ -89,3 +99,4 @@ OptionParser.new do |opts|
 end.parse!
 
 TaskStack.pop_all
+WonkoTheSane.wonkoweb_uploader.upload_changes!

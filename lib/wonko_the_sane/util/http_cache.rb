@@ -16,7 +16,7 @@ class HTTPCache
 
   def file(ctxt, url, key, check_stale = true)
     fetch ctxt, url, key, check_stale
-    File.new @basedir + '/' + key, 'r'
+    File.open @basedir + '/' + key, 'r'
   end
 
   private

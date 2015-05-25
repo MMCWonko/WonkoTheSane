@@ -10,9 +10,13 @@ require 'digest'
 require 'date'
 require 'time'
 require 'oga'
+require 'configliere'
+require 'httparty'
+require 'active_support/core_ext/hash/indifferent_access'
 
 require 'wonko_the_sane/version'
 require 'wonko_the_sane/tools/update_nem'
+require 'wonko_the_sane/util/benchmark'
 require 'wonko_the_sane/util/configuration'
 require 'wonko_the_sane/util/extraction_cache'
 require 'wonko_the_sane/util/deep_storage_cache'
@@ -36,6 +40,7 @@ require 'wonko_the_sane/versionlists/liteloader_version_list'
 require 'wonko_the_sane/versionlists/vanilla_legacy_version_list'
 require 'wonko_the_sane/versionlists/vanilla_version_list'
 
+require 'wonko_the_sane/wonkoweb_uploader'
 require 'wonko_the_sane/reader_writer'
 require 'wonko_the_sane/registry'
 require 'wonko_the_sane/rules'
@@ -45,8 +50,16 @@ require 'wonko_the_sane/version_parser'
 require 'wonko_the_sane/wonko_version'
 
 module WonkoTheSane
+  def self.wonkoweb_uploader
+    @uploader ||= WonkoWebUploader.new
+  end
+
   def self.lists
     configuration.lists
+  end
+
+  def self.settings_file
+    File.dirname(__FILE__) + '/../wonko_the_sane.yml'
   end
 
   def self.data(file)
@@ -54,7 +67,8 @@ module WonkoTheSane
   end
 
   def self.data_json(file)
-    JSON.parse File.open(data(file), 'r'), symbolize_keys: true
+    res = JSON.parse File.read data file
+    res.is_a?(Hash) ? HashWithIndifferentAccess.new(res) : res
   end
 
   def self.set_data_json(file, obj)
@@ -70,3 +84,24 @@ module WonkoTheSane
   end
   private_class_method :configuration
 end
+
+Settings.use :config_block, :encrypted, :prompt, :define
+Settings({
+  aws: {
+      client_id: nil,
+      client_secret: nil
+  },
+  wonkoweb: {
+      host: nil,
+      email: nil,
+      token: nil
+  }
+})
+Settings.define 'aws.client_id', encrypted: true
+Settings.define 'aws.client_secret', encrypted: true
+Settings.define 'wonkoweb.host'
+Settings.define 'wonkoweb.name'
+Settings.define 'wonkoweb.token', encrypted: true
+Settings.read WonkoTheSane.settings_file
+Settings[:encrypt_pass] = ENV['ENCRYPT_PASS'] || (print 'Password: '; pwd = STDIN.noecho(&:gets).chomp; puts; pwd)
+Settings.resolve!

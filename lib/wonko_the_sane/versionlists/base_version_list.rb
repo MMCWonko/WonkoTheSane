@@ -18,38 +18,36 @@ class BaseVersionList
 
   def refresh
     @lastError = nil
-    begin
-      versions = get_versions
+    versions = get_versions
 
-      # check if some versions aren't in @processed (likely new ones) and fetch and process them
-      versions.each do |version|
-        begin
-          next if not version
-          id = version.is_a?(Array) ? version.first : version
-          unless @processed.include? id
-            files = get_version version
-            next if files.nil? or (files.is_a? Array and files.empty?)
+    # check if some versions aren't in @processed (likely new ones) and fetch and process them
+    versions.each do |version|
+      begin
+        next if not version
+        id = version.is_a?(Array) ? version.first : version
+        unless @processed.include? id
+          files = get_version version
+          next if files.nil? or (files.is_a? Array and files.empty?)
 
-            files.flatten.each do |file|
-              file.is_complete = true
-              Registry.instance.store file
-            end if files and files.is_a? Array
-            files.is_complete = true if files and files.is_a? WonkoVersion
-            Registry.instance.store files if files and files.is_a? WonkoVersion
+          files.flatten.each do |file|
+            file.is_complete = true
+            Registry.instance.store file
+          end if files and files.is_a? Array
+          files.is_complete = true if files and files.is_a? WonkoVersion
+          Registry.instance.store files if files and files.is_a? WonkoVersion
 
-            @processed << id
-            write_cache_file
-          end
-        rescue => e
-          logger.error e.message
-          logger.warn e.backtrace.first
-          binding.pry if $stdout.isatty && ENV['DEBUG_ON_ERROR']
-          @lastError = e.message
+          @processed << id
+          write_cache_file
         end
       end
-
-      FileUtils.touch cache_file
     end
+
+    FileUtils.touch cache_file
+  rescue => e
+    logger.error e.message
+    logger.warn e.backtrace.first
+    binding.pry if $stdout.isatty && ENV['DEBUG_ON_ERROR']
+    @lastError = e.message
   end
 
   def logger
@@ -93,11 +91,11 @@ class BaseVersionList
   end
 
   def get_json(url)
-    JSON.parse HTTPCache.file(url, ctxt: @artifact, check_stale: true), symbolize_names: true
+    Yajl::Parser.parse HTTPCache.file(url, ctxt: @artifact, check_stale: true), symbolize_keys: true
   end
 
   def get_json_cached(url)
-    JSON.parse HTTPCache.file(url, ctxt: @artifact, check_stale: false), symbolize_names: true
+    Yajl::Parser.parse HTTPCache.file(url, ctxt: @artifact, check_stale: false), symbolize_keys: true
   end
 end
 Dir.mkdir 'cache' unless Dir.exist? 'cache'

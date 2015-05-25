@@ -2,7 +2,7 @@ require 'hashie'
 
 module Reader
   def read_version_index(data)
-    json = Hashie::Mash.new JSON.parse(data, symbolize_names: true)
+    json = Hashie::Mash.new data
 
     index = VersionIndex.new json.uid
     index.name = json.name
@@ -21,11 +21,11 @@ module Reader
 
   def read_download(data, key)
     if data[key.to_sym]
-      return data[key.to_sym].map do |dl|
+      data[key.to_sym].map do |dl|
         Download.from_json key, dl
       end
     else
-      return []
+      []
     end
   end
 
@@ -49,7 +49,7 @@ module Reader
   end
 
   def read_version(data)
-    json = Hashie::Mash.new JSON.parse(data)
+    json = Hashie::Mash.new data
 
     file = WonkoVersion.new
     file.is_complete = true
@@ -73,11 +73,11 @@ module Reader
       end
     end if json[:data]
 
-    return file
+    file
   end
 
   def read_index(data)
-    JSON.parse data, symbolize_names: true
+    data.with_indifferent_access
   end
 end
 
@@ -96,7 +96,7 @@ module Writer
       json[:versions] << obj
     end
 
-    return JSON.pretty_generate json
+    json
   end
 
   def write_resource(side, resource, out)
@@ -134,25 +134,26 @@ module Writer
         formatVersion: 0,
         uid: version.uid,
         version: version.version,
-        time: version.time
+        time: version.time.to_s,
+        type: version.type,
+        data: [],
+        requires: []
     }
-    json[:type] = version.type                             if version.type and version.type != ''
     json[:requires] = version.requires.map do |req|
       obj = { uid: req.uid }
       obj[:version] = req.version if req.version
       obj
     end if version.requires and not version.requires.empty?
 
-    json[:data] = []
     write_resource(:client, version.client, json[:data]) if version.is_complete
     write_resource(:server, version.server, json[:data]) if version.is_complete
     write_resource(:common, version.common, json[:data]) if version.is_complete
 
-    JSON.pretty_generate json
+    json
   end
 
   def write_index(index)
-    JSON.pretty_generate index
+    index
   end
 end
 
