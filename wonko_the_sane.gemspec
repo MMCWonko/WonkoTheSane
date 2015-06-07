@@ -38,4 +38,10 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency 'configliere'
   spec.add_runtime_dependency 'httparty'
   spec.add_runtime_dependency 'activesupport'
+  spec.add_runtime_dependency 'faraday'
+  spec.add_runtime_dependency 'faraday-http-cache'
+  spec.add_runtime_dependency 'faraday-request-timer'
+  spec.add_runtime_dependency 'faraday_middleware'
+  spec.add_runtime_dependency 'faraday-cookie_jar'
+  spec.add_runtime_dependency 'faraday_connection_pool'
 end
