@@ -7,6 +7,7 @@ require 'faraday/http_cache'
 require 'faraday_middleware'
 require 'faraday-cookie_jar'
 require 'active_support/cache'
+require 'uri'
 
 class HTTPCache
   def initialize(basedir)
@@ -45,8 +46,9 @@ class HTTPCache
 
       connection = nil
       @mutex.synchronize do
-        unless @connections.key? host
-          @connections[host] = Faraday.new url: host do |faraday|
+        connection_id = host + ctxt.to_s
+        unless @connections.key? connection_id
+          @connections[connection_id] = Faraday.new url: host do |faraday|
             faraday.use :cookie_jar
             faraday.response :raise_error
             faraday.response :chunked
@@ -62,7 +64,7 @@ class HTTPCache
             faraday.adapter :net_http_pooled
           end
         end
-        connection = @connections[host]
+        connection = @connections[connection_id]
       end
       Logging.logger[ctxt.to_s].debug "DL: #{url}"
 

@@ -109,7 +109,7 @@ module Writer
     data[:'general.launcher'] = resource.launchMethod              if resource.launchMethod
     data[:'general.folders'] = resource.folders                    if resource.folders and not resource.folders.empty?
     resource.downloads.each do |dl|
-      data[dl.type] = [] if not data[dl.type]
+      data[dl.type] = [] unless data[dl.type]
       data[dl.type] << dl.to_json
     end
     data[:'java.mainClass'] = resource.mainClass                   if resource.mainClass and resource.mainClass != ''
@@ -120,7 +120,7 @@ module Writer
     data[:'mc.assets'] = resource.assets                           if resource.assets and resource.assets != ''
     data[:'mc.arguments'] = resource.minecraftArguments            if resource.minecraftArguments and resource.minecraftArguments != ''
 
-    if not data.empty?
+    unless data.empty?
       if side == :client or side == :server
         data[:rules] = [
           ImplicitRule.new(:disallow).to_json,

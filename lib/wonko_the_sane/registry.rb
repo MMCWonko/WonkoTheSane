@@ -20,7 +20,8 @@ class Registry
     else
       BaseSanitizer.sanitize(version, DownloadsFixer).each do |version|
         Dir.mkdir 'files/' + version.uid unless Dir.exist? 'files/' + version.uid
-        File.write version.local_filename, JSON.pretty_generate($rw.write_version version)
+        File.write version.local_filename + '.new', JSON.pretty_generate($rw.write_version version)
+        File.write version.local_filename, JSON.pretty_generate($old_format.write_version version)
         WonkoTheSane.wonkoweb_uploader.version_changed version.uid, version.version
 
         vindex = version_index version.uid
@@ -41,7 +42,7 @@ class Registry
 
   def retrieve(id, version)
     if File.exist? WonkoVersion.local_filename(id, version)
-      $rw.read_version JSON.parse File.read(WonkoVersion.local_filename id, version)
+      $rw.read_version JSON.parse File.read(WonkoVersion.local_filename(id, version) + '.new')
     else
       nil
     end

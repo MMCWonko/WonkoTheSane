@@ -66,7 +66,7 @@ class ForgeRemoveMinecraftSanitizer < BaseSanitizer
       end
     end
     minecraft = Registry.instance.retrieve 'net.minecraft', mcversion
-    if not minecraft
+    unless minecraft
       # if we can't find the wanted version on the first try we try reloading the list to see if we get something
       WonkoTheSane.lists.each do |list|
         list.refresh if list.artifact == 'net.minecraft'

@@ -2,28 +2,29 @@ class BaseVersionList
   attr_accessor :artifact
   # @processed contains a list of version ids for all versions that have been processed. simply clear it to invalidate caches
   attr_accessor :processed
-  attr_accessor :lastError
+  attr_accessor :last_error
 
   def initialize(artifact)
     @artifact = artifact
     if File.exist? cache_file
       data = JSON.parse File.read(cache_file), symbolize_names: true
+      binding.pry if data.nil?
       @processed = data[:versions] ? data[:versions] : []
-      @lastError = data[:lastError]
+      @last_error = data[:@last_error]
     else
       @processed = []
-      @lastError = nil
+      @last_error = nil
     end
   end
 
   def refresh
-    @lastError = nil
+    @last_error = nil
     versions = get_versions
 
     # check if some versions aren't in @processed (likely new ones) and fetch and process them
     versions.each do |version|
+      next if version.nil?
       begin
-        next if not version
         id = version.is_a?(Array) ? version.first : version
         unless @processed.include? id
           files = get_version version
@@ -39,6 +40,11 @@ class BaseVersionList
           @processed << id
           write_cache_file
         end
+      rescue => e
+        logger.error e.message
+        logger.warn e.backtrace.first
+        binding.pry if $stdout.isatty && ENV['DEBUG_ON_ERROR']
+        @last_error = e.message
       end
     end
 
@@ -47,7 +53,7 @@ class BaseVersionList
     logger.error e.message
     logger.warn e.backtrace.first
     binding.pry if $stdout.isatty && ENV['DEBUG_ON_ERROR']
-    @lastError = e.message
+    @last_error = e.message
   end
 
   def logger
@@ -74,7 +80,7 @@ class BaseVersionList
   def write_cache_file
     File.write cache_file, JSON.pretty_generate({
                                                     versions: @processed,
-                                                    lastError: @lastError
+                                                    lastError: @last_error
                                                 })
   end
 

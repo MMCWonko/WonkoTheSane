@@ -69,7 +69,7 @@ class MojangInput
       end
 
       allowedPlatformsForRules(lib.rules).uniq.each do |platform|
-        if not nativeIds.key? platform
+        unless nativeIds.key? platform
           next
         end
 

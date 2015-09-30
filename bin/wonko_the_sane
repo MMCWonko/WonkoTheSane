@@ -40,7 +40,7 @@ OptionParser.new do |opts|
         TaskStack.push(Proc.new do
                          Logging.logger[list.artifact].info 'Refreshing'
                          list.refresh
-                         Logging.logger[list.artifact].error list.lastError if list.lastError
+                         Logging.logger[list.artifact].error list.last_error if list.last_error
                        end)
         foundList = true
       end
@@ -53,7 +53,7 @@ OptionParser.new do |opts|
       TaskStack.push(Proc.new do
                        Logging.logger[list.artifact].info 'Refreshing'
                        list.refresh
-                       Logging.logger[list.artifact].error list.lastError if list.lastError
+                       Logging.logger[list.artifact].error list.last_error if list.last_error
                      end)
     end
   end

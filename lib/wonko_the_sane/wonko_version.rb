@@ -68,11 +68,25 @@ class VersionLibrary < Download
   attr_accessor :name
   attr_accessor :mavenBaseUrl
 
+  def ==(other)
+    name == other.name && url == other.url && sha256 == other.sha256 && rules == other.rules
+  end
+
   def type
     'java.libraries'
   end
   def url
-    @url ? @url : (@mavenBaseUrl + WonkoTheSane::Util::MavenIdentifier.new(@name).to_path)
+    if @url
+      @url
+    elsif @mavenBaseUrl
+      @mavenBaseUrl + WonkoTheSane::Util::MavenIdentifier.new(@name).to_path
+    else
+      nil
+    end
+  end
+
+  def explicit_url?
+    !@url.nil?
   end
 
   def maven
@@ -84,7 +98,7 @@ class VersionLibrary < Download
     obj[:name] = @name
     obj[:mavenBaseUrl] = @mavenBaseUrl if @mavenBaseUrl
 
-    if not @url
+    unless @url
       obj.delete :url
     end
 
