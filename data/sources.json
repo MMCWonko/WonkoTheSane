@@ -172,11 +172,6 @@
       "artifact": "Power%20Converters"
     },
     {
-      "uid": "galacticraft",
-      "url": "http://ci.micdoodle8.com:8080",
-      "artifact": "Galacticraft-1.7"
-    },
-    {
       "uid": "artifice",
       "url": "http://76.72.175.100:8080",
       "artifact": "Artifice"

@@ -2,5 +2,6 @@ cache/
 files/
 .idea/
 pkg/
+out/
 wonko.log
-.aws-credentials
+wts.yml

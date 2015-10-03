@@ -40,7 +40,6 @@ require 'wonko_the_sane/versionlists/liteloader_version_list'
 require 'wonko_the_sane/versionlists/vanilla_legacy_version_list'
 require 'wonko_the_sane/versionlists/vanilla_version_list'
 
-require 'wonko_the_sane/wonkoweb_uploader'
 require 'wonko_the_sane/new_format'
 require 'wonko_the_sane/old_format'
 require 'wonko_the_sane/registry'

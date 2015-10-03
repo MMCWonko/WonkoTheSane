@@ -1,5 +1,3 @@
-require 'pry'
-
 class JenkinsVersionList < BaseVersionList
   def initialize(artifact, base_url, job, file_regex)
     super(artifact)

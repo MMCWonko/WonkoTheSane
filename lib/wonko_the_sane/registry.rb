@@ -1,3 +1,5 @@
+require 'fileutils'
+
 class Registry
   def version_index(uid)
     return VersionIndex.new uid unless File.exists? VersionIndex.local_filename uid
@@ -6,7 +8,7 @@ class Registry
 
   def store_version_index(index)
     File.write index.local_filename, JSON.pretty_generate($rw.write_version_index index)
-    WonkoTheSane.wonkoweb_uploader.file_changed index.uid
+    FileUtils.copy index.local_filename, "#{Registry.out_dir}/#{index.uid}.json" unless Registry.out_dir.blank?
   end
 
   def index
@@ -25,7 +27,10 @@ class Registry
           Dir.mkdir 'files/' + ver.uid unless Dir.exist? 'files/' + ver.uid
           File.write ver.local_filename + '.new', JSON.pretty_generate($rw.write_version ver)
           File.write ver.local_filename, JSON.pretty_generate($old_format.write_version ver)
-          WonkoTheSane.wonkoweb_uploader.version_changed ver.uid, ver.version
+          unless Registry.out_dir.blank?
+            FileUtils.copy ver.local_filename + '.new', "#{Registry.out_dir}/#{ver.uid}-#{ver.version}.new.json"
+            FileUtils.copy ver.local_filename, "#{Registry.out_dir}/#{ver.uid}-#{ver.version}.json"
+          end
 
           vindex = version_index ver.uid
           vindex.add_version ver
@@ -53,7 +58,12 @@ class Registry
   end
 
   def self.instance
-    Dir.mkdir 'files' unless Dir.exist? 'files'
+    FileUtils.mkdir_p 'files' unless Dir.exist? 'files'
+    FileUtils.mkdir_p out_dir unless out_dir.blank? || Dir.exists?(out_dir)
     @instance ||= Registry.new
+  end
+
+  def self.out_dir
+    WonkoTheSane.configuration.out_dir
   end
 end

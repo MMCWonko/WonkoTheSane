@@ -84,9 +84,3 @@ OptionParser.new do |opts|
 end.parse!
 
 TaskStack.pop_all
-
-begin
-  WonkoTheSane.wonkoweb_uploader.upload_changes!
-rescue Errno::ECONNREFUSED => e
-  Logging.logger['General'].error 'Unable to upload changes to wonkoweb: ' + e.message
-end
