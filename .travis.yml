@@ -1,0 +1,8 @@
+language: ruby
+rvm:
+  - ruby-2.2.3
+  - ruby-head
+cache: bundler
+sudo: false
+notifications:
+  email: false
