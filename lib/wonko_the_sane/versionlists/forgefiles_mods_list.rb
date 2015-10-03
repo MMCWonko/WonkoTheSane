@@ -1,5 +1,3 @@
-require 'pry'
-
 class ForgeFilesModsList < BaseVersionList
   def initialize(artifact, url_id)
     super(artifact)

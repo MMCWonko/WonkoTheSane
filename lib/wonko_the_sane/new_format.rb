@@ -80,7 +80,7 @@ end
 module Writer
   def write_version_index(index)
     json = {
-        formatVersion: 0,
+        formatVersion: 10,
         uid: index.uid,
         name: index.name,
         versions: []
@@ -127,7 +127,7 @@ module Writer
   def write_version(version)
     # metadata
     json = {
-        formatVersion: 0,
+        formatVersion: 10,
         uid: version.uid,
         version: version.version,
         time: version.time.to_s,
