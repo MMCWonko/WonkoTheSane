@@ -2,11 +2,11 @@ require_relative 'base_version_list'
 
 class VanillaLegacyVersionList < BaseVersionList
   def initialize
-    super('net.minecraft')
+    super 'net.minecraft'
   end
 
   def get_versions
-    WonkoTheSane.data_json('minecraft.json')[:versions].map do |obj| [obj[:id], obj] end
+    WonkoTheSane.data_json('minecraft.json')[:versions].map { |obj| [obj[:id], obj] }
   end
 
   def get_version(id)
@@ -20,10 +20,10 @@ class VanillaLegacyVersionList < BaseVersionList
     file.client.extra[:processArguments] = data[:processArguments]
     file.client.mainClass = data[:mainClass] if data.has_key? :mainClass
     file.client.appletClass = data[:appletClass] if data.has_key? :appletClass
-    mainLib = VersionLibrary.new
-    mainLib.name = 'net.minecraft:minecraft:' + file.version
-    mainLib.url = 'http://s3.amazonaws.com/Minecraft.Download/versions/' + file.version + '/' + file.version + '.jar'
-    file.client.downloads = [ mainLib ]
+    main_lib = VersionLibrary.new
+    main_lib.name = 'net.minecraft:minecraft:' + file.version
+    main_lib.url = 'http://s3.amazonaws.com/Minecraft.Download/versions/' + file.version + '/' + file.version + '.jar'
+    file.client.downloads = [ main_lib ]
 
     file.client.folders['minecraft/screenshots'] = ['general.screenshots']
     file.client.folders['minecraft/resourcepackks'] = ['mc.resourcepacks'] if file.time >= 1372430921

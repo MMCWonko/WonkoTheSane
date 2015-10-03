@@ -29,13 +29,11 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'guard-shell'
 
   spec.add_runtime_dependency 'rubyzip'
-  spec.add_runtime_dependency 'hashie'
   spec.add_runtime_dependency 'yajl-ruby'
   spec.add_runtime_dependency 'colorize'
   spec.add_runtime_dependency 'oga'
   spec.add_runtime_dependency 'logging'
   spec.add_runtime_dependency 'aws-sdk'
-  spec.add_runtime_dependency 'configliere'
   spec.add_runtime_dependency 'httparty'
   spec.add_runtime_dependency 'activesupport'
   spec.add_runtime_dependency 'faraday'

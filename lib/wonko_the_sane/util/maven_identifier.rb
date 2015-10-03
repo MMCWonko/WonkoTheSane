@@ -13,26 +13,20 @@ module WonkoTheSane
         @artifact = parts[:artifact]
         @version = parts[:version]
         @classifier = parts[:classifier]
-        @extension = parts[:extension] ? parts[:extension] : 'jar'
+        @extension = parts[:extension] || 'jar'
       end
 
       def to_path
-        path = @group.gsub(/\./, '/') + '/' + @artifact + '/' + @version + '/' + @artifact + '-' + @version
-        if @classifier
-          path = path + '-' + @classifier
-        end
-        return path + '.' + @extension
+        path = "#{@group.gsub /\./, '/'}/#{@artifact}/#{@version}/#{@artifact}-#{@version}"
+        path = "#{path}-#{@classifier}" if @classifier
+        "#{path}.#{@extension}"
       end
 
       def to_name
-        name = @group + ':' + @artifact + ':' + @version
-        if @classifier
-          name = name + ':' + @classifier
-        end
-        if @extension != 'jar'
-          name = name + '@' + @extension
-        end
-        return name
+        name = "#{@group}:#{@artifact}:#{@version}"
+        name = "#{name}:#{@classifier}" if @classifier
+        name = "#{name}@#{@extension}" if @extension != 'jar'
+        name
       end
     end
   end

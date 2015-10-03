@@ -50,7 +50,7 @@ class OsRule < Rule
     obj[:os] = { name: @os }
     obj[:os][:version] = @os_version if @os_version
     obj[:os][:arch] = @os_arch if @os_arch
-    return obj
+    obj
   end
 end
 class SidedRule < Rule
@@ -64,6 +64,6 @@ class SidedRule < Rule
   def to_json
     obj = super
     obj[:side] = @side
-    return obj
+    obj
   end
 end

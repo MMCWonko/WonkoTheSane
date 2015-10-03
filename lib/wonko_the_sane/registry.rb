@@ -10,34 +10,38 @@ class Registry
   end
 
   def index
-    return { index: [] } unless File.exists? 'files/index.json'
+    return {index: []} unless File.exists? 'files/index.json'
     $rw.read_index JSON.parse File.read 'files/index.json'
   end
 
   def store(version)
     if version.is_a? Array
-      version.each do |f| store(f) end
+      version.each do |f|
+        store(f)
+      end
     else
-      BaseSanitizer.sanitize(version, DownloadsFixer).each do |version|
-        Dir.mkdir 'files/' + version.uid unless Dir.exist? 'files/' + version.uid
-        File.write version.local_filename + '.new', JSON.pretty_generate($rw.write_version version)
-        File.write version.local_filename, JSON.pretty_generate($old_format.write_version version)
-        WonkoTheSane.wonkoweb_uploader.version_changed version.uid, version.version
+      BaseSanitizer.sanitize(version, DownloadsFixer).each do |ver|
+        begin
+          Dir.mkdir 'files/' + ver.uid unless Dir.exist? 'files/' + ver.uid
+          File.write ver.local_filename + '.new', JSON.pretty_generate($rw.write_version ver)
+          File.write ver.local_filename, JSON.pretty_generate($old_format.write_version ver)
+          WonkoTheSane.wonkoweb_uploader.version_changed ver.uid, ver.version
 
-        vindex = version_index version.uid
-        vindex.add_version version
-        store_version_index vindex
+          vindex = version_index ver.uid
+          vindex.add_version ver
+          store_version_index vindex
 
-        ind = index
-        next if ind[:index].find { |i| version.uid == i[:uid] } # early exit if the uid already exists in the index
-        ind[:formatVersion] = 0
-        ind[:index] << { uid: version.uid }
-        File.write 'files/index.json', JSON.pretty_generate($rw.write_index ind)
+          ind = index
+          next if ind[:index].find { |i| ver.uid == i[:uid] } # early exit if the uid already exists in the index
+          ind[:formatVersion] = 0
+          ind[:index] << {uid: ver.uid}
+          File.write 'files/index.json', JSON.pretty_generate($rw.write_index ind)
+        rescue Exception => e
+          Logging.logger[ver.uid].error 'Unable to store: ' + ver.version
+          raise e
+        end
       end
     end
-  rescue Exception => e
-    Logging.logger[version.uid].error 'Unable to store: ' + version.version
-    raise e
   end
 
   def retrieve(id, version)
@@ -50,6 +54,6 @@ class Registry
 
   def self.instance
     Dir.mkdir 'files' unless Dir.exist? 'files'
-    @@instance ||= Registry.new
+    @instance ||= Registry.new
   end
 end

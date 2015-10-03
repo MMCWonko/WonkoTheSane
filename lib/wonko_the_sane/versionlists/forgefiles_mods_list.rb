@@ -1,16 +1,14 @@
 require 'pry'
 
 class ForgeFilesModsList < BaseVersionList
-  def initialize(artifact, urlId)
+  def initialize(artifact, url_id)
     super(artifact)
-    @urlId = urlId
+    @url_id = url_id
     @input = ForgeFilesModsInput.new(artifact)
   end
 
   def get_versions
-    result = get_json "http://files.minecraftforge.net/#{@urlId}/json"
-
-    return result[:builds].map do |build|
+    get_json("http://files.minecraftforge.net/#{@url_id}/json")[:builds].map do |build|
       [
           build[:version],
           build

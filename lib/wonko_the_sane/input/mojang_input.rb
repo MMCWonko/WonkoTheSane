@@ -1,77 +1,72 @@
-def allowedPlatformsForRules(rules)
+def allowed_platforms_for_rules(rules)
   possible = ['win32', 'win64', 'lin32', 'lin64', 'osx64']
 
   allowed = possible
   if rules
     rules.each do |rule|
-      if rule.action == :allow
-        if rule.is_a? OsRule
-          if rule.os == 'windows'
-            allowed << 'win32'
-            allowed << 'win64'
-          elsif rule.os == 'linux'
-            allowed << 'lin32'
-            allowed << 'lin64'
-          elsif rule.os == 'osx'
+      if rule.is_a? ImplicitRule
+        if rule.action == :allow
+          allowed = possible
+        else
+          allowed = []
+        end
+      elsif rule.is_a? OsRule
+        if rule.action == :allow
+          case rule.os
+          when 'windows'
+            allowed << 'win32' << 'win64'
+          when 'linux'
+            allowed << 'lin32' << 'lin64'
+          when 'osx'
             allowed << 'osx64'
           end
-        elsif rule.is_a? ImplicitRule
-          allowed = possible
-        end
-      elsif rule.action == :disallow
-        if rule.is_a? OsRule
-          if rule.os == 'windows'
+        elsif rule.action == :disallow
+          case rule.os
+          when 'windows'
             allowed.delete 'win32'
             allowed.delete 'win64'
-          elsif rule.os == 'linux'
+          when 'linux'
             allowed.delete 'lin32'
             allowed.delete 'lin64'
-          elsif rule.os == 'osx'
+          when 'osx'
             allowed.delete 'osx64'
           end
-        elsif rule.is_a? ImplicitRule
-          allowed = []
         end
       end
     end
   end
 
-  return allowed
+  allowed
 end
 
 class MojangInput
   # reads a general mojang-style library
-  def self.sanetize_mojang_library(object)
-    lib = if object.key? :natives then VersionLibraryNative.new else VersionLibrary.new end
+  def self.sanitize_mojang_library(object)
+    lib = object.key?(:natives) ? VersionLibraryNative.new : VersionLibrary.new
     lib.name = object[:name]
-    lib.mavenBaseUrl = object.key?(:url) ? object[:url] : 'https://libraries.minecraft.net/'
-
+    lib.maven_base_url = object.key?(:url) ? object[:url] : 'https://libraries.minecraft.net/'
     lib.rules = object[:rules].map do |obj| Rule.from_json obj end if object[:rules]
 
     libs = []
-    if not lib.is_a? VersionLibraryNative
+    if !lib.is_a? VersionLibraryNative
       libs << lib
     else
-      nativeIds = {}
-      if object.key? :natives
-        natives = object[:natives]
-        if natives.key? :windows
-          nativeIds['win32'] = natives[:windows].gsub "${arch}", '32'
-          nativeIds['win64'] = natives[:windows].gsub "${arch}", '64'
-        end
-        if natives.key? :linux
-          nativeIds['lin32'] = natives[:linux].gsub "${arch}", '32'
-          nativeIds['lin64'] = natives[:linux].gsub "${arch}", '64'
-        end
-        if natives.key? :osx
-          nativeIds['osx64'] = natives[:osx].gsub "${arch}", '64'
-        end
+      native_ids = {}
+      natives = object[:natives]
+      if natives.key? :windows
+        native_ids['win32'] = natives[:windows].gsub "${arch}", '32'
+        native_ids['win64'] = natives[:windows].gsub "${arch}", '64'
+      end
+      if natives.key? :linux
+        native_ids['lin32'] = natives[:linux].gsub "${arch}", '32'
+        native_ids['lin64'] = natives[:linux].gsub "${arch}", '64'
+      end
+      if natives.key? :osx
+        native_ids['osx64'] = natives[:osx].gsub "${arch}", '64'
       end
 
-      allowedPlatformsForRules(lib.rules).uniq.each do |platform|
-        unless nativeIds.key? platform
-          next
-        end
+      allowed_platforms_for_rules(lib.rules).uniq.each do |platform|
+        next unless native_ids.key? platform
 
         native = lib.clone
         native.rules = [
@@ -81,12 +76,12 @@ class MojangInput
           nil,
           {'win32': '32', 'win64': '64', 'lin32': '32', 'lin64': '64', 'osx64': '64'}[platform.to_sym])
         ]
-        native.url = native.url.sub '.jar', ('-' + nativeIds[platform] + '.jar')
+        native.url = native.url.sub '.jar', ('-' + native_ids[platform] + '.jar')
         libs << native
       end
     end
 
-    return libs
+    libs
   end
 
   def initialize(artifact)
@@ -97,7 +92,7 @@ class MojangInput
     object = data.class == Hash ? data : JSON.parse(data, symbolize_names: true)
 
     if object[:minimumLauncherVersion] and object[:minimumLauncherVersion] > 14
-      # TODO log error
+      logger.warn 'To high minimumLauncherVersion encountered for ' + object[:id] + ': ' + object[:minimumLauncherVersion]
       return []
     end
 
@@ -111,9 +106,7 @@ class MojangInput
     file.client.assets = object[:assets]
     file.client.minecraftArguments = object[:minecraftArguments]
     file.client.jarModTarget = "net.minecraft:minecraft:#{file.version}"
-    file.client.downloads = object[:libraries].map do |obj|
-      MojangInput.sanetize_mojang_library obj
-    end.flatten 1
+    file.client.downloads = object[:libraries].map { |obj| MojangInput.sanitize_mojang_library obj }.flatten 1
     main_lib = VersionLibrary.new
     main_lib.name = "net.minecraft:minecraft:#{file.version}"
     main_lib.url = 'http://s3.amazonaws.com/Minecraft.Download/versions/' + file.version + '/' + file.version + '.jar'
@@ -134,7 +127,7 @@ class MojangInput
     file.client.folders['minecraft/saves'] = ['mc.saves.region'] if file.time >= 1298325600 and file.time < 1330552800
     file.client.folders['minecraft/saves'] = ['mc.saves.infdev'] if file.time >= 1291327200 and file.time < 1298325600
 
-    return BaseSanitizer.sanitize file, MojangSplitLWJGLSanitizer
+    BaseSanitizer.sanitize file, MojangSplitLWJGLSanitizer
   end
 end
 
@@ -142,28 +135,28 @@ class MojangExtractTweakersSanitizer < BaseSanitizer
   def self.sanitize(file)
     file.client.tweakers = file.client.minecraftArguments.scan(/--tweakClass ([^ ]*)/).flatten
     file.client.minecraftArguments = file.client.minecraftArguments.gsub /\ ?--tweakClass ([^ ]*)/, ''
-    return file
+    file
   end
 end
 
 # extract lwjgl specific libraries and natives
 class MojangSplitLWJGLSanitizer < BaseSanitizer
-  @@lwjglList = ['org.lwjgl', 'net.java.jinput', 'net.java.jutils']
-  @@lwjglExtras = ['net.java.jinput', 'net.java.jutils']
+  class << self; attr_accessor :lwjgl_list, :lwjgl_extras; end
+  self.lwjgl_list = %w(org.lwjgl net.java.jinput net.java.jutils)
+  self.lwjgl_extras = %w(net.java.jinput net.java.jutils)
 
   def self.sanitize(file)
     file.requires = [] if file.requires.nil?
     file.requires << Referenced.new('org.lwjgl')
 
     extras = [] # [Download]
-    versioned = {} # String => [Download]
+    versioned = Hash.new { |hash, key| hash[key] = [] } # String => [Download]
     file.client.downloads.select! do |lib|
-      nil == @@lwjglList.find do |lwjglCandidate|
-        if lib.name.include? lwjglCandidate
-          if @@lwjglExtras.include? lib.maven.group
+      nil == self.lwjgl_list.find do |lwjgl_candidate|
+        if lib.name.include? lwjgl_candidate
+          if self.lwjgl_extras.include? lib.maven.group
             extras << lib
           else
-            versioned[lib.maven.version] ||= []
             versioned[lib.maven.version] << lib
           end
           true
@@ -190,8 +183,6 @@ end
 
 class MojangTraitsSanitizer < BaseSanitizer
   def self.sanitize(file)
-    if file.uid == 'net.minecraft'
-    end
     file
   end
 end

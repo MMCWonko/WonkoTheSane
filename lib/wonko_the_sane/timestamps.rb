@@ -4,8 +4,8 @@ class Timestamps
   end
 
   def get(uid, version, default = nil)
-    if @json[uid.to_sym] and @json[uid.to_sym][version.to_sym.to_sym]
-      return @json[uid.to_sym][version.to_sym]
+    if @json[uid.to_sym] && @json[uid.to_sym][version.to_sym]
+      @json[uid.to_sym][version.to_sym]
     elsif default.nil?
       raise 'No timestamp available for ' + uid + ': ' + version
     elsif default.is_a? String
@@ -24,7 +24,7 @@ class Timestamps
   end
 
   def self.get(uid, version, default = nil)
-    @@me ||= Timestamps.new
-    @@me.get uid, version, default
+    @me ||= Timestamps.new
+    @me.get uid, version, default
   end
 end

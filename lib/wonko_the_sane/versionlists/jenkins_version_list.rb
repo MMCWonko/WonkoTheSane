@@ -1,26 +1,19 @@
 require 'pry'
 
 class JenkinsVersionList < BaseVersionList
-  def initialize(artifact, baseUrl, job, fileRegex)
+  def initialize(artifact, base_url, job, file_regex)
     super(artifact)
-    @baseUrl = baseUrl
+    @base_url = base_url
     @job = job
-    @input = JenkinsInput.new(artifact, fileRegex)
+    @input = JenkinsInput.new(artifact, file_regex)
 
-    if @baseUrl[@baseUrl.length - 1] == '/'
-      @baseUrl[@baseUrl.length - 1] = ''
+    if @base_url[@base_url.length - 1] == '/'
+      @base_url[@base_url.length - 1] = ''
     end
   end
 
   def get_versions
-    result = get_json "#{@baseUrl}/job/#{@job}/api/json"
-
-    return result[:builds].map do |build|
-      [
-          build[:number],
-          build[:url]
-      ]
-    end
+    get_json("#{@base_url}/job/#{@job}/api/json")[:builds].map { |build| [build[:number], build[:url]] }
   end
 
   def get_version(id)

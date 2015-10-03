@@ -4,7 +4,7 @@ require 'time'
 
 class LiteLoaderVersionList < BaseVersionList
   def initialize
-    super('com.mumfrey.liteloader')
+    super 'com.mumfrey.liteloader'
   end
 
   def get_versions
@@ -15,34 +15,26 @@ class LiteLoaderVersionList < BaseVersionList
       minecraft = mcver.first
       mcver[1][:artefacts].each do |artefact|
         if artefact.first == :'com.mumfrey:liteloader'
-          latest = nil
-          artefact[1].each do |item|
-            if item.first == 'latest'
-              latest = item[1][:version]
-              break
-            end
-          end
-          artefact[1].each do |item|
-            if item.first != 'latest'
-              out << [
-                  item[1][:version],
-                  item[1].merge({
-                    minecraft: minecraft.to_s,
-                    type: latest == item[1][:version] ? 'latest' : nil
-                  })
-              ]
-            end
+          latest = artefact[1].find { |i| i[0] == 'latest' }[1][:version]
+          artefact[1].reject { |i| i.first == 'latest' }.each do |item|
+            out << [
+                item[1][:version],
+                item[1].merge({
+                  minecraft: minecraft.to_s,
+                  type: latest == item[1][:version] ? 'latest' : nil
+                })
+            ]
           end
         end
       end
     end
-    return out
+    out
   end
 
   def get_version(id)
-    liteloaderLib = VersionLibrary.new
-    liteloaderLib.name = 'com.mumfrey:liteloader:' + id[1][:version]
-    liteloaderLib.url = 'http://dl.liteloader.com/versions/com/mumfrey/liteloader/' + id[1][:minecraft] + '/' + id[1][:file]
+    liteloader_lib = VersionLibrary.new
+    liteloader_lib.name = 'com.mumfrey:liteloader:' + id[1][:version]
+    liteloader_lib.url = 'http://dl.liteloader.com/versions/com/mumfrey/liteloader/' + id[1][:minecraft] + '/' + id[1][:file]
 
     file = WonkoVersion.new
     file.uid = 'com.mumfrey.liteloader'
@@ -53,14 +45,12 @@ class LiteLoaderVersionList < BaseVersionList
     file.client.tweakers = [ id[1][:tweakClass] ]
     file.client.mainClass = 'net.minecraft.launchwrapper.Launch'
     file.client.downloads = id[1][:libraries].map do |lib|
-      libs = MojangInput.sanetize_mojang_library lib
-      if lib[:name] == 'org.ow2.asm:asm-all:5.0.3'
-        libs[0].mavenBaseUrl = 'http://repo.maven.apache.org/maven2/'
-      end
+      libs = MojangInput.sanitize_mojang_library lib
+      libs[0].maven_base_url = 'http://repo.maven.apache.org/maven2/' if lib[:name] == 'org.ow2.asm:asm-all:5.0.3'
       libs
     end.flatten 1
     file.client.folders['minecraft/mods'] = ['mc.liteloadermods']
-    file.client.downloads.unshift liteloaderLib
-    return BaseSanitizer.sanitize file
+    file.client.downloads << liteloader_lib
+    BaseSanitizer.sanitize file
   end
 end

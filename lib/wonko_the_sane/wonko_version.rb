@@ -1,9 +1,13 @@
 class Download
-  attr_accessor :internalUrl # not serialized, used for DownloadsFixer when the url isn't direct (requires user interaction)
+  attr_accessor :internal_url # not serialized, used for DownloadsFixer when the url isn't direct (requires user interaction)
   attr_accessor :url
   attr_accessor :size
   attr_accessor :sha256
   attr_accessor :rules # [Rule]
+
+  def usable_url
+    internal_url.nil? ? url : internal_url
+  end
 
   def type
     'general.downloads'
@@ -66,10 +70,10 @@ end
 
 class VersionLibrary < Download
   attr_accessor :name
-  attr_accessor :mavenBaseUrl
+  attr_accessor :maven_base_url
 
   def ==(other)
-    name == other.name && url == other.url && sha256 == other.sha256 && rules == other.rules
+    self.class == other.class && name == other.name && url == other.url && sha256 == other.sha256 && rules == other.rules
   end
 
   def type
@@ -78,8 +82,8 @@ class VersionLibrary < Download
   def url
     if @url
       @url
-    elsif @mavenBaseUrl
-      @mavenBaseUrl + WonkoTheSane::Util::MavenIdentifier.new(@name).to_path
+    elsif @maven_base_url
+      @maven_base_url + WonkoTheSane::Util::MavenIdentifier.new(@name).to_path
     else
       nil
     end
@@ -96,7 +100,7 @@ class VersionLibrary < Download
   def to_json
     obj = super
     obj[:name] = @name
-    obj[:mavenBaseUrl] = @mavenBaseUrl if @mavenBaseUrl
+    obj[:@maven_base_url] = @maven_base_url if @maven_base_url
 
     unless @url
       obj.delete :url
@@ -108,10 +112,10 @@ class VersionLibrary < Download
   def from_json(json)
     super
     @name = json[:name]
-    @mavenBaseUrl = json[:mavenBaseUrl]
+    @maven_base_url = json[:@maven_base_url]
 
     # if the absolute url is equal to the expected maven url we clear the absolute url
-    if @mavenBaseUrl && @url == url
+    if @maven_base_url && @url == url
       @url = nil
     end
   end
@@ -139,7 +143,7 @@ class Referenced
   end
 
   def ==(other)
-    @uid == other.uid and @version == other.version
+    self.class == other.class && @uid == other.uid && @version == other.version
   end
 end
 

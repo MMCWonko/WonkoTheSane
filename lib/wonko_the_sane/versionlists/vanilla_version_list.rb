@@ -3,8 +3,8 @@ require 'date'
 
 class VanillaVersionList < BaseVersionList
   def initialize
-    super('net.minecraft')
-    @input = MojangInput.new('net.minecraft')
+    super 'net.minecraft'
+    @input = MojangInput.new 'net.minecraft'
   end
 
   def get_versions
@@ -12,7 +12,7 @@ class VanillaVersionList < BaseVersionList
     @latest_release = result[:latest][:release]
     @latest_snapshot = result[:latest][:snapshot]
 
-    return result[:versions].map do |obj| obj[:id] end
+    result[:versions].map { |obj| obj[:id] }
   end
 
   def get_version(id)
@@ -23,10 +23,8 @@ class VanillaVersionList < BaseVersionList
              get_json_cached url
            end
     files = @input.parse json
-    mcfile = files.find do |file|
-      file.uid == 'net.minecraft'
-    end
-    if mcfile and mcfile.time > DateTime.iso8601('2013-06-25T15:08:56+02:00').to_time.to_i
+    mcfile = files.find { |file| file.uid == 'net.minecraft' }
+    if mcfile && mcfile.time > DateTime.iso8601('2013-06-25T15:08:56+02:00').to_time.to_i
       files
     else
       []

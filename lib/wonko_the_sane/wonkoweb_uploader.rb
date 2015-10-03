@@ -1,3 +1,5 @@
+require 'httparty'
+
 module WonkoTheSane
   class WonkoWeb
     include HTTParty
@@ -11,9 +13,9 @@ module WonkoTheSane
     end
 
     def initialize(benchmark)
-      self.class.base_uri Settings[:wonkoweb][:host]
-      self.class.headers 'X-Uploader-Name' => Settings[:wonkoweb][:name],
-                         'X-Uploader-Token' => Settings[:wonkoweb][:token],
+      self.class.base_uri WonkoTheSane.configuration.wonkoweb.host
+      self.class.headers 'X-Uploader-Name' => WonkoTheSane.configuration.wonkoweb.name,
+                         'X-Uploader-Token' => WonkoTheSane.configuration.wonkoweb.token,
                          'X-WUR-Enabled' => 'true',
                          'Content-Type' => 'application/json'
 
@@ -69,7 +71,6 @@ module WonkoTheSane
             end
 
       if !res.nil? && (res.code >= 300 || JSON.parse(res.body).key?('errors'))
-        binding.pry
         fail UploadError.new res.body[:errors]
       end
     end
@@ -105,10 +106,10 @@ module WonkoTheSane
 
     def upload_changes!
       @changed_files.uniq!
-      return if Settings[:wonkoweb][:host].nil?
+      return if WonkoTheSane.configuration.wonkoweb.host.nil?
 
       existing_uids = @benchmark.benchmark('initial index') { @client.index }[:index].map { |obj| obj[:uid] }
-      logger.info "Uploading #{@changed_files.size} changed files to WonkoWeb at #{Settings[:wonkoweb][:host]}..."
+      logger.info "Uploading #{@changed_files.size} changed files to WonkoWeb at #{WonkoTheSane.configuration.wonkoweb.host}..."
       @changed_files.dup.each do |uid|
         begin
           @client.upload_file $rw.write_version_index Registry.instance.version_index uid
@@ -124,7 +125,7 @@ module WonkoTheSane
       @benchmark.print_times true
 
       num_versions = @changed_versions.collect { |k, v| v.size }.inject :+
-      logger.info "Uploading #{num_versions} changed versions to WonkoWeb at #{Settings[:wonkoweb][:host]}..."
+      logger.info "Uploading #{num_versions} changed versions to WonkoWeb at #{WonkoTheSane.configuration.wonkoweb.host}..."
       @changed_versions.dup.each do |uid, versions|
         versions.dup.each do |version|
           begin

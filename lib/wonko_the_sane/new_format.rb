@@ -1,36 +1,31 @@
-require 'hashie'
-
 module Reader
   def read_version_index(data)
-    json = Hashie::Mash.new data
-
-    index = VersionIndex.new json.uid
-    index.name = json.name
-    json.versions.each do |ver|
+    data = data.with_indifferent_access
+    index = VersionIndex.new data[:uid]
+    index.name = data[:name]
+    data[:versions].each do |ver|
       v = WonkoVersion.new
       v.is_complete = false
-      v.uid = json.uid
+      v.uid = data[:uid]
       v.version = ver[:version]
       v.type = ver[:type]
       v.time = ver[:time]
       index.versions << v
     end
 
-    return index
+    index
   end
 
   def read_download(data, key)
     if data[key.to_sym]
-      data[key.to_sym].map do |dl|
-        Download.from_json key, dl
-      end
+      data[key.to_sym].map { |dl| Download.from_json key, dl }
     else
       []
     end
   end
 
   def read_resource(data)
-    return if not data or not data.is_a? Object
+    return if !data || !data.is_a?(Object)
     res = WonkoVersion::Resources.new
     res.traits = data[:'general.traits'] if data[:'general.traits']
     res.folders = data[:'general.folders'] if data[:'general.folders']
@@ -52,29 +47,27 @@ module Reader
   end
 
   def read_version(data)
-    json = Hashie::Mash.new data
+    data = data.with_indifferent_access
 
     file = WonkoVersion.new
     file.is_complete = true
 
-    file.uid = json.uid
-    file.version = json.version
-    file.time = json.time
-    file.type = json.type
-    file.requires = json.requires.map do |req|
-      Referenced.new(req[:uid], req[:version])
-    end if json.requires
+    file.uid = data[:uid]
+    file.version = data[:version]
+    file.time = data[:time]
+    file.type = data[:type]
+    file.requires = data[:requires].map { |req| Referenced.new(req[:uid], req[:version]) } if data[:requires]
 
-    json[:data].each do |data|
-      rules = data[:rules] ? data[:rules] : [ImplicitRule.new(:allow)]
+    data[:data].each do |group|
+      rules = group[:rules] ? group[:rules] : [ImplicitRule.new(:allow)]
       if Rule.allowed_on_side(rules, :client) && Rule.allowed_on_side(rules, :server)
-        file.common = read_resource data
+        file.common = read_resource group
       elsif Rule.allowed_on_side rules, :server
-        file.server = read_resource data
+        file.server = read_resource group
       else
-        file.client = read_resource data
+        file.client = read_resource group
       end
-    end if json[:data]
+    end if data[:data]
 
     file
   end
@@ -121,7 +114,7 @@ module Writer
     data[:'mc.arguments'] = resource.minecraftArguments            if resource.minecraftArguments and resource.minecraftArguments != ''
 
     unless data.empty?
-      if side == :client or side == :server
+      if side == :client || side == :server
         data[:rules] = [
           ImplicitRule.new(:disallow).to_json,
           SidedRule.new(:allow, side).to_json

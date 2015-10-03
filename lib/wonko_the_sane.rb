@@ -10,9 +10,8 @@ require 'digest'
 require 'date'
 require 'time'
 require 'oga'
-require 'configliere'
-require 'httparty'
 require 'active_support/core_ext/hash/indifferent_access'
+require 'active_support/core_ext/object/blank'
 
 require 'wonko_the_sane/version'
 require 'wonko_the_sane/tools/update_nem'
@@ -24,6 +23,7 @@ require 'wonko_the_sane/util/file_hash_cache'
 require 'wonko_the_sane/util/http_cache'
 require 'wonko_the_sane/util/maven_identifier'
 require 'wonko_the_sane/util/task_stack'
+require 'wonko_the_sane/util/version_parser'
 
 require 'wonko_the_sane/input/base_input'
 require 'wonko_the_sane/input/forge_installer_profile_input'
@@ -47,7 +47,6 @@ require 'wonko_the_sane/registry'
 require 'wonko_the_sane/rules'
 require 'wonko_the_sane/timestamps'
 require 'wonko_the_sane/version_index'
-require 'wonko_the_sane/version_parser'
 require 'wonko_the_sane/wonko_version'
 
 module WonkoTheSane
@@ -83,26 +82,7 @@ module WonkoTheSane
   def self.configuration
     @configuration ||= Util::Configuration.new
   end
-  private_class_method :configuration
 end
 
-Settings.use :config_block, :encrypted, :prompt, :define
-Settings({
-  aws: {
-      client_id: nil,
-      client_secret: nil
-  },
-  wonkoweb: {
-      host: nil,
-      email: nil,
-      token: nil
-  }
-})
-Settings.define 'aws.client_id', encrypted: true
-Settings.define 'aws.client_secret', encrypted: true
-Settings.define 'wonkoweb.host'
-Settings.define 'wonkoweb.name'
-Settings.define 'wonkoweb.token', encrypted: true
-Settings.read WonkoTheSane.settings_file
-Settings[:encrypt_pass] = ENV['ENCRYPT_PASS'] || (print 'Password: '; pwd = STDIN.noecho(&:gets).chomp; puts; pwd)
-Settings.resolve!
+WonkoTheSane.configuration.load_from_file 'wts.yml' if File.exists? 'wts.yml'
+WonkoTheSane.configuration.load_from_env

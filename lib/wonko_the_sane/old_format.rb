@@ -1,4 +1,3 @@
-require 'hashie'
 require 'time'
 
 module OldFormatWriter
@@ -40,12 +39,12 @@ module OldFormatWriter
     natives = {}
     json[:'+libraries'] = resource.downloads
                             .select { |dl| dl.type == 'java.libraries' || dl.type == 'java.natives' }
-    .reject { |lib| lib.name.start_with? 'net.minecraft:minecraft:' }
+                            .reject { |lib| lib.name.start_with? 'net.minecraft:minecraft:' }
                             .map do |lib|
       result = { name: lib.name }
       if lib.explicit_url?
         result[:'MMC-absoluteUrl'] = lib.url
-      elsif !lib.url.nil? && lib.mavenBaseUrl != 'https://libraries.minecraft.net/'
+      elsif !lib.url.nil? && lib.maven_base_url != 'https://libraries.minecraft.net/'
         result[:url] = lib.url
       end
       result[:rules] = lib.rules.map { |r| r.to_json } unless lib.rules.nil?

@@ -1,25 +1,27 @@
 require 'aws-sdk-resources'
 require 'wonko_the_sane/util/http_cache'
+require 'wonko_the_sane'
 
 module WonkoTheSane
   module Util
     class DeepStorageCache
       def initialize
         @resource = Aws::S3::Resource.new region: 'eu-west-1',
-                                          credentials: Aws::Credentials.new(Settings[:aws][:client_id],
-                                                                            Settings[:aws][:client_secret])
-        @bucket = @resource.bucket 'wonkoweb-02jandal-xyz'
+                                          credentials: Aws::Credentials.new(WonkoTheSane.configuration.aws.client_id,
+                                                                            WonkoTheSane.configuration.aws.client_secret)
+        @bucket = @resource.bucket WonkoTheSane.configuration.aws.bucket
 
         @manifest = @bucket.object 'manifest.json'
         @entries = @manifest.exists? ? JSON.parse(@manifest.get.body.read, symbolize_keys: true) : {}
       end
 
+      # fetch file (if not available), get info hash, upload metadata and file to S3, return info hash
       def get_info(url, options = {})
         return @entries[url] if @entries.key? url
 
         ctxt = options[:ctxt] || 'DeepStorageCache'
 
-        file = HTTPCache.file url, check_stale: false, ctxt: options[:ctxt]
+        file = HTTPCache.file url, check_stale: false, ctxt: ctxt
         info = self.class.info_for_file file, url
 
         @entries[url] = info
@@ -43,7 +45,7 @@ module WonkoTheSane
             object.put body: file,
                        content_md5: md5,
                        content_type: content_type,
-                       metadata: Hash[info.map { |k,v| [k.to_s, v.to_s]}]
+                       metadata: Hash[info.map { |k, v| [k.to_s, v.to_s] }]
             Logging.logger[ctxt].debug 'Backup successfully uploaded to S3'
           end
         end
@@ -52,9 +54,9 @@ module WonkoTheSane
       end
 
       def self.get_info(url, options = {})
-        if Settings[:aws][:client_id]
-          @@instance ||= DeepStorageCache.new
-          @@instance.get_info url, options
+        if WonkoTheSane.configuration.aws.client_id
+          @instance ||= DeepStorageCache.new
+          @instance.get_info url, options
         else
           info_for_file HTTPCache.file(url, check_stale: false, ctxt: options[:ctxt]), url
         end

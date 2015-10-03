@@ -1,30 +1,27 @@
 class JenkinsInput < BaseInput
-  def initialize(artifact, fileRegex)
+  def initialize(artifact, file_regex)
     @artifact = artifact
-    @fileRegex = fileRegex
+    @file_regex = file_regex
   end
 
   def parse(data)
-    if data[:result] != 'SUCCESS'
-      return nil
-    end
+    return nil if data[:result] != 'SUCCESS'
 
     file = WonkoVersion.new
-
     file.uid = @artifact
     file.version = data[:number].to_s
     file.time = data[:timestamp]
 
     artifact = data[:artifacts].find do |art|
       path = art[:fileName]
-      if @fileRegex
-        path.match @fileRegex
+      if @file_regex
+        path.match @file_regex
       else
-        not path.include? '-api.' and not path.include? '-deobf.' and not path.include? '-dev.' and not path.include? '-javadoc.' and not path.include? '-library.' and not path.include? '-sources.' and not path.include? '-src.' and not path.include? '-util.'
+        %w(-api. -deobf. -dev. -javadoc. -library. -sources. -src. -util.).find { |infix| path.include? infix }.nil?
       end
     end
 
-    if not artifact
+    if artifact.nil?
       logger.warn 'No valid artifact found for ' + file.version
     else
       dl = FileDownload.new
@@ -33,14 +30,13 @@ class JenkinsInput < BaseInput
       file.common.downloads << dl
     end
 
-    return BaseSanitizer.sanitize file
+    BaseSanitizer.sanitize file
   end
 
   private
+
   def clean_url(url)
-    if url[url.length - 1] == '/'
-      url[url.length - 1] = ''
-    end
-    return url
+    url[url.length - 1] = '' if url[url.length - 1] == '/'
+    url
   end
 end

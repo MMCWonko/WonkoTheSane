@@ -8,12 +8,10 @@ class BaseVersionList
     @artifact = artifact
     if File.exist? cache_file
       data = JSON.parse File.read(cache_file), symbolize_names: true
-      binding.pry if data.nil?
-      @processed = data[:versions] ? data[:versions] : []
-      @last_error = data[:@last_error]
+      @processed = data[:versions] || []
+      @last_error = data[:last_error]
     else
       @processed = []
-      @last_error = nil
     end
   end
 
@@ -28,14 +26,17 @@ class BaseVersionList
         id = version.is_a?(Array) ? version.first : version
         unless @processed.include? id
           files = get_version version
-          next if files.nil? or (files.is_a? Array and files.empty?)
+          next if files.nil? || (files.is_a?(Array) && files.empty?)
 
-          files.flatten.each do |file|
-            file.is_complete = true
-            Registry.instance.store file
-          end if files and files.is_a? Array
-          files.is_complete = true if files and files.is_a? WonkoVersion
-          Registry.instance.store files if files and files.is_a? WonkoVersion
+          if files.is_a?(Array)
+            files.flatten.each do |file|
+              file.is_complete = true
+              Registry.instance.store file
+            end
+          else
+            files.is_complete = true
+            Registry.instance.store files
+          end
 
           @processed << id
           write_cache_file

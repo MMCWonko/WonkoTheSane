@@ -10,7 +10,7 @@ class FileHashCache
     name = (file.is_a?(File) ? file.path : file).to_sym
     timestamp = (file.is_a?(File) ? file.mtime : File.mtime(file)).to_i
     size = file.is_a?(File) ? file.size : File.size(file)
-    if not @data[name] or not @data[name][:timestamp] == timestamp or not @data[name][:size] == size
+    if !@data[name] || !@data[name][:timestamp] == timestamp || !@data[name][:size] == size
       hash = digest(file.is_a?(File) ? file.read : File.read(file))
       @data[name] = {
           timestamp: timestamp,
@@ -19,7 +19,7 @@ class FileHashCache
       }
       File.write @file, JSON.pretty_generate(@data)
     end
-    return @data[name][:hash]
+    @data[name][:hash]
   end
 
   def digest(data)
@@ -30,13 +30,13 @@ class FileHashCache
     end
   end
 
-  @@defaultCache = FileHashCache.new 'cache/filehashes', :sha256
   def self.get(file)
-    @@defaultCache.get file
+    @sha256_cache ||= FileHashCache.new 'cache/filehashes.json', :sha256
+    @sha256_cache.get file
   end
 
-  @@md5Cache = FileHashCache.new 'cache/filehashes.md5', :md5
   def self.get_md5(file)
-    @@md5Cache.get file
+    @md5_cache ||= FileHashCache.new 'cache/filehashes.md5.json', :md5
+    @md5_cache.get file
   end
 end

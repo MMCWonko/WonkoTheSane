@@ -34,19 +34,16 @@ OptionParser.new do |opts|
   opts.banner = 'Usage: main.rb [options]'
 
   opts.on '-rID', '--refresh=ID', 'Refresh the specified list' do |id|
-    foundList = false
-    WonkoTheSane.lists.each do |list|
-      if list.artifact == id
+    list = WonkoTheSane.lists.find { |l| l.artifact == id }
+    if list.nil?
+      Logging.logger['General'].warn "Couldn't find the specified list #{id.cyan}"
+    else
         TaskStack.push(Proc.new do
                          Logging.logger[list.artifact].info 'Refreshing'
                          list.refresh
                          Logging.logger[list.artifact].error list.last_error if list.last_error
                        end)
-        foundList = true
-      end
     end
-
-    Logging.logger['General'].warn "Couldn't find the specified list #{id.cyan}" if !foundList
   end
   opts.on '-a', '--refresh-all', 'Refresh all lists' do
     WonkoTheSane.lists.each do |list|
@@ -58,16 +55,13 @@ OptionParser.new do |opts|
     end
   end
   opts.on '--invalidate=ID', 'Invalidates all versions on the specified list' do |id|
-    foundList = false
-    WonkoTheSane.lists.each do |list|
-      if list.artifact == id
-        Logging.logger[list.artifact].info 'Invalidating'
-        list.invalidate
-        foundList = true
-      end
+    list = WonkoTheSane.lists.find { |l| l.artifact == id }
+    if list.nil?
+      Logging.logger['General'].warn "Couldn't find the specified list #{id.cyan}"
+    else
+      Logging.logger[list.artifact].info 'Invalidating'
+      list.invalidate
     end
-
-    Logging.logger['General'].warn "Couldn't find the specified list #{id.cyan}" if !foundList
   end
   opts.on '--invalidate-all', 'Invalidates all versions on all lists' do
     WonkoTheSane.lists.each do |list|
@@ -82,15 +76,6 @@ OptionParser.new do |opts|
   end
   opts.on '--update-nem', 'Updates sources.json with data from NEM' do
     update_nem
-  end
-  opts.on '--set-config=VAL', 'Sets a configuration value' do |val|
-    parts = val.match /([^:=]*)([:=](.*))?/
-    if parts.length == 4 && !parts[3].nil?
-      Settings[parts[1]] = parts[3]
-    else
-      Settings.delete parts[1]
-    end
-    Settings.save! WonkoTheSane.settings_file
   end
   opts.on '-h', '--help', 'Prints this help' do
     puts opts

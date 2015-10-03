@@ -1,27 +1,23 @@
 class VersionParser
   private
-  @@cache = {}
+
+  cache = {}
+
   def self.parse(string)
-    if @@cache.has_key? string
-      return @@cache[string]
-    end
+    return self.cache[string] if self.cache.has_key? string
     appendix = string.scan(/\-.*$/).first
     string = string.sub /\-.*$/, ''
     sections = string.split '.'
     sections.map! do |sec|
       test = Integer sec rescue nil
-      if test.nil?
-        sec
-      else
-        test
-      end
+      test || sec
     end
 
     result = {
         appendix: appendix,
         sections: sections
     }
-    @@cache[string] = result
+    self.cache[string] = result
     return result
   end
 
@@ -42,7 +38,7 @@ class VersionParser
       when 'pre'
         [2, digits]
           end
-    return ret ? ret : [-1, digits]
+    ret || [-1, digits]
   end
 
   def self.compare_values(first, second)
@@ -64,7 +60,7 @@ class VersionParser
     size.times do |index|
       val1 = par1[:sections].length > index ? par1[:sections][index] : 0
       val2 = par2[:sections].length > index ? par2[:sections][index] : 0
-      if val1.is_a? Integer and val2.is_a? Integer
+      if val1.is_a? Integer && val2.is_a?(Integer)
         ret = VersionParser.compare_values val1, val2
       elsif val1.is_a? Integer
         ret = VersionParser.compare_values val1.to_s, val2
@@ -76,7 +72,7 @@ class VersionParser
       break unless ret == 0
     end
     if ret == 0
-      if par1[:appendix] and par2[:appendix]
+      if par1[:appendix] && par2[:appendix]
         appendix1 = VersionParser.appendix_values par1[:appendix]
         appendix2 = VersionParser.appendix_values par2[:appendix]
         ret = VersionParser.compare_values appendix1[0], appendix2[0]
