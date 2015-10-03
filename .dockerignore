@@ -1,0 +1,7 @@
+cache/
+files/
+.idea/
+pkg/
+out/
+wonko.log
+wts.yml

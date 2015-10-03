@@ -62,23 +62,31 @@ Having to reimplement all this hackery\^Wlogic in each client is a waste of reso
 
 ## Installation
 
-Add this line to your application's Gemfile:
+## Usage
 
-```ruby
-gem 'wonko_the_sane'
-```
+### With docker
 
-And then execute:
+Install [docker](https://www.docker.com/) and run 
 
-    $ bundle
+    $ docker run --rm=true -d -v /path/to/cache:/usr/src/app/cache -v /path/to/out:/usr/src/app/out 02jandal/wonko_the_sane
 
-Or install it yourself as:
+This will download the `02jandal/wonko_the_sane` image and run it. Replace `/path/to/cache` and `/path/to/out` with paths to directories on your local filesystem.
+
+If you do not wish the container to run in the background, for example because you want to be able to view the log, remove the `-d` option.
+
+See the documentation for the [docker run](https://docs.docker.com/reference/run/) command for all possible options.
+
+### Without docker
+
+Just run
 
     $ gem install wonko_the_sane
 
-## Usage
+And then use the `wonko_the_sane` command. Try
 
-TODO: Write usage instructions here
+    $ wonko_the_sane --help
+
+to see what you can do.
 
 ## Development
 
