@@ -1,4 +1,11 @@
-# WonkoTheSane [![Gem Version](https://badge.fury.io/rb/wonko_the_sane.svg)](http://badge.fury.io/rb/wonko_the_sane)
+# WonkoTheSane
+
+[![Gem Version](https://badge.fury.io/rb/wonko_the_sane.svg)](http://badge.fury.io/rb/wonko_the_sane)
+[![Build Status](https://travis-ci.org/MMCWonko/WonkoTheSane.svg?branch=master)](https://travis-ci.org/MMCWonko/WonkoTheSane)
+[![Dependency Status](https://gemnasium.com/MMCWonko/WonkoTheSane.svg)](https://gemnasium.com/MMCWonko/WonkoTheSane)
+[![License](https://img.shields.io/github/license/MMCWonko/WonkoTheSane.svg)](https://img.shields.io/github/license/MMCWonko/WonkoTheSane.svg)
+[![Code Climate](https://codeclimate.com/github/MMCWonko/WonkoTheSane/badges/gpa.svg)](https://codeclimate.com/github/MMCWonko/WonkoTheSane)
+[![Test Coverage](https://codeclimate.com/github/MMCWonko/WonkoTheSane/badges/coverage.svg)](https://codeclimate.com/github/MMCWonko/WonkoTheSane/coverage)
 
 From _So Long and Thanks for All the Fish_ by Douglas Adams:
 
