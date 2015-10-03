@@ -63,11 +63,9 @@ From _So Long and Thanks for All the Fish_ by Douglas Adams:
 
 This is a ruby application that queries, fetches, sanitizes and then stores resources, currently mainly Minecraft related ones, but this can be extended.
 
-#### Why?
+### Why?
 
 Having to reimplement all this hackery\^Wlogic in each client is a waste of resources, therefore this project aims at centralizing them. This means less hacks in the client (and thus the hacks can more easily be updated when needed) and overall simpler client design.
-
-## Installation
 
 ## Usage
 
@@ -75,11 +73,13 @@ Having to reimplement all this hackery\^Wlogic in each client is a waste of reso
 
 Install [docker](https://www.docker.com/) and run 
 
-    $ docker run --rm=true -d -v /path/to/cache:/usr/src/app/cache -v /path/to/out:/usr/src/app/out 02jandal/wonko_the_sane
+    $ docker run -d -v /path/to/cache:/usr/src/app/cache -v /path/to/out:/usr/src/app/out 02jandal/wonko_the_sane
 
-This will download the `02jandal/wonko_the_sane` image and run it. Replace `/path/to/cache` and `/path/to/out` with paths to directories on your local filesystem.
+This will download the `02jandal/wonko_the_sane` image and run it. Replace `/path/to/cache` and `/path/to/out` with
+paths to directories on your local filesystem.
 
-If you do not wish the container to run in the background, for example because you want to be able to view the log, remove the `-d` option.
+If you do not wish the container to run in the background, for example because you want to be able to view the log,
+remove the `-d` option.
 
 See the documentation for the [docker run](https://docs.docker.com/reference/run/) command for all possible options.
 
@@ -94,6 +94,21 @@ And then use the `wonko_the_sane` command. Try
     $ wonko_the_sane --help
 
 to see what you can do.
+
+### Configuration
+
+Several config options can be set through environment variables (use `-e NAME=VALUE` for docker):
+
+* `WTS_AWS_CLIENT_ID`, `WTS_AWS_CLIENT_SECRET` and `WTS_AWS_BUCKET`
+    * Required for uploading of backups to S3
+    * The client ID/secret should have upload permissions to the bucket
+* `WTS_OUT_DIR`
+    * Additionally to putting all resulting files into `$PWD/files` (cannot be changed), files that are changed can
+      optionally also be put into this directory. This is mainly for usage together with
+      [SomebodyElsesProblem](https://github.com/MMCWonko/SomebodyElsesProblem), let `WTS_OUT_DIR` and the SEP `--indir`
+      be the same.
+    * If you are using the docker image this variable will already be set by the image. Do NOT overwrite it. Mount a
+      volume to the container path `/usr/src/app/out` instead.
 
 ## Development
 
