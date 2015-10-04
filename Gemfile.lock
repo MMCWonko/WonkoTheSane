@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    wonko_the_sane (0.1.5)
+    wonko_the_sane (0.1.6)
       activesupport
       aws-sdk
       colorize

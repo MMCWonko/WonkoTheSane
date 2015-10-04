@@ -1,22 +1,18 @@
 language: ruby
 rvm:
-  - ruby-2.2.3
-  - ruby-head
+- ruby-2.2.3
+- ruby-head
+
 cache: bundler
 sudo: false
 notifications:
   email: false
+
 before_script: bundle list
 script:
-  - bundle exec rake spec
-  - bundle exec rake build
-deploy:
-  - provider: releases
-    api_key:
-      secure: CbTY7GoUkGKpkjN405/3RifWF6c66ooYODbrmNIuGIBiO5oW8V6ZrxjHHqJZN/dFkpoI/y2Yf9AW0TImfg4fzRsWB4wyMRBWGSbHRoYuYkvBWTwFI1fjX9uBNnDguQ5QF7c6ErI0QRECsGbENRI2iVZFG3arwAlD3d2THcLRp/0=
-    file: pkg/wonko_the_sane-*.gem
-    on:
-      repo: MMCWonko/WonkoTheSane
-      tags: true
-      rvm: ruby-2.2.3
-    skip_cleanup: true
+- bundle exec rake spec
+
+addons:
+  code_climate:
+    repo_token:
+      secure: EA7KxZyVAE7aQUm4z+4WUoZLuL6gU2cgjn2aqf3HzWDZ3noZdjHhq1qSMBKVuekw7WyTKlg30XLsSQoktLWge9LFLJjRTyAPDulknRmQ91tFcsMXj1FtE+IeT9HGcrCjFvMvMfsO3qQOT9PhDd9PXdusY3OAp+bL3jHqyuVeWG8=
