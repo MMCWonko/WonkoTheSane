@@ -6,6 +6,7 @@ cache: bundler
 sudo: false
 notifications:
   email: false
+before_script: bundle list
 script:
   - bundle exec rake spec
   - bundle exec rake build
