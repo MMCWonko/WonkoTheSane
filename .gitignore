@@ -4,5 +4,6 @@ files/
 pkg/
 out/
 .bundle/
+coverage/
 wonko.log
 wts.yml

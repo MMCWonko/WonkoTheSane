@@ -19,8 +19,8 @@ class Download
       size: @size,
       sha256: @sha256
     }
-    obj[:rules] = @rules.map do |rule| rule.to_json end if @rules and not @rules.empty?
-    return obj
+    obj[:rules] = @rules.map { |rule| rule.to_json } unless @rules.blank?
+    obj
   end
 
   def from_json(json)
@@ -100,7 +100,7 @@ class VersionLibrary < Download
   def to_json
     obj = super
     obj[:name] = @name
-    obj[:@maven_base_url] = @maven_base_url if @maven_base_url
+    obj[:@maven_base_url] = @maven_base_url unless @maven_base_url.blank?
 
     unless @url
       obj.delete :url

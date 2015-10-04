@@ -29,7 +29,7 @@ module WonkoTheSane
 
         object = @bucket.object info[:file]
         unless object.exists? && object.size == info[:size]
-          TaskStack.in_background do
+          WonkoTheSane.tasks.in_background do
             # convert the hex-encoded md5 to a base64-encoded md5, which is what S3 expects
             # http://anthonylewis.com/2011/02/09/to-hex-and-back-with-ruby/
             md5 = [info[:md5].scan(/../).map { |x| x.hex.chr }.join].pack 'm0'

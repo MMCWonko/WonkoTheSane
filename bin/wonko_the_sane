@@ -38,7 +38,7 @@ OptionParser.new do |opts|
     if list.nil?
       Logging.logger['General'].warn "Couldn't find the specified list #{id.cyan}"
     else
-        TaskStack.push(Proc.new do
+        WonkoTheSane.tasks.push(Proc.new do
                          Logging.logger[list.artifact].info 'Refreshing'
                          list.refresh
                          Logging.logger[list.artifact].error list.last_error if list.last_error
@@ -47,7 +47,7 @@ OptionParser.new do |opts|
   end
   opts.on '-a', '--refresh-all', 'Refresh all lists' do
     WonkoTheSane.lists.each do |list|
-      TaskStack.push(Proc.new do
+      WonkoTheSane.tasks.push(Proc.new do
                        Logging.logger[list.artifact].info 'Refreshing'
                        list.refresh
                        Logging.logger[list.artifact].error list.last_error if list.last_error
@@ -83,4 +83,4 @@ OptionParser.new do |opts|
   end
 end.parse!
 
-TaskStack.pop_all
+WonkoTheSane.tasks.pop_all

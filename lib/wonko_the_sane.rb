@@ -10,6 +10,7 @@ require 'digest'
 require 'date'
 require 'time'
 require 'oga'
+require 'pathname'
 require 'active_support/core_ext/hash/indifferent_access'
 require 'active_support/core_ext/object/blank'
 
@@ -49,20 +50,16 @@ require 'wonko_the_sane/version_index'
 require 'wonko_the_sane/wonko_version'
 
 module WonkoTheSane
-  def self.wonkoweb_uploader
-    @uploader ||= WonkoWebUploader.new
-  end
-
   def self.lists
     configuration.lists
   end
 
-  def self.settings_file
-    File.dirname(__FILE__) + '/../wonko_the_sane.yml'
+  def self.tasks
+    @tasks ||= WonkoTheSane::Util::TaskStack.new
   end
 
   def self.data(file)
-    configuration.data_path + '/' + file
+    Pathname.new(configuration.data_path) + file
   end
 
   def self.data_json(file)

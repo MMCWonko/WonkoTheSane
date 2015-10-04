@@ -1,4 +1,5 @@
 require 'yaml'
+require 'active_support/core_ext/string/inflections'
 
 module WonkoTheSane
   module Util
@@ -18,6 +19,7 @@ module WonkoTheSane
       def initialize
         @lists = []
         @aws = Aws.new
+        @data_path = Dir.pwd + '/data'
       end
 
       def load_from_env
@@ -30,20 +32,23 @@ module WonkoTheSane
       end
 
       def load_from_file(filename)
-        raw = YAML.load_file filename
-        @aws.client_id = raw['aws']['client_id']
-        @aws.client_secret = raw['aws']['client_secret']
-        @aws.bucket = raw['aws']['bucket']
+        raw = YAML.load_file(filename).with_indifferent_access
+        if raw.key? 'aws'
+          aws = raw['aws']
+          @aws.client_id = aws['client_id'] if aws.key? 'client_id'
+          @aws.client_secret = aws['client_secret'] if aws.key? 'client_secret'
+          @aws.bucket = aws['bucket'] if aws.key? 'bucket'
+        end
 
-        @data_path = raw['data_path']
-        @out_dir = raw['out_dir']
+        @data_path = raw['data_path'] if raw.key? 'data_path'
+        @out_dir = raw['out_dir'] if raw.key? 'out_dir'
       end
 
       def register_list(list)
         case list
-        when String
-          register_list list.to_sym
         when Symbol
+          register_list list.to_s.constantize
+        when String
           register_list list.constantize
         when Class
           register_list list.new
@@ -52,8 +57,12 @@ module WonkoTheSane
         end
       end
 
-      def register_lists_from_sources
-        sources = WonkoTheSane.data_json 'sources.json'
+      def register_lists_from_sources(filename = 'sources.json')
+        sources = if filename.is_a? String
+                    WonkoTheSane.data_json filename
+                  else
+                    filename
+                  end
         sources[:forgefiles].each do |uid, urlId|
           register_list ForgeFilesModsList.new(uid.to_s, urlId)
         end if sources[:forgefiles]

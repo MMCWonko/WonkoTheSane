@@ -26,11 +26,10 @@ class VanillaLegacyVersionList < BaseVersionList
     file.client.downloads = [ main_lib ]
 
     file.client.folders['minecraft/screenshots'] = ['general.screenshots']
-    file.client.folders['minecraft/resourcepackks'] = ['mc.resourcepacks'] if file.time >= 1372430921
     file.client.folders['minecraft/texturepacks'] = ['mc.texturepacks'] if file.time < 1372430921
     file.client.folders['minecraft/saves'] = ['mc.saves.anvil'] if file.time >= 1330552800
-    file.client.folders['minecraft/saves'] = ['mc.saves.region'] if file.time >= 1298325600 and file.time < 1330552800
-    file.client.folders['minecraft/saves'] = ['mc.saves.infdev'] if file.time >= 1291327200 and file.time < 1298325600
+    file.client.folders['minecraft/saves'] = ['mc.saves.region'] if file.time >= 1298325600 && file.time < 1330552800
+    file.client.folders['minecraft/saves'] = ['mc.saves.infdev'] if file.time >= 1291327200 && file.time < 1298325600
     file.client.traits.delete 'texturepacks' if file.client.traits
     file.client.traits.delete 'no-resourcepacks' if file.client.traits
 

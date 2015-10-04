@@ -37,7 +37,7 @@ class HTTPCache
 
     return if File.exists?(cached_path) && !check_stale
 
-    TaskStack.in_background do
+    WonkoTheSane.tasks.in_background do
       uri = URI.parse url
       host = URI::HTTP.new(uri.scheme, uri.userinfo, uri.host, uri.port, nil, nil, nil, nil, nil).to_s
 

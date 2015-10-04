@@ -98,20 +98,20 @@ module Writer
   def write_resource(side, resource, out)
     data = {}
 
-    data[:'general.traits'] = resource.traits                      if resource.traits and not resource.traits.empty?
-    data[:'general.launcher'] = resource.launchMethod              if resource.launchMethod
-    data[:'general.folders'] = resource.folders                    if resource.folders and not resource.folders.empty?
+    data[:'general.traits'] = resource.traits unless resource.traits.blank?
+    data[:'general.launcher'] = resource.launchMethod unless resource.launchMethod.blank?
+    data[:'general.folders'] = resource.folders unless resource.folders.blank?
     resource.downloads.each do |dl|
       data[dl.type] = [] unless data[dl.type]
       data[dl.type] << dl.to_json
     end
-    data[:'java.mainClass'] = resource.mainClass                   if resource.mainClass and resource.mainClass != ''
-    data[:'mc.jarModTarget'] = resource.jarModTarget               if resource.jarModTarget
+    data[:'java.mainClass'] = resource.mainClass unless resource.mainClass.blank?
+    data[:'mc.jarModTarget'] = resource.jarModTarget unless resource.jarModTarget.blank?
 
-    data[:'mc.tweakers'] = resource.tweakers                       if resource.tweakers and not resource.tweakers.empty?
-    data[:'mc.appletClass'] = resource.appletClass                 if resource.appletClass and resource.appletClass != ''
-    data[:'mc.assets'] = resource.assets                           if resource.assets and resource.assets != ''
-    data[:'mc.arguments'] = resource.minecraftArguments            if resource.minecraftArguments and resource.minecraftArguments != ''
+    data[:'mc.tweakers'] = resource.tweakers unless resource.tweakers.blank?
+    data[:'mc.appletClass'] = resource.appletClass unless resource.appletClass.blank?
+    data[:'mc.assets'] = resource.assets unless resource.assets.blank?
+    data[:'mc.arguments'] = resource.minecraftArguments unless resource.minecraftArguments.blank?
 
     unless data.empty?
       if side == :client || side == :server
@@ -139,7 +139,7 @@ module Writer
       obj = { uid: req.uid }
       obj[:version] = req.version if req.version
       obj
-    end if version.requires and not version.requires.empty?
+    end unless version.requires.blank?
 
     write_resource(:client, version.client, json[:data]) if version.is_complete
     write_resource(:server, version.server, json[:data]) if version.is_complete
