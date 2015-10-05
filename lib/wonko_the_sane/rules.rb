@@ -31,12 +31,16 @@ class Rule
     end
   end
 end
+
 class ImplicitRule < Rule
 end
+
 class OsRule < Rule
   attr_accessor :os
   attr_accessor :os_version
   attr_accessor :os_arch
+
+  POSSIBLE = ['windows', 'linux', 'osx']
 
   def initialize(action, os, os_version = nil, os_arch = nil)
     super(action)
@@ -52,7 +56,28 @@ class OsRule < Rule
     obj[:os][:arch] = @os_arch if @os_arch
     obj
   end
+
+  def self.allowed_operating_systems(rules)
+    allowed = OsRule::POSSIBLE
+    rules.each do |rule|
+      if rule.is_a? ImplicitRule
+        if rule.action == :allow
+          allowed = OsRule::POSSIBLE
+        else
+          allowed = []
+        end
+      elsif rule.is_a? OsRule
+        if rule.action == :allow
+          allowed << rule.os
+        elsif rule.action == :disallow
+          allowed.delete rule.os
+        end
+      end
+    end
+    allowed
+  end
 end
+
 class SidedRule < Rule
   attr_accessor :side
 
