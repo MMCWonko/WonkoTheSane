@@ -1,12 +1,12 @@
 class CurseVersionList < BaseVersionList
-  def initialize(uid, curse_id, file_regex)
-    super uid
+  def initialize(uid, name, curse_id, file_regex)
+    super uid, name
     @curse_id = curse_id
     @file_regex = file_regex.gsub /\?P\</, '?<'
   end
 
   def get_versions
-    result = Oga.parse_html HTTPCache.file('http://curse.com/project/' + @curse_id, ctxt: @artifact, key: 'curse/' + @curse_id + '.html', check_stale: false)
+    result = Oga.parse_html HTTPCache.file('http://curse.com/project/' + @curse_id, ctxt: @uid, key: 'curse/' + @curse_id + '.html', check_stale: false)
     # start by getting rid of some elements that standard xml parsers have issues with
     result.each_node { |node| node.remove if node.is_a?(Oga::XML::Element) && ['script', 'like'].include?(node.name) }
     rows = result.xpath "html/body/#{'div/' * 14}table/tbody/tr"
@@ -33,10 +33,10 @@ class CurseVersionList < BaseVersionList
     dl = FileDownload.new
     dl.internal_url = "http://addons-origin.cursecdn.com/files/#{url_id[0...4]}/#{url_id[4...7]}/#{id[1][:fileId]}"
     dl.url = "http://curse.com" + id[1][:url]
-    dl.destination = "mods/#{@artifact}-#{id.first}.jar"
+    dl.destination = "mods/#{@uid}-#{id.first}.jar"
 
     file = WonkoVersion.new
-    file.uid = @artifact
+    file.uid = @uid
     file.version = id.first
     file.type =  id[1][:type]
     file.time = id[1][:timestamp]

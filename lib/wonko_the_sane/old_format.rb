@@ -4,9 +4,9 @@ module OldFormatWriter
   def write_version(version)
     # metadata
     json = {
-      formatVersion: 0,
+      formatVersion: 1,
       uid: version.uid,
-      name: version.uid,
+      name: version.name,
       fileId: version.uid,
       version: version.version,
       time: Time.at(version.time).iso8601,

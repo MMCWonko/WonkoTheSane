@@ -149,6 +149,8 @@ end
 
 class WonkoVersion
   attr_accessor :uid
+  attr_accessor :name
+
   attr_accessor :version
   attr_reader :time # unix timestamp
   attr_accessor :type

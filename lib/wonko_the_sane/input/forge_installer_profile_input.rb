@@ -1,14 +1,12 @@
 class ForgeInstallerProfileInput < BaseInput
-  def initialize(artifact)
-    @artifact = artifact
-  end
-
-  def parse(data, version)
+  def parse(data, version, artifact)
     object = JSON.parse data, symbolize_names: true
     info = object[:versionInfo]
     file = WonkoVersion.new
 
-    file.uid = @artifact
+    file.client.extra[:artifact] = artifact
+    file.uid = @uid
+    file.name = @name
     file.version = version
     file.time = info[:time]
     file.type = info[:type]
@@ -37,19 +35,22 @@ end
 
 class ForgeFixJarSanitizer < BaseSanitizer
   def self.sanitize(file)
-    file.client.downloads.map! do |lib|
-      ident = WonkoTheSane::Util::MavenIdentifier.new(lib.name)
-      ident.artifact = 'forge' if 'net.minecraftforge' == ident.group && 'minecraftforge' == ident.artifact
-      if %w(forge fml).include?(ident.artifact) && %w(net.minecraftforge cpw.mods).include?(ident.group)
-        mcversion = file.requires.find { |r| r.uid == 'net.minecraft' }.version rescue nil
-        lib = lib.clone
-        ident.classifier = 'universal'
-        ident.version = "#{mcversion}-#{ident.version}" unless ident.version.start_with? "#{mcversion}"
-        lib.name = ident.to_name
-      end
-      lib
-    end
+    mcversion = file.requires.find { |r| r.uid == 'net.minecraft' }.version
+    file.client.downloads.map! { |lib| ForgeFixJarSanitizer.fix_library mcversion, lib }
+    file.server.downloads.map! { |lib| ForgeFixJarSanitizer.fix_library mcversion, lib }
     file
+  end
+
+  def self.fix_library(mcversion, lib)
+    ident = WonkoTheSane::Util::MavenIdentifier.new(lib.name)
+    ident.artifact = 'forge' if 'net.minecraftforge' == ident.group && 'minecraftforge' == ident.artifact
+    if %w(forge minecraftforge fml).include?(ident.artifact) && %w(net.minecraftforge cpw.mods).include?(ident.group)
+      lib = lib.clone
+      ident.classifier = 'universal'
+      ident.version = "#{mcversion}-#{ident.version}" unless ident.version.start_with? mcversion
+      lib.name = ident.to_name
+    end
+    lib
   end
 end
 
@@ -63,7 +64,7 @@ class ForgeRemoveMinecraftSanitizer < BaseSanitizer
     minecraft = Registry.instance.retrieve 'net.minecraft', mcversion
     if minecraft.nil?
       # if we can't find the wanted version on the first try we try reloading the list to see if we get something
-      WonkoTheSane.lists.find { |l| l.artifact == 'net.minecraft' }.refresh
+      WonkoTheSane.lists.find { |l| l.uid == 'net.minecraft' }.refresh
       minecraft = Registry.instance.retrieve 'net.minecraft', mcversion
     end
 

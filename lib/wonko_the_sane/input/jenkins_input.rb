@@ -1,6 +1,6 @@
 class JenkinsInput < BaseInput
-  def initialize(artifact, file_regex)
-    @artifact = artifact
+  def initialize(uid, name, file_regex)
+    super uid, name
     @file_regex = file_regex
   end
 
@@ -8,7 +8,8 @@ class JenkinsInput < BaseInput
     return nil if data[:result] != 'SUCCESS'
 
     file = WonkoVersion.new
-    file.uid = @artifact
+    file.uid = @uid
+    file.name = @name
     file.version = data[:number].to_s
     file.time = data[:timestamp]
 

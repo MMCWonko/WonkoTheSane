@@ -50,7 +50,7 @@ class HTTPCache
       Logging.logger[ctxt.to_s].debug "DL: #{url}"
 
       response = connection.get uri.path
-      File.write cached_path, response.body
+      File.write cached_path, response.body unless response.body.empty? && File.exists?(cached_path)
       response.body
     end
   end
@@ -59,7 +59,6 @@ class HTTPCache
     Faraday.new url: host do |faraday|
       faraday.use :cookie_jar
       faraday.response :raise_error
-      faraday.response :chunked
       faraday.use :http_cache,
                   logger: Logging.logger[ctxt],
                   shared_cache: true,

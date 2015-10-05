@@ -1,7 +1,7 @@
 module Reader
   def read_version_index(data)
     data = data.with_indifferent_access
-    index = VersionIndex.new data[:uid]
+    index = VersionIndex.new data[:uid], data[:name]
     index.name = data[:name]
     data[:versions].each do |ver|
       v = WonkoVersion.new
@@ -10,6 +10,7 @@ module Reader
       v.version = ver[:version]
       v.type = ver[:type]
       v.time = ver[:time]
+      v.requires = data[:requires].map { |req| Referenced.new(req[:uid], req[:version]) } if data[:requires]
       index.versions << v
     end
 
@@ -89,6 +90,7 @@ module Writer
       obj = { version: ver.version }
       obj[:type] = ver.type
       obj[:time] = ver.time
+      obj[:requires] = ver.requires.map { |req| { uid: req.uid, version: req.version } }
       json[:versions] << obj
     end
 

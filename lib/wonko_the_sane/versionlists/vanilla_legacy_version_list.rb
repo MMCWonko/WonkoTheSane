@@ -2,7 +2,7 @@ require_relative 'base_version_list'
 
 class VanillaLegacyVersionList < BaseVersionList
   def initialize
-    super 'net.minecraft'
+    super 'net.minecraft', 'Minecraft'
   end
 
   def get_versions
@@ -12,7 +12,8 @@ class VanillaLegacyVersionList < BaseVersionList
   def get_version(id)
     data = id[1]
     file = WonkoVersion.new
-    file.uid = 'net.minecraft'
+    file.uid = @uid
+    file.name = @name
     file.version = data[:id]
     file.time = data[:releaseTime]
     file.type = data[:type]

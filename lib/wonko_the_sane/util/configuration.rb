@@ -63,14 +63,14 @@ module WonkoTheSane
                   else
                     filename
                   end
-        sources[:forgefiles].each do |uid, urlId|
-          register_list ForgeFilesModsList.new(uid.to_s, urlId)
+        sources[:forgefiles].each do |obj|
+          register_list ForgeFilesModsList.new(obj[:uid], obj[:name], obj[:url_id])
         end if sources[:forgefiles]
         sources[:jenkins].each do |obj|
-          register_list JenkinsVersionList.new(obj[:uid], obj[:url], obj[:artifact], obj[:@file_regex])
+          register_list JenkinsVersionList.new(obj[:uid], obj[:name], obj[:url], obj[:artifact], obj[:@file_regex])
         end if sources[:jenkins]
         sources[:curse].each do |obj|
-          register_list CurseVersionList.new(obj[:uid], obj[:id], obj[:fileregex])
+          register_list CurseVersionList.new(obj[:uid], obj[:name], obj[:id], obj[:fileregex])
         end if sources[:curse]
       end
     end

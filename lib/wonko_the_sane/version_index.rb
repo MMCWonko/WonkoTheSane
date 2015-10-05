@@ -3,8 +3,9 @@ class VersionIndex
   attr_accessor :name
   attr_reader :versions
 
-  def initialize(uid)
+  def initialize(uid, name)
     @uid = uid
+    @name = name
     @versions = []
   end
 

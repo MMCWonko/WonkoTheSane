@@ -1,6 +1,11 @@
 class BaseInput
+  def initialize(uid, name)
+    @uid = uid
+    @name = name
+  end
+
   def logger
-    Logging.logger[@artifact]
+    Logging.logger[@uid]
   end
 end
 

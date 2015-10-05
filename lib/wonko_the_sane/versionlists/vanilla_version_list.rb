@@ -3,8 +3,8 @@ require 'date'
 
 class VanillaVersionList < BaseVersionList
   def initialize
-    super 'net.minecraft'
-    @input = MojangInput.new 'net.minecraft'
+    super 'net.minecraft', 'Minecraft'
+    @input = MojangInput.new 'net.minecraft', 'Minecraft'
   end
 
   def get_versions

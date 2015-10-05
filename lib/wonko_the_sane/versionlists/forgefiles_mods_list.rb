@@ -1,8 +1,8 @@
 class ForgeFilesModsList < BaseVersionList
-  def initialize(artifact, url_id)
-    super(artifact)
+  def initialize(uid, name, url_id)
+    super(uid, name)
     @url_id = url_id
-    @input = ForgeFilesModsInput.new(artifact)
+    @input = ForgeFilesModsInput.new(uid, name)
   end
 
   def get_versions

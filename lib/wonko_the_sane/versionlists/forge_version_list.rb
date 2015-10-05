@@ -57,9 +57,9 @@ def fml_libs_mappings
 end
 
 class ForgeVersionList < BaseVersionList
-  def initialize(artifact = 'net.minecraftforge', url_id = 'forge')
-    super(artifact)
-    @input = ForgeInstallerProfileInput.new artifact
+  def initialize(uid = 'net.minecraftforge', name = 'Minecraft Forge', url_id = 'forge')
+    super(uid, name)
+    @input = ForgeInstallerProfileInput.new uid, name
     @url_id = url_id
   end
 
@@ -90,10 +90,10 @@ class ForgeVersionList < BaseVersionList
 
     # installer versions of forge
     if !installer_file.nil? && id[1][:mcversion] != '1.5.2'
-      path = "#{version}/#{id[1][:artifact]}-#{version}-#{installer_file[1]}.#{installer_file[0]}"
+      path = "#{version}/#{id[1][:artifact]}-#{version}-installer.#{installer_file[0]}"
       url = id[1][:baseurl] + '/' + path
-      HTTPCache.get url, ctxt: @artifact, key: 'forgeinstallers/' + path, check_stale: false
-      result << @input.parse(ExtractionCache.get('cache/network/forgeinstallers/' + path, :zip, 'install_profile.json'), id[1][:version])
+      HTTPCache.get url, ctxt: @uid, key: 'forgeinstallers/' + path, check_stale: false
+      result << @input.parse(ExtractionCache.get('cache/network/forgeinstallers/' + path, :zip, 'install_profile.json'), id[1][:version], id[1][:artifact])
     elsif !universal_file.nil?
       res = construct_base_version id[1]
       mod = Jarmod.new
@@ -118,7 +118,7 @@ class ForgeVersionList < BaseVersionList
 
   def construct_base_version(data)
     version = WonkoVersion.new
-    version.uid = @artifact
+    version.uid = @uid
     version.version = data[:version]
     version.requires << Referenced.new('net.minecraft', data[:mcversion])
     version.time = data[:modified]
@@ -134,6 +134,6 @@ end
 
 class FMLVersionList < ForgeVersionList
   def initialize
-    super 'net.minecraftforge.fml', 'fml'
+    super 'net.minecraftforge.fml', 'Forge Mod Loader', 'fml'
   end
 end

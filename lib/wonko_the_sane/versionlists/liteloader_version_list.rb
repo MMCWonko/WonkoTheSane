@@ -4,7 +4,7 @@ require 'time'
 
 class LiteLoaderVersionList < BaseVersionList
   def initialize
-    super 'com.mumfrey.liteloader'
+    super 'com.mumfrey.liteloader', 'LiteLoader'
   end
 
   def get_versions
@@ -15,8 +15,8 @@ class LiteLoaderVersionList < BaseVersionList
       minecraft = mcver.first
       mcver[1][:artefacts].each do |artefact|
         if artefact.first == :'com.mumfrey:liteloader'
-          latest = artefact[1].find { |i| i[0] == 'latest' }[1][:version]
-          artefact[1].reject { |i| i.first == 'latest' }.each do |item|
+          latest = artefact[1].find { |i| i[0] == :latest }[1][:version]
+          artefact[1].reject { |i| i == :latest }.each do |item|
             out << [
                 item[1][:version],
                 item[1].merge({
@@ -37,7 +37,8 @@ class LiteLoaderVersionList < BaseVersionList
     liteloader_lib.url = 'http://dl.liteloader.com/versions/com/mumfrey/liteloader/' + id[1][:minecraft] + '/' + id[1][:file]
 
     file = WonkoVersion.new
-    file.uid = 'com.mumfrey.liteloader'
+    file.uid = @uid
+    file.name = @name
     file.version = id.first
     file.type =  'release' # id[1][:type]
     file.time = id[1][:timestamp]

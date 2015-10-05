@@ -10,7 +10,7 @@ def allowed_platforms_for_rules(rules)
   result
 end
 
-class MojangInput
+class MojangInput < BaseInput
   # @param [String] platform A string formatted like {win,lin,osx}{32,64}
   def self.rules_for_only(platform)
     [
@@ -57,10 +57,6 @@ class MojangInput
     end
   end
 
-  def initialize(artifact)
-    @artifact = artifact
-  end
-
   def parse(data)
     object = data.class == Hash ? data : JSON.parse(data, symbolize_names: true)
 
@@ -71,7 +67,8 @@ class MojangInput
 
     file = WonkoVersion.new
 
-    file.uid = @artifact
+    file.uid = @uid
+    file.name = @name
     file.version = object[:id]
     file.time = object[:releaseTime]
     file.type = object[:type]

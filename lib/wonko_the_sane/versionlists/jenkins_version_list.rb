@@ -1,9 +1,9 @@
 class JenkinsVersionList < BaseVersionList
-  def initialize(artifact, base_url, job, file_regex)
-    super(artifact)
+  def initialize(uid, name, base_url, job, file_regex)
+    super(uid, name)
     @base_url = base_url
     @job = job
-    @input = JenkinsInput.new(artifact, file_regex)
+    @input = JenkinsInput.new(uid, name, file_regex)
 
     if @base_url[@base_url.length - 1] == '/'
       @base_url[@base_url.length - 1] = ''

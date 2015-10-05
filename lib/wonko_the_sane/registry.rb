@@ -1,9 +1,9 @@
 require 'fileutils'
 
 class Registry
-  def version_index(uid)
-    return VersionIndex.new uid unless File.exists? VersionIndex.local_filename uid
-    $rw.read_version_index JSON.parse File.read(VersionIndex.local_filename uid)
+  def version_index(version)
+    return VersionIndex.new version.uid, version.name unless File.exists? VersionIndex.local_filename version.uid
+    $rw.read_version_index JSON.parse File.read(VersionIndex.local_filename version.uid)
   end
 
   def store_version_index(index)
@@ -32,14 +32,17 @@ class Registry
             FileUtils.copy ver.local_filename, "#{Registry.out_dir}/#{ver.uid}-#{ver.version}.json"
           end
 
-          vindex = version_index ver.uid
+          vindex = version_index ver
           vindex.add_version ver
           store_version_index vindex
 
           ind = index
           next if ind[:index].find { |i| ver.uid == i[:uid] } # early exit if the uid already exists in the index
-          ind[:formatVersion] = 0
-          ind[:index] << {uid: ver.uid}
+          ind[:formatVersion] = 1
+          ind[:index] << {
+            uid: ver.uid,
+            name: ver.name
+          }
           File.write 'files/index.json', JSON.pretty_generate($rw.write_index ind)
         rescue Exception => e
           Logging.logger[ver.uid].error 'Unable to store: ' + ver.version

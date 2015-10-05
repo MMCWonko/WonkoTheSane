@@ -1,12 +1,9 @@
 class ForgeFilesModsInput < BaseInput
-  def initialize(artifact)
-    @artifact = artifact
-  end
-
   def parse(data, version)
     file = WonkoVersion.new
 
-    file.uid = @artifact
+    file.uid = @uid
+    file.name = @name
     file.version = version
     file.time = data[:info]
     file.requires << Referenced.new('net.minecraft', data[:mcver])

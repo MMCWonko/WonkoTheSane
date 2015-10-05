@@ -1,422 +1,506 @@
 {
-  "forgefiles": {
-    "ironchests": "IronChests2",
-    "biomesoplenty": "BiomesOPlenty",
-    "codechicken.lib": "CodeChickenLib",
-    "forgeessentials": "ForgeEssentials",
-    "forgemultipart": "ForgeMultipart",
-    "secretroomsmod": "SecretRoomsMod",
-    "worldcore": "WorldCore",
-    "compactsolars": "CompactSolars"
-  },
+  "forgefiles": [
+    {
+      "uid": "ironchests",
+      "url_id": "IronChests2",
+      "name": "Iron Chests 2"
+    },
+    {
+      "uid": "biomesoplenty",
+      "url_id": "BiomesOPlenty",
+      "name": "Biomes O'Plenty"
+    },
+    {
+      "uid": "codechicken.lib",
+      "url_id": "CodeChickenLib",
+      "name": "CodeChickenLib"
+    },
+    {
+      "uid": "forgeessentials",
+      "url_id": "ForgeEssentials",
+      "name": "Forge Essentials"
+    },
+    {
+      "uid": "forgemultipart",
+      "url_id": "ForgeMultipart",
+      "name": "Forge Multipart"
+    },
+    {
+      "uid": "secretroomsmod",
+      "url_id": "SecretRoomsMod",
+      "name": "Secret Rooms Mod"
+    },
+    {
+      "uid": "worldcore",
+      "url_id": "WorldCore",
+      "name": "World Core"
+    },
+    {
+      "uid": "compactsolars",
+      "url_id": "CompactSolars",
+      "name": "Compact Solars"
+    }
+
+  ],
   "jenkins": [
     {
       "uid": "ic2",
       "url": "http://jenkins.ic2.player.to",
-      "artifact": "IC2_experimental"
+      "artifact": "IC2_experimental",
+      "name": "Industrial Craft 2"
     },
     {
       "uid": "dimdoors",
       "url": "http://build.technicpack.net",
-      "artifact": "DimDoors"
+      "artifact": "DimDoors",
+      "name": "Dimensional Doors"
     },
     {
       "uid": "enderore",
       "url": "http://build.technicpack.net",
-      "artifact": "EnderOre"
+      "artifact": "EnderOre",
+      "name": "Ender Ore"
     },
     {
       "uid": "flatbedrock",
       "url": "http://build.technicpack.net",
-      "artifact": "FlatBedrock"
+      "artifact": "FlatBedrock",
+      "name": "Flat Bedrock"
     },
     {
       "uid": "gregslighting",
       "url": "http://build.technicpack.net",
-      "artifact": "GregsLighting"
+      "artifact": "GregsLighting",
+      "name": "Gregs Lightning"
     },
     {
       "uid": "hexxitgear",
       "url": "http://build.technicpack.net",
-      "artifact": "HexxitGear"
+      "artifact": "HexxitGear",
+      "name": "Hexxit Gear"
     },
     {
       "uid": "inventorytweaks",
       "url": "http://build.technicpack.net",
-      "artifact": "Inventory-Tweaks"
+      "artifact": "Inventory-Tweaks",
+      "name": "Inventory Tweaks"
     },
     {
       "uid": "minefactoryreloaded",
       "url": "http://build.technicpack.net",
-      "artifact": "MineFactoryReloaded"
+      "artifact": "MineFactoryReloaded",
+      "name": "MineFactory Reloaded"
     },
     {
       "uid": "modularpowersuits",
       "url": "http://build.technicpack.net",
       "artifact": "ModularPowersuits",
-      "fileRegex": "ModularPowersuits-[\\.\\d\\-]*\\.jar"
+      "fileRegex": "ModularPowersuits-[\\.\\d\\-]*\\.jar",
+      "name": "Modular Powersuits"
     },
     {
       "uid": "numina",
       "url": "http://build.technicpack.net",
-      "artifact": "Numina"
+      "artifact": "Numina",
+      "name": "Numina"
     },
     {
       "uid": "buildcraft",
       "url": "http://nallar.me/buildservice",
-      "artifact": "Buildcraft"
+      "artifact": "Buildcraft",
+      "name": "Buildcraft"
     },
     {
       "uid": "equivalentexchange3",
       "url": "http://nallar.me/buildservice",
-      "artifact": "Equivalent%20Exchange%203"
+      "artifact": "Equivalent%20Exchange%203",
+      "name": "Equivalent Exchange 3"
     },
     {
       "uid": "openblocks",
       "url": "http://openmods.info:8080",
-      "artifact": "OpenBlocks"
+      "artifact": "OpenBlocks",
+      "name": "OpenBlocks"
     },
     {
       "uid": "openeye",
       "url": "http://openmods.info:8080",
-      "artifact": "OpenEye"
+      "artifact": "OpenEye",
+      "name": "OpenEye"
     },
     {
       "uid": "openmodslib",
       "url": "http://openmods.info:8080",
-      "artifact": "OpenModsLib"
+      "artifact": "OpenModsLib",
+      "name": "OpenModsLib"
     },
     {
       "uid": "openperipheralsaddons",
       "url": "http://openmods.info:8080",
-      "artifact": "OpenPeripheralAddons"
+      "artifact": "OpenPeripheralAddons",
+      "name": "OpenPeripheral Addons"
     },
     {
       "uid": "openperipheralscore",
       "url": "http://openmods.info:8080",
-      "artifact": "OpenPeripheralCore"
+      "artifact": "OpenPeripheralCore",
+      "name": "OpenPeripheral Core"
     },
     {
       "uid": "openperipheralintegration",
       "url": "http://openmods.info:8080",
-      "artifact": "OpenPeripheralIntegration"
+      "artifact": "OpenPeripheralIntegration",
+      "name": "OpenPeripheral Integration"
     },
     {
       "uid": "logisticspipes",
       "url": "http://ci.thezorro266.com",
-      "artifact": "LogisticsPipesMC1.2.5"
+      "artifact": "LogisticsPipesMC1.2.5",
+      "name": "Logistics Pipes"
     },
     {
       "uid": "logisticspipes",
       "url": "http://ci.thezorro266.com",
-      "artifact": "LogisticsPipesMC1.3.2"
+      "artifact": "LogisticsPipesMC1.3.2",
+      "name": "Logistics Pipes"
     },
     {
       "uid": "logisticspipes",
       "url": "http://ci.thezorro266.com",
-      "artifact": "LogisticsPipesMC1.4.7"
+      "artifact": "LogisticsPipesMC1.4.7",
+      "name": "Logistics Pipes"
     },
     {
       "uid": "logisticspipes",
       "url": "http://ci.thezorro266.com",
-      "artifact": "LogisticsPipesMC1.5.2"
+      "artifact": "LogisticsPipesMC1.5.2",
+      "name": "Logistics Pipes"
     },
     {
       "uid": "logisticspipes",
       "url": "http://ci.thezorro266.com",
-      "artifact": "LogisticsPipes1.7"
+      "artifact": "LogisticsPipes1.7",
+      "name": "Logistics Pipes"
     },
     {
       "uid": "bdlib",
       "url": "http://jenkins.bdew.net",
-      "artifact": "bdlib-1.7.10"
-    },
-    {
-      "uid": "bdlib",
-      "url": "http://jenkins.bdew.net",
-      "artifact": "bdlib-1.7.10"
+      "artifact": "bdlib-1.7.10",
+      "name": "BDLib"
     },
     {
       "uid": "gendustry",
       "url": "http://jenkins.bdew.net",
-      "artifact": "gendustry-1.7.10"
+      "artifact": "gendustry-1.7.10",
+      "name": "Gendustry"
     },
     {
       "uid": "bdew.generators",
       "url": "http://jenkins.bdew.net",
-      "artifact": "generators-1.7.10"
+      "artifact": "generators-1.7.10",
+      "name": "Advanced Generators"
     },
     {
       "uid": "neiaddons",
       "url": "http://jenkins.bdew.net",
-      "artifact": "neiaddons-1.7.10"
+      "artifact": "neiaddons-1.7.10",
+      "name": "NEI Addons"
     },
     {
       "uid": "bdew.pressure",
       "url": "http://jenkins.bdew.net",
-      "artifact": "pressure-1.7.10"
+      "artifact": "pressure-1.7.10",
+      "name": "Pressure Pipes"
     },
     {
       "uid": "modularpowersuits.addons",
       "url": "http://build.technicpack.net",
-      "artifact": "ModularPowersuitsAddons"
+      "artifact": "ModularPowersuitsAddons",
+      "name": "ModularPowersuit Addons"
     },
     {
       "uid": "powercrystals.core",
       "url": "http://build.technicpack.net",
-      "artifact": "PowerCrystalsCore"
+      "artifact": "PowerCrystalsCore",
+      "name": "PowerCrystalsCore"
     },
     {
       "uid": "powerconverters",
       "url": "http://jamesmckay.id.au:8080",
-      "artifact": "Power%20Converters"
-    },
-    {
-      "uid": "artifice",
-      "url": "http://76.72.175.100:8080",
-      "artifact": "Artifice"
+      "artifact": "Power%20Converters",
+      "name": "Power Converters"
     },
     {
       "uid": "mekanism",
       "url": "http://ci.indiewikis.com:8080",
-      "artifact": "Mekanism"
+      "artifact": "Mekanism",
+      "name": "Mekanism"
     },
     {
       "uid": "enderio",
       "url": "http://ci.tterrag.com",
-      "artifact": "EnderIO"
+      "artifact": "EnderIO",
+      "name": "Ender IO"
     },
     {
       "uid": "extracells",
       "url": "http://shadowcity.net:8080",
-      "artifact": "ecrv1"
+      "artifact": "ecrv1",
+      "name": "Extra Cells"
     },
     {
       "uid": "supermassivetech",
       "url": "http://ci.tterrag.com",
-      "artifact": "Super%20Massive%20Tech"
+      "artifact": "Super%20Massive%20Tech",
+      "name": "Super Massive Tech"
     },
     {
       "uid": "forestry",
       "url": "http://jenkins.ic2.player.to",
-      "artifact": "Forestry"
-    },
-    {
-      "uid": "projectred",
-      "url": "http://ci.indiewikis.com:8080",
-      "artifact": "Project%20Red"
+      "artifact": "Forestry",
+      "name": "Forestry"
     },
     {
       "uid": "morpheus",
       "url": "http://jenkins.qmunity.co.uk",
-      "artifact": "Morpheus%201.7.x"
+      "artifact": "Morpheus%201.7.x",
+      "name": "Morpheus"
     },
     {
       "uid": "pay2spawn",
       "url": "http://jenkins.dries007.net",
-      "artifact": "Pay2Spawn"
+      "artifact": "Pay2Spawn",
+      "name": "Pay 2 Spawn"
     },
     {
       "uid": "holoinventory",
       "url": "http://jenkins.dries007.net",
-      "artifact": "HoloInventory"
+      "artifact": "HoloInventory",
+      "name": "Holo Inventory"
     },
     {
       "uid": "placeabletools",
       "url": "http://jenkins.dries007.net",
-      "artifact": "PlaceableTools"
+      "artifact": "PlaceableTools",
+      "name": "Placeable Tools"
     },
     {
       "uid": "torchtools",
       "url": "http://jenkins.dries007.net",
-      "artifact": "TorchTools"
+      "artifact": "TorchTools",
+      "name": "Torch Tools"
     },
     {
       "uid": "opencomputers",
       "url": "http://ci.cil.li",
-      "artifact": "OpenComputers-1.5-MC1.7.10"
+      "artifact": "OpenComputers-1.5-MC1.7.10",
+      "name": "OpenComputers"
     },
     {
       "uid": "autocrafter2000",
       "url": "http://jenkins.dries007.net",
-      "artifact": "AutoCrafter2000"
+      "artifact": "AutoCrafter2000",
+      "name": "AutoCrafter 2000"
     },
     {
       "uid": "craycrafting",
       "url": "http://jenkins.dries007.net",
-      "artifact": "CrayCrafting"
+      "artifact": "CrayCrafting",
+      "name": "Cray Crafting"
     },
     {
       "uid": "d3core",
       "url": "http://jenkins.dries007.net",
-      "artifact": "D3Core"
+      "artifact": "D3Core",
+      "name": "D3Core"
     },
     {
       "uid": "greenthumb",
       "url": "http://jenkins.dries007.net",
-      "artifact": "GreenThumb"
+      "artifact": "GreenThumb",
+      "name": "GreenThumb"
     },
     {
       "uid": "letitburn",
       "url": "http://jenkins.dries007.net",
-      "artifact": "Let-it-Burn"
+      "artifact": "Let-it-Burn",
+      "name": "Let-it-Burn"
     },
     {
       "uid": "lumberjack",
       "url": "http://jenkins.dries007.net",
-      "artifact": "Lumberjack"
+      "artifact": "Lumberjack",
+      "name": "Lumberjack"
     },
     {
       "uid": "hexwool",
       "url": "http://server.techjargaming.com:8080",
-      "artifact": "HexWool"
-    },
-    {
-      "uid": "madscience",
-      "url": "http://madsciencemod.com:8080",
-      "artifact": "Mad%20Science"
+      "artifact": "HexWool",
+      "name": "HexWool"
     },
     {
       "uid": "minechem",
       "url": "http://jenkins.jakimfett.com",
-      "artifact": "Minechem%201.7%20v5"
-    },
-    {
-      "uid": "alchemyplusplus",
-      "url": "http://jenkins.jakimfett.com",
-      "artifact": "AlchemyPlusPlus%201.7"
+      "artifact": "Minechem%201.7%20v5",
+      "name": "Minechem"
     },
     {
       "uid": "betterstorage",
       "url": "http://jenkins.rx14.co.uk/job/copygirl",
-      "artifact": "BetterStorage"
+      "artifact": "BetterStorage",
+      "name": "Better Storage"
     },
     {
       "uid": "launchgui",
       "url": "http://tehnut.info/jenkins",
-      "artifact": "LaunchGUI-1.7.10"
+      "artifact": "LaunchGUI-1.7.10",
+      "name": "LaunchGUI"
     },
     {
       "uid": "loaderlist",
       "url": "http://tehnut.info/jenkins",
-      "artifact": "LoaderList"
+      "artifact": "LoaderList",
+      "name": "LoaderList"
     },
     {
       "uid": "sunstroke",
       "url": "http://tehnut.info/jenkins",
-      "artifact": "SunStroke"
+      "artifact": "SunStroke",
+      "name": "Sun Stroke"
     },
     {
       "uid": "morechisels",
       "url": "http://tehnut.info/jenkins",
-      "artifact": "MoreChisels"
+      "artifact": "MoreChisels",
+      "name": "More Chisels"
     },
     {
       "uid": "chiseltones",
       "url": "http://tehnut.info/jenkins",
-      "artifact": "ChiselTones"
+      "artifact": "ChiselTones",
+      "name": "Chisel Tones"
     },
     {
       "uid": "cookiecore",
       "url": "http://tehnut.info/jenkins",
-      "artifact": "CookieCore"
+      "artifact": "CookieCore",
+      "name": "Cookie Core"
     },
     {
       "uid": "modulararmour",
       "url": "http://tehnut.info/jenkins",
-      "artifact": "ModularArmour"
+      "artifact": "ModularArmour",
+      "name": "Modular Armour"
     },
     {
       "uid": "sanguimancy",
       "url": "http://tehnut.info/jenkins",
-      "artifact": "Sanguimancy"
+      "artifact": "Sanguimancy",
+      "name": "Sanguimancy"
     },
     {
       "uid": "tinkerssteelworks.ephys",
       "url": "http://tehnut.info/jenkins",
-      "artifact": "TSteelworks"
+      "artifact": "TSteelworks",
+      "name": "Tinkers' Steelworks"
     },
     {
       "uid": "enderzoo",
       "url": "http://ci.tterrag.com",
-      "artifact": "Ender%20Zoo"
+      "artifact": "Ender%20Zoo",
+      "name": "Ender Zoo"
     },
     {
       "uid": "extracells",
       "url": "http://shadowcity.net:8080",
-      "artifact": "ecrv2"
+      "artifact": "ecrv2",
+      "name": "Extra Cells"
     },
     {
       "uid": "forestry",
       "url": "http://jenkins.ic2.player.to",
-      "artifact": "Forestry_Dev"
+      "artifact": "Forestry_Dev",
+      "name": "Forestry"
     },
     {
       "uid": "morpheus",
       "url": "http://jenkins.qmunity.co.uk",
-      "artifact": "Morpheus"
+      "artifact": "Morpheus",
+      "name": "Morpheus"
     },
     {
       "uid": "opencomputers",
       "url": "http://ci.cil.li",
-      "artifact": "OpenComputers-dev-MC1.7.10"
+      "artifact": "OpenComputers-dev-MC1.7.10",
+      "name": "OpenComputers"
     },
     {
       "uid": "launchgui",
       "url": "http://tehnut.info/jenkins",
-      "artifact": "LaunchGUI-1.8"
+      "artifact": "LaunchGUI-1.8",
+      "name": "LaunchGUI"
     }
   ],
   "curse": [
     {
       "uid": "compactmachines",
       "id": "224218",
-      "fileregex": "compactmachines-(?P<mc>.+?)-(?P<version>.+?).jar$"
+      "fileregex": "compactmachines-(?P<mc>.+?)-(?P<version>.+?).jar$",
+      "name": "Compact Machines"
     },
     {
       "uid": "minefactoryreloaded",
       "id": "66672",
-      "fileregex": "MineFactoryReloaded-\\[(?P<mc>.+?)\\](?P<version>.+?).jar"
+      "fileregex": "MineFactoryReloaded-\\[(?P<mc>.+?)\\](?P<version>.+?).jar",
+      "name": "MineFactory Reloaded"
     },
     {
       "uid": "lanteacraft",
       "id": "77342",
-      "fileregex": "LanteaCraft-(?P<mc>.+?)-(?P<version>.+?).jar$"
+      "fileregex": "LanteaCraft-(?P<mc>.+?)-(?P<version>.+?).jar$",
+      "name": "LanteaCraft"
     },
     {
       "uid": "tinkersconstruct",
       "id": "74072",
-      "fileregex": "TConstruct-(?P<mc>.+?)-(?P<version>.+?).jar"
+      "fileregex": "TConstruct-(?P<mc>.+?)-(?P<version>.+?).jar",
+      "name": "Tinkers' Construct"
     },
     {
       "uid": "tinkersmechworks",
       "id": "78057",
-      "fileregex": "TMechworks-(?P<mc>.+?)-(?P<version>.+?).jar"
+      "fileregex": "TMechworks-(?P<mc>.+?)-(?P<version>.+?).jar",
+      "name": "Tinkers' Mechworks"
     },
     {
       "uid": "endertech",
       "id": "223428",
-      "fileregex": "EnderTech-(?P<mc>.+?)-(?P<version>.+?).jar"
+      "fileregex": "EnderTech-(?P<mc>.+?)-(?P<version>.+?).jar",
+      "name": "EnderTech"
     },
     {
       "uid": "bloodmagic",
       "id": "224791",
-      "fileregex": "BloodMagic-(?P<mc>.+?)-(?P<version>.+?)-.+?.jar"
+      "fileregex": "BloodMagic-(?P<mc>.+?)-(?P<version>.+?)-.+?.jar",
+      "name": "Blood Magic"
     },
     {
       "uid": "creepercollateral",
       "id": "223801",
-      "fileregex": "CreeperCollateral-\\[(?P<mc>.+?)\\](?P<version>.+?).jar"
+      "fileregex": "CreeperCollateral-\\[(?P<mc>.+?)\\](?P<version>.+?).jar",
+      "name": "Creeper Collateral"
     },
     {
       "uid": "inpurecore",
       "id": "223792",
-      "fileregex": "INpureCore-\\[(?P<mc>.+?)\\](?P<version>.+?).jar"
+      "fileregex": "INpureCore-\\[(?P<mc>.+?)\\](?P<version>.+?).jar",
+      "name": "INpureCore"
     },
     {
       "uid": "enderio",
       "id": "64578",
-      "fileregex": "EnderIO-(?P<mc>.+?)-(?P<version>.+?).jar"
+      "fileregex": "EnderIO-(?P<mc>.+?)-(?P<version>.+?).jar",
+      "name": "EnderIO"
     }
   ]
 }

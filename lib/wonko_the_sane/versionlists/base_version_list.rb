@@ -1,11 +1,13 @@
 class BaseVersionList
-  attr_accessor :artifact
+  attr_accessor :uid
+  attr_accessor :name
   # @processed contains a list of version ids for all versions that have been processed. simply clear it to invalidate caches
   attr_accessor :processed
   attr_accessor :last_error
 
-  def initialize(artifact)
-    @artifact = artifact
+  def initialize(uid, name)
+    @uid = uid
+    @name = name
     if File.exist? cache_file
       data = JSON.parse File.read(cache_file), symbolize_names: true
       @processed = data[:versions] || []
@@ -44,6 +46,7 @@ class BaseVersionList
       rescue => e
         logger.error e.message
         logger.warn e.backtrace.first
+        require 'pry'
         binding.pry if $stdout.isatty && ENV['DEBUG_ON_ERROR']
         @last_error = e.message
       end
@@ -53,12 +56,13 @@ class BaseVersionList
   rescue => e
     logger.error e.message
     logger.warn e.backtrace.first
+    require 'pry'
     binding.pry if $stdout.isatty && ENV['DEBUG_ON_ERROR']
     @last_error = e.message
   end
 
   def logger
-    Logging.logger[@artifact]
+    Logging.logger[@uid]
   end
 
   def invalidate(version = nil)
@@ -86,7 +90,7 @@ class BaseVersionList
   end
 
   def cache_file
-    'cache/' + @artifact + '.json'
+    'cache/' + @uid + '.json'
   end
 
   def get_versions
@@ -98,11 +102,12 @@ class BaseVersionList
   end
 
   def get_json(url)
-    Yajl::Parser.parse HTTPCache.file(url, ctxt: @artifact, check_stale: true), symbolize_keys: true
+    data = HTTPCache.get(url, ctxt: @uid, check_stale: true)
+    Yajl::Parser.parse HTTPCache.file(url, ctxt: @uid, check_stale: true), symbolize_keys: true
   end
 
   def get_json_cached(url)
-    Yajl::Parser.parse HTTPCache.file(url, ctxt: @artifact, check_stale: false), symbolize_keys: true
+    Yajl::Parser.parse HTTPCache.file(url, ctxt: @uid, check_stale: false), symbolize_keys: true
   end
 end
 Dir.mkdir 'cache' unless Dir.exist? 'cache'
