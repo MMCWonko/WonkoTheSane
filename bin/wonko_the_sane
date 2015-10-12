@@ -34,15 +34,17 @@ OptionParser.new do |opts|
   opts.banner = 'Usage: main.rb [options]'
 
   opts.on '-rID', '--refresh=ID', 'Refresh the specified list' do |id|
-    list = WonkoTheSane.lists.find { |l| l.uid == id }
-    if list.nil?
+    lists = WonkoTheSane.lists.select { |l| l.uid == id }
+    if lists.empty?
       Logging.logger['General'].warn "Couldn't find the specified list #{id.cyan}"
     else
+      lists.each do |list|
         WonkoTheSane.tasks.push(Proc.new do
                          Logging.logger[list.uid].info 'Refreshing'
                          list.refresh
                          Logging.logger[list.uid].error list.last_error if list.last_error
-                       end)
+                                end)
+      end
     end
   end
   opts.on '-a', '--refresh-all', 'Refresh all lists' do
@@ -55,12 +57,14 @@ OptionParser.new do |opts|
     end
   end
   opts.on '--invalidate=ID', 'Invalidates all versions on the specified list' do |id|
-    list = WonkoTheSane.lists.find { |l| l.uid == id }
-    if list.nil?
+    lists = WonkoTheSane.lists.select { |l| l.uid == id }
+    if lists.empty?
       Logging.logger['General'].warn "Couldn't find the specified list #{id.cyan}"
     else
-      Logging.logger[list.uid].info 'Invalidating'
-      list.invalidate
+      lists.each do |list|
+        Logging.logger[list.uid].info 'Invalidating'
+        list.invalidate
+      end
     end
   end
   opts.on '--invalidate-all', 'Invalidates all versions on all lists' do

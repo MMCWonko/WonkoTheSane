@@ -10,7 +10,7 @@ module Reader
       v.version = ver[:version]
       v.type = ver[:type]
       v.time = ver[:time]
-      v.requires = data[:requires].map { |req| Referenced.new(req[:uid], req[:version]) } if data[:requires]
+      v.requires = ver[:requires].map { |req| Referenced.new(req[:uid], req[:version]) } if ver[:requires]
       index.versions << v
     end
 
