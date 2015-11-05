@@ -100,7 +100,7 @@ class ForgeVersionList < BaseVersionList
       mod.name = "net.minecraftforge:#{id[1][:artifact]}:#{version}:universal@#{universal_file[0]}"
       mod.maven_base_url = 'http://files.minecraftforge.net/maven/'
       res.client.downloads << mod
-      res.client.downloads |= fml_libs_mappings[id[1][:mcversion]] if fml_libs_mappings[id[1][:mcversion]]
+      res.client.downloads |= fml_libs_mappings[id[1][:mcversion].to_sym] if fml_libs_mappings[id[1][:mcversion].to_sym]
       result << res
     elsif !client_file.nil?
       res = construct_base_version id[1]
@@ -108,7 +108,7 @@ class ForgeVersionList < BaseVersionList
       mod.name = "net.minecraftforge:#{id[1][:artifact]}:#{version}:client@#{client_file[0]}"
       mod.maven_base_url = 'http://files.minecraftforge.net/maven/'
       res.client.downloads << mod
-      res.client.downloads |= fml_libs_mappings[id[1][:mcversion]] if fml_libs_mappings[id[1][:mcversion]]
+      res.client.downloads |= fml_libs_mappings[id[1][:mcversion].to_sym] if fml_libs_mappings[id[1][:mcversion].to_sym]
       result << res
     elsif !server_file.nil?
       # TODO
@@ -118,6 +118,7 @@ class ForgeVersionList < BaseVersionList
 
   def construct_base_version(data)
     version = WonkoVersion.new
+    version.name = @name
     version.uid = @uid
     version.version = data[:version]
     version.requires << Referenced.new('net.minecraft', data[:mcversion])

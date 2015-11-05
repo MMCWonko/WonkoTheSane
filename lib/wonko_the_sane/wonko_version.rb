@@ -100,7 +100,7 @@ class VersionLibrary < Download
   def to_json
     obj = super
     obj[:name] = @name
-    obj[:@maven_base_url] = @maven_base_url unless @maven_base_url.blank?
+    obj[:maven_base_url] = @maven_base_url unless @maven_base_url.blank?
 
     unless @url
       obj.delete :url
@@ -112,7 +112,7 @@ class VersionLibrary < Download
   def from_json(json)
     super
     @name = json[:name]
-    @maven_base_url = json[:@maven_base_url]
+    @maven_base_url = json[:maven_base_url]
 
     # if the absolute url is equal to the expected maven url we clear the absolute url
     if @maven_base_url && @url == url

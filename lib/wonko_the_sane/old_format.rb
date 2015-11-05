@@ -44,8 +44,8 @@ module OldFormatWriter
       result = { name: lib.name }
       if lib.explicit_url?
         result[:'MMC-absoluteUrl'] = lib.url
-      elsif !lib.url.nil? && lib.maven_base_url != 'https://libraries.minecraft.net/'
-        result[:url] = lib.url
+      elsif lib.maven_base_url != 'https://libraries.minecraft.net/'
+        result[:url] = lib.maven_base_url
       end
       result[:rules] = lib.rules.map { |r| r.to_json } unless lib.rules.nil?
 
@@ -95,8 +95,20 @@ module OldFormatWriter
     end.reject { |i| i.nil? }
 
     json[:'+jarMods'] = resource.downloads.select { |dl| dl.type == 'mc.jarmods' }.map do |lib|
-      {}
+      {
+        name: SecureRandom.uuid + '.jar',
+        originalName: lib.maven.artifact + '-' + lib.maven.version,
+        'MMC-absoluteUrl': lib.url
+      }
     end
+
+    json[:'+traits'] = []
+    if version.uid == 'net.minecraft'
+      json[:'+traits'] << 'no-texturepacks' if version.time <= 1288908001
+      json[:'+traits'] << 'texturepacks' if version.time > 1288908001 && version.time < 1372430921
+      json[:'+traits'] << 'legacyLaunch' if version.time <= 1366904700
+    end
+    json.delete :'+traits' if json[:'+traits'].blank?
 
     json
   end
