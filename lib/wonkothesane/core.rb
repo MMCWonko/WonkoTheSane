@@ -15,8 +15,8 @@ module WonkoTheSane
     post '/version/new' do
       msg = env[JsonPostBody::FORM_HASH]
       break [400, '{"msg": "Invalid version file!"}'] unless verify_wonko_version msg
-      break [500, '{"msg": "Error adding version file"}'] unless @storage.register_version(msg)
-      '{"msg": "OK"}'
+      break [200, '{"msg": "Version exists already, skipping"}'] unless @storage.register_version(msg)
+      [201, '{"msg": "OK"}']
     end
 
     get '/version/:uid/:ver' do

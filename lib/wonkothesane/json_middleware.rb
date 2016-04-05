@@ -7,8 +7,6 @@ module Rack
     FORM_INPUT = 'rack.request.form_input'.freeze
     FORM_HASH = 'rack.request.form_hash'.freeze
 
-    # Supported Content-Types
-    #
     APPLICATION_JSON = 'application/json'.freeze
 
     def initialize(app)

@@ -23,7 +23,9 @@ module WonkoTheSane
       id             = version[:id]
       ver            = version[:version]
       version[:time] = DateTime.now.iso8601
+      false if(File.exist? "#{id}/#{ver}.json")
       write_json("Add #{id} version #{ver}", "#{id}/#{ver}.json", version)
+      true
     end
 
     def get_version(id, ver)
